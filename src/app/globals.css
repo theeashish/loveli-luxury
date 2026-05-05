@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 24 14% 4%;
+    --foreground: 40 30% 96%;
+    --muted: 24 8% 12%;
+    --muted-foreground: 40 10% 70%;
+    --primary: 43 77% 52%;        /* Logo gold */
+    --primary-foreground: 24 14% 4%;
+    --accent: 0 75% 56%;           /* Logo crimson */
+    --accent-foreground: 40 30% 96%;
+    --border: 24 8% 18%;
+    --ring: 43 77% 52%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
