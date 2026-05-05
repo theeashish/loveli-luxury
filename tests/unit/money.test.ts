@@ -74,10 +74,10 @@ describe('sumMinor', () => {
 })
 
 describe('formatKes', () => {
-  it('formats with thousands separator and KES symbol', () => {
+  it('formats with thousands separator and Ksh symbol', () => {
     const formatted = formatKes(kesToMinor(1_234_567))
     expect(formatted).toContain('1,234,567')
-    expect(formatted).toContain('KES')
+    expect(formatted).toContain('Ksh')
   })
 })
 
