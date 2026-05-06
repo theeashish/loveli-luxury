@@ -73,7 +73,9 @@ const nextConfig = {
 
   experimental: {
     serverActions: {
-      bodySizeLimit: '2mb',
+      // Catalog image uploads cap at 8 MB (see image-pipeline.ts MAX_FILE_BYTES).
+      // Keep this in sync if that limit moves.
+      bodySizeLimit: '10mb',
     },
   },
 }
