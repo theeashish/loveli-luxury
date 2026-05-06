@@ -162,3 +162,4 @@ See `supabase/migrations/001_initial_schema.sql`. 22 tables in 9 domains:
 ## Owner
 
 Built by **Abala (NexDocs / Mbogiwood Productions)** for Loveli Luxury International.
+"# loveli-luxury" 
