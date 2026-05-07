@@ -12,6 +12,8 @@
 
 import { z } from 'zod'
 
+const emptyToUndef = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v)
+
 // -----------------------------------------------------------------------------
 // Public schema (NEXT_PUBLIC_*, safe in the browser)
 // -----------------------------------------------------------------------------
@@ -35,10 +37,12 @@ const serverSchema = z.object({
   FLUTTERWAVE_ENCRYPTION_KEY: z.string().min(10),
   FLUTTERWAVE_WEBHOOK_SECRET_HASH: z.string().min(20),
   REVALIDATE_SECRET: z.string().min(32),
-  SENTRY_DSN: z.string().url().optional(),
-  SENTRY_AUTH_TOKEN: z.string().optional(),
-  RESEND_API_KEY: z.string().min(10).optional(),
-  RESEND_FROM_EMAIL: z.string().email().optional(),
+  // Optional fields. Treat empty string as "unset" so a blank line in
+  // .env.local doesn't trip the format validators (URL/email/min-length).
+  SENTRY_DSN: z.preprocess(emptyToUndef, z.string().url().optional()),
+  SENTRY_AUTH_TOKEN: z.preprocess(emptyToUndef, z.string().optional()),
+  RESEND_API_KEY: z.preprocess(emptyToUndef, z.string().min(10).optional()),
+  RESEND_FROM_EMAIL: z.preprocess(emptyToUndef, z.string().email().optional()),
   ENABLE_DISTRIBUTOR_SIGNUP: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_PAYOUTS: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_MAINTENANCE_MODE: z.string().transform((v) => v === 'true').default('false'),

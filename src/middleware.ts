@@ -34,7 +34,10 @@ export async function middleware(request: NextRequest) {
 
   // Gate /admin/* — only admin and superadmin may enter.
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) return redirectTo(request, '/?reason=auth')
+    if (!user) {
+      const next = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search)
+      return redirectTo(request, `/login?next=${next}`)
+    }
 
     const { data: rolesData } = await supabase
       .from('user_roles')
