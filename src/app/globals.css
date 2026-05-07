@@ -57,3 +57,38 @@
     border-top: 1px solid hsl(var(--border));
   }
 }
+
+/* Refined scrollbar — thin, gold-tipped, low-key. */
+@media (hover: hover) and (pointer: fine) {
+  html { scrollbar-width: thin; scrollbar-color: hsl(38 56% 60% / 0.55) transparent; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(38 56% 60% / 0.7), hsl(38 56% 50% / 0.4));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(38 56% 60% / 0.9); }
+}
+
+/* Hide native cursor only on devices that can show ours. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"] {
+    cursor: none;
+  }
+}
+
+.custom-cursor-ring.ring-hovered {
+  width: 64px;
+  height: 64px;
+  border-color: hsl(var(--primary));
+  background-color: hsl(38 56% 60% / 0.08);
+}
+
+/* Lenis smooth scroll requirement */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }

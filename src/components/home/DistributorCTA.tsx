@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { animate, motion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { MagneticLink } from '@/components/chrome/MagneticLink'
 
 function CountUp({ to, suffix = '', duration = 1.6 }: { to: number; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement | null>(null)
@@ -88,13 +88,13 @@ export function DistributorCTA() {
           transition={{ duration: 0.9, delay: 0.55 }}
           className="mt-12"
         >
-          <Link
+          <MagneticLink
             href="/bundles"
             className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--primary))] px-10 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--primary-foreground))] transition hover:scale-[1.02]"
           >
             <span className="relative z-10">Explore starter packages</span>
             <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-          </Link>
+          </MagneticLink>
         </motion.div>
       </div>
     </section>

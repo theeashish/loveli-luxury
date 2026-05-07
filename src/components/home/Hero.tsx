@@ -12,6 +12,8 @@ import {
 } from 'framer-motion'
 import { FRAGRANCES } from '@/lib/catalog/fragrance-meta'
 import { CursorSpotlight } from './CursorSpotlight'
+import { KineticHeading, Slot } from '@/components/chrome/KineticHeading'
+import { MagneticLink } from '@/components/chrome/MagneticLink'
 
 const ROTATION_MS = 6500
 const HERO_PICKS = ['ocean-desire', 'crimson-noir', 'sunset-bliss', 'afar', 'vanilla-smoke'] as const
@@ -66,17 +68,13 @@ export function Hero() {
           >
             Where love meets luxury
           </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-            className="mt-5 font-serif text-[clamp(2.75rem,7vw,5.5rem)] leading-[1.02] tracking-tight"
-          >
-            The Scent of{' '}
-            <em className="italic font-medium text-[hsl(var(--primary))]">Elegance</em>,
+          <KineticHeading className="mt-5 font-serif text-[clamp(2.75rem,7vw,5.5rem)] leading-[1.02] tracking-tight">
+            <Slot>The Scent of </Slot>
+            <Slot italic gold>Elegance</Slot>
+            <Slot>,</Slot>
             <br />
-            Bottled.
-          </motion.h1>
+            <Slot>Bottled.</Slot>
+          </KineticHeading>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -121,13 +119,13 @@ export function Hero() {
             transition={{ duration: 1, delay: 0.55 }}
             className="mt-10 flex flex-wrap items-center gap-4"
           >
-            <Link
+            <MagneticLink
               href="/shop"
               className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--primary))] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--primary-foreground))] transition hover:scale-[1.02]"
             >
               <span className="relative z-10">Shop the collection</span>
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-            </Link>
+            </MagneticLink>
             <Link
               href="/bundles"
               className="text-xs uppercase tracking-[0.25em] text-[hsl(var(--foreground))] underline-offset-8 transition hover:text-[hsl(var(--primary))] hover:underline"

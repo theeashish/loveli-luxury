@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { Toaster } from 'sonner'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
+import { SmoothScroll } from '@/components/chrome/SmoothScroll'
+import { CustomCursor } from '@/components/chrome/CustomCursor'
+import { ScrollProgress } from '@/components/chrome/ScrollProgress'
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
@@ -13,6 +16,9 @@ const NAV = [
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <SmoothScroll />
+      <CustomCursor />
+      <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <Link href="/" className="group flex flex-col leading-none">
