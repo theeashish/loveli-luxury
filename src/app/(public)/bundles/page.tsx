@@ -1,7 +1,9 @@
 import { listBundles } from '@/lib/catalog/queries'
 import { BundleHighlight } from '@/components/catalog/BundleHighlight'
 
-export const revalidate = false
+// Catalog reads use the auth-bound Supabase client (cookies()), which
+// is incompatible with static generation. Render fresh per request.
+export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Bundles',
   description: 'Curated combos and starter packages from Loveli Luxury.',

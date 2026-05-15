@@ -1,7 +1,9 @@
 import { listProductSummaries } from '@/lib/catalog/queries'
 import { ProductCard } from '@/components/catalog/ProductCard'
 
-export const revalidate = false
+// Catalog reads use the auth-bound Supabase client (cookies()), which
+// is incompatible with static generation. Render fresh per request.
+export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Shop',
   description: 'The full Loveli Luxury Eau de Parfum collection.',

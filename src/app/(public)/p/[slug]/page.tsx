@@ -4,7 +4,10 @@ import { getProductBySlug, listActiveProductSlugs } from '@/lib/catalog/queries'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { VariantPicker } from '@/components/catalog/VariantPicker'
 
-export const revalidate = false
+// Catalog reads use the auth-bound Supabase client (cookies()), which
+// breaks static generation with DYNAMIC_SERVER_USAGE. Render fresh
+// per request for now.
+export const dynamic = 'force-dynamic'
 export const dynamicParams = true
 
 export async function generateStaticParams() {

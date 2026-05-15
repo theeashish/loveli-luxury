@@ -9,7 +9,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatKes } from '@/lib/money'
-import { ALLOWED_ACTIONS, transitionOrderStatus } from './actions'
+import { transitionOrderStatus } from './actions'
+import { ALLOWED_ACTIONS } from './transitions'
 
 export const dynamic = 'force-dynamic'
 

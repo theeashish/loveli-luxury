@@ -5,7 +5,12 @@ import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { BundleContents } from '@/components/catalog/BundleContents'
 import { BundleAddToCart } from '@/components/catalog/BundleAddToCart'
 
-export const revalidate = false
+// Catalog reads go through the auth-bound Supabase client which calls
+// cookies() at request time — incompatible with static generation
+// (DYNAMIC_SERVER_USAGE). Force dynamic so each request renders fresh.
+// Phase 9 follow-up: route catalog reads through the service-role client
+// and re-enable ISR for the cache hit.
+export const dynamic = 'force-dynamic'
 export const dynamicParams = true
 
 export async function generateStaticParams() {

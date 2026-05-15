@@ -248,13 +248,5 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
   revalidatePath(`/admin/orders/${orderId}`)
 }
 
-export const ALLOWED_ACTIONS: Record<AnyStatus, Action[]> = {
-  pending: ['cancel'],
-  paid: ['fulfill', 'refund'],
-  fulfilled: ['ship', 'refund'],
-  shipped: ['deliver', 'refund'],
-  delivered: [],
-  cancelled: [],
-  failed: [],
-  refunded: [],
-}
+// ALLOWED_ACTIONS lives in ./transitions.ts so this 'use server' file
+// exports only async functions (Next.js constraint).

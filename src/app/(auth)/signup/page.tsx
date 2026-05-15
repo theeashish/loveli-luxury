@@ -1,18 +1,18 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { LoginForm } from '@/components/auth/LoginForm'
+import { SignupForm } from '@/components/auth/SignupForm'
 
-export const metadata = { title: 'Sign in', robots: { index: false } }
+export const metadata = { title: 'Create account', robots: { index: false } }
 
-export default function LoginPage({
+export default function SignupPage({
   searchParams,
 }: {
   searchParams: { next?: string }
 }) {
   const next = typeof searchParams.next === 'string' ? searchParams.next : ''
-  const signupHref = next
-    ? `/signup?next=${encodeURIComponent(next)}`
-    : '/signup'
+  const loginHref = next
+    ? `/login?next=${encodeURIComponent(next)}`
+    : '/login'
 
   const isJoinFlow = next.startsWith('/distributors/signup')
 
@@ -22,24 +22,24 @@ export default function LoginPage({
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
           Loveli Luxury
         </p>
-        <h1 className="mt-2 text-3xl font-light tracking-tight">Sign in</h1>
+        <h1 className="mt-2 text-3xl font-light tracking-tight">Create account</h1>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
           {isJoinFlow
-            ? 'Sign in to continue your Boss Scents registration.'
-            : 'Welcome back. Sign in to continue.'}
+            ? 'Start by creating an account. Your Boss Scents registration continues right after.'
+            : 'Set up your Loveli Luxury account.'}
         </p>
         <div className="mt-8">
           <Suspense fallback={null}>
-            <LoginForm />
+            <SignupForm />
           </Suspense>
         </div>
         <p className="mt-6 text-sm text-[hsl(var(--muted-foreground))]">
-          New here?{' '}
+          Already have one?{' '}
           <Link
-            href={signupHref}
+            href={loginHref}
             className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
           >
-            Create an account
+            Sign in
           </Link>
           .
         </p>

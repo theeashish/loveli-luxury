@@ -51,6 +51,14 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
 
+  // Lint is run separately in CI via `npm run lint`. We don't want
+  // cosmetic ESLint rules (e.g. react/no-unescaped-entities) to block
+  // production builds — the rules-of-hooks violation that mattered is
+  // fixed in the source.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

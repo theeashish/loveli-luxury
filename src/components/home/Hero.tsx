@@ -34,13 +34,13 @@ export function Hero() {
   const copyY = useTransform(scrollYProgress, [0, 1], ['0%', '14%'])
   const copyOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.2])
 
-  if (!current) return null
-
   useEffect(() => {
     if (reduce) return
     const id = setInterval(() => setIndex((i) => (i + 1) % picks.length), ROTATION_MS)
     return () => clearInterval(id)
   }, [reduce, picks.length])
+
+  if (!current) return null
 
   return (
     <section ref={sectionRef} className="relative isolate overflow-hidden">

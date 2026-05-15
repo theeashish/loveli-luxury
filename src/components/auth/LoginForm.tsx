@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export function LoginForm() {
-  const router = useRouter()
   const params = useSearchParams()
-  const next = params.get('next') ?? '/admin/catalog'
+  // Default to homepage when no `next` is provided. Admin routes set
+  // their own `?next=/admin/...` via middleware redirects, so this only
+  // affects bare /login visits (e.g. from the public header).
+  const next = params.get('next') ?? '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,13 +22,17 @@ export function LoginForm() {
     setBusy(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setBusy(false)
     if (error) {
+      setBusy(false)
       setError(error.message)
       return
     }
-    router.push(next)
-    router.refresh()
+    // Hard navigation rather than router.push so middleware runs on the
+    // request, picks up the freshly-set Supabase auth cookies, and the
+    // destination's server component sees the session immediately.
+    // router.push() can race the cookie propagation in production builds
+    // and bounce an auth-required page back to /login.
+    window.location.assign(next)
   }
 
   return (
