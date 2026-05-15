@@ -19,6 +19,17 @@ export type Json =
 
 type Timestamptz = string
 type UserRoleEnum = 'customer' | 'distributor' | 'admin' | 'superadmin'
+type OrderStatusEnum =
+  | 'pending'
+  | 'paid'
+  | 'failed'
+  | 'cancelled'
+  | 'fulfilled'
+  | 'shipped'
+  | 'delivered'
+  | 'refunded'
+type OrderKindEnum = 'retail' | 'distributor_signup' | 'distributor_restock'
+type PayoutStatusEnum = 'pending' | 'processing' | 'completed' | 'failed' | 'reversed'
 
 export type Database = {
   public: {
@@ -100,6 +111,8 @@ export type Database = {
           size_ml: number
           retail_price_minor: string
           distributor_price_minor: string
+          selling_price_minor: string | null
+          pv_per_bottle: number
           weight_g: number | null
           inventory_qty: number
           is_active: boolean
@@ -290,11 +303,618 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          phone: string | null
+          full_name: string
+          national_id: string | null
+          date_of_birth: string | null
+          country_code: string
+          preferred_language: string
+          preferred_currency: string
+          marketing_consent_at: Timestamptz | null
+          created_at: Timestamptz
+          updated_at: Timestamptz
+        }
+        Insert: {
+          id: string
+          email: string
+          phone?: string | null
+          full_name: string
+          national_id?: string | null
+          date_of_birth?: string | null
+          country_code?: string
+          preferred_language?: string
+          preferred_currency?: string
+          marketing_consent_at?: Timestamptz | null
+        }
+        Update: Partial<Database['public']['Tables']['profiles']['Insert']>
+        Relationships: []
+      }
+      addresses: {
+        Row: {
+          id: number
+          user_id: string
+          label: string | null
+          recipient_name: string
+          phone: string
+          street_line_1: string
+          street_line_2: string | null
+          city: string
+          region: string | null
+          postal_code: string | null
+          country_code: string
+          is_default: boolean
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          label?: string | null
+          recipient_name: string
+          phone: string
+          street_line_1: string
+          street_line_2?: string | null
+          city: string
+          region?: string | null
+          postal_code?: string | null
+          country_code: string
+          is_default?: boolean
+          created_at?: Timestamptz
+        }
+        Update: Partial<Database['public']['Tables']['addresses']['Insert']>
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          id: number
+          order_number: string
+          user_id: string | null
+          customer_email: string
+          customer_phone: string | null
+          kind: OrderKindEnum
+          status: OrderStatusEnum
+          subtotal_minor: string
+          shipping_minor: string
+          tax_minor: string
+          discount_minor: string
+          total_minor: string
+          currency: string
+          sponsor_distributor_id: number | null
+          shipping_address_id: number | null
+          payment_provider: string | null
+          payment_provider_ref: string | null
+          paid_at: Timestamptz | null
+          notes: string | null
+          created_at: Timestamptz
+          updated_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          order_number: string
+          user_id?: string | null
+          customer_email: string
+          customer_phone?: string | null
+          kind?: OrderKindEnum
+          status?: OrderStatusEnum
+          subtotal_minor: number | string
+          shipping_minor?: number | string
+          tax_minor?: number | string
+          discount_minor?: number | string
+          total_minor: number | string
+          currency?: string
+          sponsor_distributor_id?: number | null
+          shipping_address_id?: number | null
+          payment_provider?: string | null
+          payment_provider_ref?: string | null
+          paid_at?: Timestamptz | null
+          notes?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['orders']['Insert']>
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          id: number
+          order_id: number
+          variant_id: number | null
+          bundle_id: number | null
+          quantity: number
+          unit_price_minor: string
+          line_total_minor: string
+          is_commissionable: boolean
+          commissionable_amount_minor: string
+          commission_pv: number
+        }
+        Insert: {
+          id?: number
+          order_id: number
+          variant_id?: number | null
+          bundle_id?: number | null
+          quantity: number
+          unit_price_minor: number | string
+          line_total_minor: number | string
+          is_commissionable?: boolean
+          commissionable_amount_minor?: number | string
+          commission_pv?: number
+        }
+        Update: Partial<Database['public']['Tables']['order_items']['Insert']>
+        Relationships: []
+      }
+      distributors: {
+        Row: {
+          id: number
+          user_id: string
+          sponsor_code: string
+          sponsor_id: number | null
+          joined_at: Timestamptz
+          is_active: boolean
+          starter_package_id: number | null
+          starter_paid_at: Timestamptz | null
+          current_rank_id: number | null
+          current_rank_achieved_at: Timestamptz | null
+          payout_msisdn: string | null
+          payout_msisdn_verified_at: Timestamptz | null
+          payout_msisdn_pending: string | null
+          payout_msisdn_pending_at: Timestamptz | null
+          kyc_status: string
+          kyc_approved_at: Timestamptz | null
+          created_at: Timestamptz
+          updated_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          user_id: string
+          sponsor_code: string
+          sponsor_id?: number | null
+          is_active?: boolean
+          starter_package_id?: number | null
+          starter_paid_at?: Timestamptz | null
+          current_rank_id?: number | null
+          current_rank_achieved_at?: Timestamptz | null
+          payout_msisdn?: string | null
+          payout_msisdn_verified_at?: Timestamptz | null
+          payout_msisdn_pending?: string | null
+          payout_msisdn_pending_at?: Timestamptz | null
+          kyc_status?: string
+          kyc_approved_at?: Timestamptz | null
+        }
+        Update: Partial<Database['public']['Tables']['distributors']['Insert']>
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          id: number
+          actor_id: string | null
+          action: string
+          resource_type: string
+          resource_id: string | null
+          before_data: Json | null
+          after_data: Json | null
+          ip_address: string | null
+          user_agent: string | null
+          occurred_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          actor_id?: string | null
+          action: string
+          resource_type: string
+          resource_id?: string | null
+          before_data?: Json | null
+          after_data?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          occurred_at?: Timestamptz
+        }
+        Update: Partial<Database['public']['Tables']['audit_log']['Insert']>
+        Relationships: []
+      }
+      payouts: {
+        Row: {
+          id: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          commissions_total_minor: string
+          salary_total_minor: string
+          rank_bonus_total_minor: string
+          retail_profit_minor: string
+          gross_total_minor: string
+          fees_minor: string
+          net_total_minor: string
+          currency: string
+          payout_method: string
+          payout_msisdn: string | null
+          status: PayoutStatusEnum
+          flutterwave_transfer_id: string | null
+          initiated_at: Timestamptz | null
+          completed_at: Timestamptz | null
+          failure_reason: string | null
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          commissions_total_minor?: number | string
+          salary_total_minor?: number | string
+          rank_bonus_total_minor?: number | string
+          retail_profit_minor?: number | string
+          gross_total_minor: number | string
+          fees_minor?: number | string
+          net_total_minor: number | string
+          currency?: string
+          payout_method?: string
+          payout_msisdn?: string | null
+          status?: PayoutStatusEnum
+          flutterwave_transfer_id?: string | null
+          initiated_at?: Timestamptz | null
+          completed_at?: Timestamptz | null
+          failure_reason?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['payouts']['Insert']>
+        Relationships: []
+      }
+      config_ranks: {
+        Row: {
+          id: number
+          rank_position: number
+          rank_name: string
+          emoji: string | null
+          min_active_recruits: number
+          min_group_sales_minor: string
+          rank_up_bonus_minor: string
+          min_personal_sales_minor: string
+          min_personal_pv: number
+          qualifying_months: number
+          effective_from: Timestamptz
+          effective_until: Timestamptz | null
+          created_by: string | null
+          created_at: Timestamptz
+          notes: string | null
+        }
+        Insert: {
+          id?: number
+          rank_position: number
+          rank_name: string
+          emoji?: string | null
+          min_active_recruits?: number
+          min_group_sales_minor?: number | string
+          rank_up_bonus_minor?: number | string
+          min_personal_sales_minor?: number | string
+          effective_from?: Timestamptz
+          effective_until?: Timestamptz | null
+          created_by?: string | null
+          notes?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['config_ranks']['Insert']>
+        Relationships: []
+      }
+      config_starter_packages: {
+        Row: {
+          id: number
+          package_code: string
+          bundle_id: number
+          joining_fee_minor: string
+          effective_from: Timestamptz
+          effective_until: Timestamptz | null
+          created_by: string | null
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          package_code: string
+          bundle_id: number
+          joining_fee_minor: number | string
+          effective_from?: Timestamptz
+          effective_until?: Timestamptz | null
+          created_by?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['config_starter_packages']['Insert']>
+        Relationships: []
+      }
+      distributor_tree: {
+        Row: {
+          ancestor_id: number
+          descendant_id: number
+          depth: number
+        }
+        Insert: {
+          ancestor_id: number
+          descendant_id: number
+          depth: number
+        }
+        Update: Partial<Database['public']['Tables']['distributor_tree']['Insert']>
+        Relationships: []
+      }
+      gsv_snapshots: {
+        Row: {
+          id: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          personal_bottles_sold: number
+          personal_sales_minor: string
+          team_gsv_minor: string
+          active_recruits_count: number
+          computed_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          personal_bottles_sold?: number
+          personal_sales_minor?: number | string
+          team_gsv_minor?: number | string
+          active_recruits_count?: number
+        }
+        Update: Partial<Database['public']['Tables']['gsv_snapshots']['Insert']>
+        Relationships: []
+      }
+      monthly_salaries: {
+        Row: {
+          id: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          rank_at_period_id: number
+          personal_bottles_sold: number
+          team_gsv_minor: string
+          qualified: boolean
+          fixed_salary_minor: string
+          performance_bonus_minor: string
+          total_minor: string
+          computed_at: Timestamptz
+          payout_id: number | null
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          period_year: number
+          period_month: number
+          rank_at_period_id: number
+          personal_bottles_sold?: number
+          team_gsv_minor?: number | string
+          qualified: boolean
+          fixed_salary_minor?: number | string
+          performance_bonus_minor?: number | string
+          total_minor?: number | string
+          payout_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['monthly_salaries']['Insert']>
+        Relationships: []
+      }
+      rank_up_bonuses: {
+        Row: {
+          id: number
+          distributor_id: number
+          rank_id: number
+          amount_minor: string
+          awarded_at: Timestamptz
+          payout_id: number | null
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          rank_id: number
+          amount_minor: number | string
+          payout_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['rank_up_bonuses']['Insert']>
+        Relationships: []
+      }
+      manual_ledger_adjustments: {
+        Row: {
+          id: number
+          distributor_id: number
+          amount_minor: string
+          currency: string
+          period_year: number
+          period_month: number
+          reason: string
+          actor_id: string | null
+          payout_id: number | null
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          amount_minor: number | string
+          currency?: string
+          period_year: number
+          period_month: number
+          reason: string
+          actor_id?: string | null
+          payout_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['manual_ledger_adjustments']['Insert']>
+        Relationships: []
+      }
+      msisdn_verifications: {
+        Row: {
+          id: number
+          distributor_id: number
+          msisdn: string
+          code_hash: string
+          expires_at: Timestamptz
+          used_at: Timestamptz | null
+          attempts: number
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          msisdn: string
+          code_hash: string
+          expires_at: Timestamptz
+          used_at?: Timestamptz | null
+          attempts?: number
+        }
+        Update: Partial<Database['public']['Tables']['msisdn_verifications']['Insert']>
+        Relationships: []
+      }
+      clawback_resolutions: {
+        Row: {
+          id: number
+          order_id: number
+          paid_amount_minor: string
+          paid_count: number
+          resolution: string | null
+          deducted_from_payout_id: number | null
+          notes: string | null
+          resolved_by: string | null
+          resolved_at: Timestamptz | null
+          applied_at: Timestamptz | null
+          created_at: Timestamptz
+        }
+        Insert: {
+          id?: number
+          order_id: number
+          paid_amount_minor: number | string
+          paid_count: number
+          resolution?: string | null
+          deducted_from_payout_id?: number | null
+          notes?: string | null
+          resolved_by?: string | null
+          resolved_at?: Timestamptz | null
+        }
+        Update: Partial<Database['public']['Tables']['clawback_resolutions']['Insert']>
+        Relationships: []
+      }
+      commission_ledger: {
+        Row: {
+          id: number
+          distributor_id: number
+          source_order_id: number
+          source_distributor_id: number
+          level: number
+          commission_basis_minor: string
+          basis_pv: number
+          rate_basis_points: number
+          amount_minor: string
+          currency: string
+          config_commission_rate_id: number
+          earned_at: Timestamptz
+          payout_id: number | null
+        }
+        Insert: {
+          id?: number
+          distributor_id: number
+          source_order_id: number
+          source_distributor_id: number
+          level: number
+          commission_basis_minor: number | string
+          rate_basis_points: number
+          amount_minor: number | string
+          currency?: string
+          config_commission_rate_id: number
+          payout_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['commission_ledger']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      generate_order_number: {
+        Args: Record<string, never>
+        Returns: string
+      }
+      mark_order_paid: {
+        Args: {
+          p_order_id: number
+          p_provider_ref: string
+          p_paid_at?: Timestamptz
+        }
+        Returns: boolean
+      }
+      write_commission_ledger: {
+        Args: { p_order_id: number }
+        Returns: number
+      }
+      provision_distributor: {
+        Args: { p_order_id: number }
+        Returns: number
+      }
+      compute_gsv_snapshot: {
+        Args: {
+          p_distributor_id: number
+          p_year: number
+          p_month: number
+        }
+        Returns: number
+      }
+      compute_monthly_salary: {
+        Args: {
+          p_distributor_id: number
+          p_year: number
+          p_month: number
+        }
+        Returns: number
+      }
+      detect_rank_up: {
+        Args: {
+          p_distributor_id: number
+          p_year: number
+          p_month: number
+        }
+        Returns: number | null
+      }
+      restore_order_inventory: {
+        Args: { p_order_id: number }
+        Returns: boolean
+      }
+      void_unpaid_commissions_for_order: {
+        Args: { p_order_id: number }
+        Returns: {
+          voided: number
+          voided_amount_minor: number
+          already_paid: number
+          paid_amount_minor: number
+        }
+      }
+      is_distributor_maintained: {
+        Args: {
+          p_distributor_id: number
+          p_year: number
+          p_month: number
+        }
+        Returns: boolean
+      }
+      is_distributor_qualified_for_rank: {
+        Args: {
+          p_distributor_id: number
+          p_rank_id: number
+          p_year: number
+          p_month: number
+        }
+        Returns: boolean
+      }
+      count_qualifying_streak: {
+        Args: {
+          p_distributor_id: number
+          p_target_rank_id: number
+          p_ending_year: number
+          p_ending_month: number
+          p_max: number
+        }
+        Returns: number
+      }
+      apply_clawback_deduction: {
+        Args: { p_resolution_id: number }
+        Returns: boolean
+      }
+    }
     Enums: {
       user_role: UserRoleEnum
+      order_status: OrderStatusEnum
+      order_kind: OrderKindEnum
+      payout_status: PayoutStatusEnum
     }
     CompositeTypes: Record<string, never>
   }

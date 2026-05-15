@@ -40,6 +40,83 @@ export function verifyWebhookSignature(receivedHash: string | null): boolean {
 }
 
 // -----------------------------------------------------------------------------
+// Create a hosted checkout link (Standard payments)
+// -----------------------------------------------------------------------------
+
+export interface CreatePaymentLinkRequest {
+  /** Our internal unique reference. Must be unique per attempt — typically the
+   *  order_number. Flutterwave echoes it back on the webhook and redirect. */
+  txRef: string
+  /** Amount in major units (whole KES). The Charges API expects major units;
+   *  callers in this codebase are responsible for the BigInt-minor → integer-major
+   *  conversion at the boundary. */
+  amountKes: number
+  /** Where to redirect the buyer after payment. Should resolve to /checkout/return. */
+  redirectUrl: string
+  customer: {
+    email: string
+    name?: string
+    phonenumber?: string
+  }
+  /** Free-form key/values stored alongside the transaction. We send the order id
+   *  here so the webhook can resolve back to our row even if tx_ref is malformed. */
+  meta?: Record<string, string | number | null>
+  /** Optional branding overrides for the hosted page. */
+  customizations?: {
+    title?: string
+    description?: string
+    logo?: string
+  }
+  /** ISO-3 currency. Defaults to KES. */
+  currency?: string
+}
+
+export interface CreatePaymentLinkResponse {
+  link: string
+}
+
+export async function createPaymentLink(
+  req: CreatePaymentLinkRequest
+): Promise<CreatePaymentLinkResponse> {
+  const env = getServerEnv()
+
+  const response = await fetch(`${FLUTTERWAVE_API_BASE}/payments`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.FLUTTERWAVE_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      tx_ref: req.txRef,
+      amount: req.amountKes,
+      currency: req.currency ?? 'KES',
+      redirect_url: req.redirectUrl,
+      customer: req.customer,
+      meta: req.meta ?? {},
+      customizations: req.customizations ?? {
+        title: 'Loveli Luxury International',
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Flutterwave create payment failed: ${response.status} ${await response.text()}`)
+  }
+
+  const json = (await response.json()) as {
+    status: string
+    message?: string
+    data?: { link: string }
+  }
+
+  if (json.status !== 'success' || !json.data?.link) {
+    throw new Error(`Flutterwave create payment non-success: ${JSON.stringify(json)}`)
+  }
+
+  return { link: json.data.link }
+}
+
+// -----------------------------------------------------------------------------
 // Verify a transaction by id (after redirect)
 // -----------------------------------------------------------------------------
 
@@ -77,6 +154,72 @@ export async function verifyTransaction(transactionId: number): Promise<Flutterw
   }
 
   return json.data
+}
+
+// -----------------------------------------------------------------------------
+// Refund a transaction (full or partial)
+// -----------------------------------------------------------------------------
+
+export interface RefundResponse {
+  flutterwaveRefundId: string
+  status: 'completed' | 'pending' | 'failed' | string
+  amountKes: number
+}
+
+/**
+ * Issue a refund against a previous successful charge.
+ *
+ *   amountKes  Optional. Omit for a full refund. The Flutterwave Refunds API
+ *              accepts an `amount` field for partial refunds, but Phase 4
+ *              only exposes full refunds in the admin UI; partials are a
+ *              follow-up.
+ *
+ * Returns a normalised refund response. The Refunds API response is
+ * synchronous-ish: the refund moves to `completed` immediately for cards
+ * but stays `pending` for some methods until the bank acknowledges. The
+ * webhook is the canonical confirmation; this helper only surfaces the
+ * initial state.
+ */
+export async function refundTransaction(
+  transactionId: number,
+  amountKes?: number,
+): Promise<RefundResponse> {
+  const env = getServerEnv()
+
+  const response = await fetch(
+    `${FLUTTERWAVE_API_BASE}/transactions/${transactionId}/refund`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.FLUTTERWAVE_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        amountKes !== undefined ? { amount: amountKes } : {},
+      ),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      `Flutterwave refund failed: ${response.status} ${await response.text()}`,
+    )
+  }
+
+  const json = (await response.json()) as {
+    status: string
+    message?: string
+    data?: { id: number; amount_refunded: number; status: string }
+  }
+  if (json.status !== 'success' || !json.data) {
+    throw new Error(`Flutterwave refund non-success: ${JSON.stringify(json)}`)
+  }
+
+  return {
+    flutterwaveRefundId: String(json.data.id),
+    status: json.data.status,
+    amountKes: json.data.amount_refunded,
+  }
 }
 
 // -----------------------------------------------------------------------------

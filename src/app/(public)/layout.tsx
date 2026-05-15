@@ -40,7 +40,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               </Link>
             ))}
             <Link
-              href="/bundles"
+              href="/distributors/signup"
               className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
             >
               Join Boss Scents

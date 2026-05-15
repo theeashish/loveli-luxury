@@ -37,12 +37,22 @@ const serverSchema = z.object({
   FLUTTERWAVE_ENCRYPTION_KEY: z.string().min(10),
   FLUTTERWAVE_WEBHOOK_SECRET_HASH: z.string().min(20),
   REVALIDATE_SECRET: z.string().min(32),
+  // Bearer secret for /api/cron/monthly-close. Required only at the call
+  // site; the route reads it lazily so a missing value doesn't break boot.
+  CRON_SECRET: z.preprocess(emptyToUndef, z.string().min(32).optional()),
   // Optional fields. Treat empty string as "unset" so a blank line in
   // .env.local doesn't trip the format validators (URL/email/min-length).
   SENTRY_DSN: z.preprocess(emptyToUndef, z.string().url().optional()),
   SENTRY_AUTH_TOKEN: z.preprocess(emptyToUndef, z.string().optional()),
   RESEND_API_KEY: z.preprocess(emptyToUndef, z.string().min(10).optional()),
   RESEND_FROM_EMAIL: z.preprocess(emptyToUndef, z.string().email().optional()),
+  // Africa's Talking SMS gateway (KE-first). If unset, MSISDN verification
+  // codes are written to audit_log instead of sent — admin manually
+  // relays. This makes the verification flow run end-to-end without
+  // requiring an SMS provider at the time of build.
+  AFRICAS_TALKING_USERNAME: z.preprocess(emptyToUndef, z.string().optional()),
+  AFRICAS_TALKING_API_KEY: z.preprocess(emptyToUndef, z.string().min(10).optional()),
+  AFRICAS_TALKING_SENDER_ID: z.preprocess(emptyToUndef, z.string().optional()),
   ENABLE_DISTRIBUTOR_SIGNUP: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_PAYOUTS: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_MAINTENANCE_MODE: z.string().transform((v) => v === 'true').default('false'),
@@ -85,10 +95,14 @@ export function getServerEnv() {
     FLUTTERWAVE_ENCRYPTION_KEY: process.env.FLUTTERWAVE_ENCRYPTION_KEY,
     FLUTTERWAVE_WEBHOOK_SECRET_HASH: process.env.FLUTTERWAVE_WEBHOOK_SECRET_HASH,
     REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
     SENTRY_DSN: process.env.SENTRY_DSN,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+    AFRICAS_TALKING_USERNAME: process.env.AFRICAS_TALKING_USERNAME,
+    AFRICAS_TALKING_API_KEY: process.env.AFRICAS_TALKING_API_KEY,
+    AFRICAS_TALKING_SENDER_ID: process.env.AFRICAS_TALKING_SENDER_ID,
     ENABLE_DISTRIBUTOR_SIGNUP: process.env.ENABLE_DISTRIBUTOR_SIGNUP,
     ENABLE_PAYOUTS: process.env.ENABLE_PAYOUTS,
     ENABLE_MAINTENANCE_MODE: process.env.ENABLE_MAINTENANCE_MODE,

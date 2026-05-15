@@ -88,14 +88,12 @@ export function CartPageClient() {
                 <span className="text-xl font-medium tabular-nums">{formatKes(subtotal)}</span>
               </div>
             </div>
-            <button
-              type="button"
-              disabled
-              title="Checkout lands in Phase 3"
-              className="mt-6 w-full cursor-not-allowed rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] opacity-60"
+            <Link
+              href="/checkout"
+              className="mt-6 block w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-center text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
             >
               Continue to checkout
-            </button>
+            </Link>
             <button
               type="button"
               onClick={() => {

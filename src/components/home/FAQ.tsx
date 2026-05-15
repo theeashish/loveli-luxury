@@ -18,7 +18,7 @@ const ITEMS = [
   },
   {
     q: 'Can I become a distributor?',
-    a: 'Absolutely. We run a 7-level commission structure with monthly salary qualification. Start with any starter package — there is no joining fee.',
+    a: 'Only by invitation. An existing distributor sends you their sponsor link, you pay the registration fee and activate with a starter package. Earn retail profit on every bottle plus 7 levels of network commission (40% of point value). Climb 8 ranks: Starter, Team Builder, Builder, Manager, Senior Manager, Director, Senior Director, President. From Manager up, qualifying months earn a lifetime monthly salary — Kes 20,000 to Kes 250,000. Monthly stock maintenance is mandatory.',
   },
   {
     q: 'Are your fragrances tested on animals?',

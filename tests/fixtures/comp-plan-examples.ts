@@ -1,9 +1,18 @@
 /**
  * Compensation plan worked examples.
  *
- * Source: Loveli Luxury International Distributor Compensation Plan PDF, pages 7-8.
- * These are the canonical examples. If the implementation produces different
- * numbers, the implementation is wrong, not the fixtures.
+ * Historical: these encode the first-draft Loveli comp plan (Bronze..Elite
+ * Diamond, rates 20/9/5/3/2/1/1). Phase 7 migration 013 replaced the
+ * production comp plan with the 8-rank scheme (Team Builder..Ambassador,
+ * rates 20/10/8/5/2/1/1) derived from the client's PDF + stated anchors.
+ *
+ * The production source of truth is now the SQL function
+ * `public.write_commission_ledger` plus `config_*` seed rows in
+ * migration 013. These JS fixtures remain as a spec for the pure-JS
+ * `calculateCommissions` helper, which is retained as a math primitive
+ * (and exercised by `commission-calculator.test.ts`) but no longer
+ * drives production writes. Updating these fixtures to the new comp
+ * plan requires equivalent worked examples — out of scope for wave 1.
  *
  * All amounts in minor units (cents). 1 KES = 100 cents.
  */

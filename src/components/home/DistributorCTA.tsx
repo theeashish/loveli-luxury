@@ -57,8 +57,10 @@ export function DistributorCTA() {
           transition={{ duration: 0.9, delay: 0.25 }}
           className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]"
         >
-          No joining fee. Up to 100% retail margins, 7 levels of commission, monthly salary
-          qualification, rank-up bonuses, and a path to car and travel incentives.
+          Invite-only. Pay your registration, activate with a starter package, and
+          maintain personal sales every month. Earn retail profit on every bottle plus
+          commission across 7 levels — and from Manager rank up, a lifetime monthly
+          salary as high as Kes 250,000.
         </motion.p>
 
         <motion.ul
@@ -69,10 +71,10 @@ export function DistributorCTA() {
           className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4"
         >
           {[
-            { node: <CountUp to={0} />, v: 'Joining fee' },
+            { node: <CountUp to={8} />, v: 'Ranks to climb' },
             { node: <CountUp to={7} />, v: 'Commission levels' },
-            { node: <CountUp to={20} suffix="%" />, v: 'Direct partner cut' },
-            { node: <><CountUp to={100} />k+</>, v: 'Rank-up bonuses' },
+            { node: <CountUp to={40} suffix="%" />, v: 'Of PV paid out' },
+            { node: <><CountUp to={250} />k</>, v: 'Top monthly salary' },
           ].map((s) => (
             <li key={s.v} className="text-center">
               <p className="font-serif text-3xl text-[hsl(var(--primary))]">{s.node}</p>
