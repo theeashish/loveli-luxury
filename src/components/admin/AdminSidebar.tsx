@@ -41,6 +41,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: '/admin/distributors', label: 'Distributors' },
       { href: '/admin/distributors/verifications', label: 'KYC queue' },
+      { href: '/admin/people/tree', label: 'Comp tree' },
     ],
   },
   {
