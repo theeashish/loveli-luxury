@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { publicEnv } from './lib/env'
+import { getDefaultSponsorCode } from './lib/distributors/default-sponsor'
 import type { Database } from './types/database'
 
 type CookieToSet = { name: string; value: string; options: CookieOptions }
@@ -53,6 +54,34 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
+
+  // Default-sponsor attribution: every visitor without a sponsor cookie
+  // (and not arriving via ?ref= — handled above) gets credited to the
+  // founding distributor. Skip admin and API routes — they don't need
+  // attribution and we want to keep them light.
+  //
+  // The founder is auto-discovered via public.default_sponsor_code()
+  // (migration 021). Returns null in the pre-bootstrap state, in which
+  // case we leave the cookie unset and the orphan-allowed transitional
+  // behaviour kicks in.
+  const isPublicSurface =
+    !path.startsWith('/admin') &&
+    !path.startsWith('/api') &&
+    !path.startsWith('/_next')
+  if (isPublicSurface && !request.cookies.get(SPONSOR_COOKIE)) {
+    const defaultCode = await getDefaultSponsorCode(supabase)
+    if (defaultCode) {
+      request.cookies.set(SPONSOR_COOKIE, defaultCode)
+      response = NextResponse.next({ request })
+      response.cookies.set(SPONSOR_COOKIE, defaultCode, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: SPONSOR_COOKIE_MAX_AGE,
+      })
+    }
+  }
 
   // Auth-required public routes — gate them in middleware rather than the
   // page so the redirect fires BEFORE any layout streams. Doing this in

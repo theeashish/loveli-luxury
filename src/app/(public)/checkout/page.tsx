@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CheckoutForm, type CheckoutAddress } from '@/components/checkout/CheckoutForm'
+import { SponsorStrip } from '@/components/sponsor/SponsorStrip'
 
 export const metadata = {
   title: 'Checkout',
@@ -73,7 +74,9 @@ export default async function CheckoutPage() {
   }))
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
+    <>
+      <SponsorStrip />
+      <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
       <header className="mb-10">
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Secure</p>
         <h1 className="mt-2 text-4xl font-light tracking-tight">Checkout</h1>
@@ -83,6 +86,7 @@ export default async function CheckoutPage() {
       </header>
 
       <CheckoutForm defaultPhone={profile.phone ?? ''} addresses={addresses} />
-    </div>
+      </div>
+    </>
   )
 }
