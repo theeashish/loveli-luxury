@@ -29,9 +29,14 @@ export type CurrentDistributor = {
 
 export async function getCurrentDistributor(): Promise<CurrentDistributor | null> {
   const supabase = createClient()
+  // getSession() (local cookie read) — getUser() can return null on
+  // Vercel Edge even when the user is signed in, which caused a loop
+  // between /account/distributor and /distributors/signup. See the
+  // long note on /app/(public)/distributors/signup/page.tsx.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) return null
 
   const service = createServiceClient()

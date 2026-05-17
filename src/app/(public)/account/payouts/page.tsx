@@ -31,8 +31,9 @@ type PayoutRow = {
 export default async function MyPayoutsPage() {
   const supabase = createClient()
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) redirect('/login?next=/account/payouts')
 
   const r = await supabase

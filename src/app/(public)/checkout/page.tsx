@@ -33,8 +33,9 @@ type ProfileRow = {
 export default async function CheckoutPage() {
   const supabase = createClient()
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) redirect('/login?next=/checkout')
 
   const [profileRes, addressesRes] = await Promise.all([
@@ -77,7 +78,7 @@ export default async function CheckoutPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Secure</p>
         <h1 className="mt-2 text-4xl font-light tracking-tight">Checkout</h1>
         <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-          Confirm your shipping details. Payment is handled by Flutterwave.
+          Confirm your shipping details. Payment is handled via M-Pesa (PayHero).
         </p>
       </header>
 

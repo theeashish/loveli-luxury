@@ -52,8 +52,48 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const path = request.nextUrl.pathname
+
+  // Auth-required public routes — gate them in middleware rather than the
+  // page so the redirect fires BEFORE any layout streams. Doing this in
+  // a Server Component leaves the user staring at a half-rendered shell
+  // while Chrome follows the 307.
+  const AUTH_REQUIRED_PREFIXES = [
+    '/distributors/signup',
+    '/account',
+    '/checkout',
+  ] as const
+  const needsAuth = AUTH_REQUIRED_PREFIXES.some(
+    (p) => path === p || path.startsWith(`${p}/`),
+  )
+  if (needsAuth && !user) {
+    const next = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search)
+    return redirectTo(request, `/login?next=${next}`)
+  }
+
+  // Already signed in and hitting /login or /signup — skip the form.
+  if ((path === '/login' || path === '/signup') && user) {
+    const rawNext = request.nextUrl.searchParams.get('next') ?? ''
+    const safe =
+      rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/'
+    return redirectTo(request, safe)
+  }
+
+  // Already a distributor and hitting /distributors/signup — send them to
+  // their portal before any layout streams (a page-level redirect leaves
+  // the chrome flashing). RLS distributors_self_read lets the anon client
+  // see their own row.
+  if (path === '/distributors/signup' && user) {
+    const dist = await supabase
+      .from('distributors')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (dist.data) return redirectTo(request, '/account/distributor')
+  }
+
   // Gate /admin/* — only admin and superadmin may enter.
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  if (path.startsWith('/admin')) {
     if (!user) {
       const next = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search)
       return redirectTo(request, `/login?next=${next}`)

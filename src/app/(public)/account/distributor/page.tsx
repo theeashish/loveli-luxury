@@ -11,7 +11,9 @@
 import Link from 'next/link'
 import { getCurrentDistributor } from '@/lib/distributors/current'
 import { createServiceClient } from '@/lib/supabase/service'
+import { publicEnv } from '@/lib/env'
 import { formatKes } from '@/lib/money'
+import { CopyButton } from '@/components/distributors/CopyButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,8 +93,39 @@ export default async function DistributorOverviewPage() {
   const currentPos = distributor.currentRankPosition ?? 1
   const nextRank = ranks.find((r) => r.rank_position === currentPos + 1)
 
+  // Pretty share link — surfaced front-and-centre so a new distributor
+  // can copy it the moment they land here. Full share controls (QR
+  // codes, alt URLs) live on the /share sub-tab.
+  const shareUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/r/${distributor.sponsorCode}`
+
   return (
     <div className="space-y-10">
+      <section className="rounded-lg border border-[hsl(var(--primary))]/40 bg-gradient-to-br from-[hsl(var(--primary))]/10 to-transparent p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
+              Your referral link
+            </p>
+            <p className="mt-2 break-all font-mono text-sm text-[hsl(var(--foreground))] md:text-base">
+              {shareUrl}
+            </p>
+            <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+              Share this with anyone — every buyer or recruit who arrives
+              through it is locked to you for commission credit.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 md:flex-col md:items-stretch">
+            <CopyButton value={shareUrl}>Copy link</CopyButton>
+            <Link
+              href="/account/distributor/share"
+              className="text-center text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))] underline-offset-4 hover:text-[hsl(var(--primary))] hover:underline"
+            >
+              QR + more →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat
           label="Team GSV"

@@ -22,7 +22,9 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
-import { refundTransaction } from '@/lib/flutterwave/service'
+// Refunds: PayHero does not yet expose a public refund API in our integration.
+// Admins issue refunds from the PayHero dashboard, then click "Mark refunded"
+// here to update inventory + clawback. See refund() below.
 
 const ACTIONS = ['cancel', 'fulfill', 'ship', 'deliver', 'refund'] as const
 type Action = (typeof ACTIONS)[number]
@@ -102,37 +104,28 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
     if (!TRANSITIONS.refund.from.includes(current.status)) {
       throw new Error(`Cannot refund an order in status "${current.status}".`)
     }
-    if (
-      current.payment_provider !== 'flutterwave' ||
-      !current.payment_provider_ref
-    ) {
-      throw new Error('Order has no Flutterwave transaction reference to refund.')
+    if (!current.payment_provider_ref) {
+      throw new Error('Order has no payment reference to refund.')
     }
 
-    const txId = Number(current.payment_provider_ref)
-    if (!Number.isFinite(txId)) {
-      throw new Error('Stored payment_provider_ref is not numeric.')
-    }
+    // Refunds: the actual money-movement is initiated in the PayHero
+    // dashboard (no documented refund API at the time of this
+    // integration). This action handles only the DB-side bookkeeping:
+    //   1. Restore inventory
+    //   2. Void unpaid commission ledger rows
+    //   3. Surface paid commissions on /admin/clawbacks for resolution
+    //   4. Flip status to refunded
+    // Admin is responsible for confirming the refund was issued in
+    // PayHero BEFORE clicking refund here. After confirming, the audit
+    // log captures the operator's intent.
 
-    // 1. Hit Flutterwave first. If this fails the order stays paid and the
-    //    admin can retry — no inventory change, no status flip.
-    let refundResult
-    try {
-      refundResult = await refundTransaction(txId)
-    } catch (err) {
-      throw new Error(`Flutterwave refund failed: ${(err as Error).message}`)
-    }
-
-    // 2. Restore inventory. The RPC raises if the order isn't in a
-    //    refundable status; matches our app-level check above but adds a
-    //    second guard at the DB.
+    // 1. Restore inventory.
     const restoreRes = await service.rpc('restore_order_inventory', {
       p_order_id: orderId,
     })
     if (restoreRes.error) {
       throw new Error(
-        `Refund issued at Flutterwave (id ${refundResult.flutterwaveRefundId}) ` +
-          `but inventory restore failed: ${restoreRes.error.message}. ` +
+        `Inventory restore failed: ${restoreRes.error.message}. ` +
           `Investigate before retrying.`,
       )
     }
@@ -194,10 +187,11 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       before_data: { status: current.status },
       after_data: {
         status: 'refunded',
-        flutterwave_refund_id: refundResult.flutterwaveRefundId,
-        flutterwave_refund_status: refundResult.status,
-        amount_kes: refundResult.amountKes,
+        provider: current.payment_provider,
+        provider_ref: current.payment_provider_ref,
         clawback,
+        note:
+          'Refund must be issued in PayHero dashboard before this status flip.',
       },
     })
 

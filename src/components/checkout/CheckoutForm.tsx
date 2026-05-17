@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { useCartStore } from '@/lib/cart/store'
 import { isEmpty, subtotalMinor, totalQty } from '@/lib/cart/selectors'
+import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { StkPushPanel } from '@/components/checkout/StkPushPanel'
 
 export type CheckoutAddress = {
   id: number
@@ -54,6 +56,8 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // When PayHero initiates an STK push, switch to polling-panel mode.
+  const [stkOrderNumber, setStkOrderNumber] = useState<string | null>(null)
 
   // Once hydrated, if the cart is empty there is nothing to check out for.
   useEffect(() => {
@@ -131,16 +135,43 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
       })
       const json = await res.json()
       if (!res.ok) {
-        setError(json?.error ?? 'Checkout failed.')
+        const base = json?.error ?? 'Checkout failed.'
+        const detail = typeof json?.detail === 'string' ? ` — ${json.detail}` : ''
+        setError(`${base}${detail}`)
         setSubmitting(false)
         return
       }
-      // Hand off to Flutterwave hosted checkout
-      window.location.href = json.redirectUrl
+
+      // PayHero — STK push fired, switch to polling panel
+      if (json.provider === 'payhero' && json.orderNumber) {
+        setStkOrderNumber(json.orderNumber as string)
+        return
+      }
+
+      setError('Payment provider did not return a usable response.')
+      setSubmitting(false)
     } catch (err) {
       setError((err as Error).message)
       setSubmitting(false)
     }
+  }
+
+  const onRetryStk = useCallback(() => {
+    setStkOrderNumber(null)
+    setSubmitting(false)
+  }, [])
+
+  // STK polling — render the panel exclusively while the payment is
+  // pending so the user isn't tempted to re-submit the form.
+  if (stkOrderNumber) {
+    return (
+      <StkPushPanel
+        orderNumber={stkOrderNumber}
+        successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
+        onRetry={onRetryStk}
+        amountLabel={formatKes(subtotal + computePayHeroFeeMinor(subtotal))}
+      />
+    )
   }
 
   const usingNew = addressKey === NEW_ADDRESS_KEY
@@ -337,12 +368,18 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
             <dt>Shipping</dt>
             <dd>Free</dd>
           </div>
+          <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+            <dt>Processing fee</dt>
+            <dd className="tabular-nums">
+              {formatKes(computePayHeroFeeMinor(subtotal))}
+            </dd>
+          </div>
         </dl>
         <div className="mt-5 border-t border-[hsl(var(--border))] pt-5">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Total</span>
             <span className="text-xl font-medium tabular-nums">
-              {formatKes(subtotal)}
+              {formatKes(subtotal + computePayHeroFeeMinor(subtotal))}
             </span>
           </div>
         </div>
@@ -356,7 +393,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
           disabled={submitting}
           className="mt-6 w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] disabled:opacity-50"
         >
-          {submitting ? 'Redirecting…' : 'Pay with Flutterwave'}
+          {submitting ? 'Sending M-Pesa prompt…' : 'Pay with M-Pesa'}
         </button>
         <p className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
           Card · M-Pesa · Mobile money

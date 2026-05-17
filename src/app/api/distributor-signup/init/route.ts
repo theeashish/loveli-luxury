@@ -26,8 +26,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { createPaymentLink } from '@/lib/flutterwave/service'
-import { publicEnv } from '@/lib/env'
+import { initiatePayment } from '@/lib/payments/dispatcher'
+import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -249,7 +249,10 @@ export async function POST(req: Request) {
 
   const bundleMinor = BigInt(bundle.retail_price_minor)
   const subtotalMinor = bundleMinor + joiningFeeMinor
-  const totalMinor = subtotalMinor
+  // Add the PayHero processing fee on top — passed through to the
+  // customer, deducted by PayHero from settlement.
+  const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+  const totalMinor = subtotalMinor + processingFeeMinor
 
   const signupBlob = {
     signup: {
@@ -265,8 +268,17 @@ export async function POST(req: Request) {
     },
   }
 
-  const orderInsert = await service
-    .from('orders')
+  // TODO(types): regenerate database.ts post-migration-020.
+  const orderInsert = (await (service.from('orders') as unknown as {
+    insert: (v: Record<string, unknown>) => {
+      select: (cols: string) => {
+        single: () => Promise<{
+          data: { id: number; order_number: string } | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
     .insert({
       order_number: orderNumber,
       user_id: user.id,
@@ -278,15 +290,19 @@ export async function POST(req: Request) {
       shipping_minor: 0,
       tax_minor: 0,
       discount_minor: 0,
+      processing_fee_minor: String(processingFeeMinor),
       total_minor: String(totalMinor),
       currency: 'KES',
       sponsor_distributor_id: sponsor.id,
       shipping_address_id: resolvedAddressId,
-      payment_provider: 'flutterwave',
+      payment_provider: 'payhero',
       notes: JSON.stringify(signupBlob),
     })
     .select('id, order_number')
-    .single()
+    .single()) as {
+    data: { id: number; order_number: string } | null
+    error: { message: string } | null
+  }
   if (orderInsert.error || !orderInsert.data) {
     return NextResponse.json(
       { error: 'Order creation failed', detail: orderInsert.error?.message },
@@ -343,32 +359,22 @@ export async function POST(req: Request) {
     )
   }
 
-  // 11. FW hosted-checkout link
+  // 11. Initiate payment via the current provider (PayHero STK push or
+  // Flutterwave hosted link, dispatched by PAYMENT_PROVIDER_DEFAULT).
   const amountKes = Number(totalMinor / 100n)
-  const redirectUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/checkout/return`
-
-  let link: string
+  let result
   try {
-    const fw = await createPaymentLink({
-      txRef: orderNumber,
+    result = await initiatePayment({
+      orderId,
+      orderNumber,
       amountKes,
-      redirectUrl,
       customer: {
         email: profile.email,
         name: profile.full_name,
-        phonenumber: body.customerPhone,
+        phone: body.customerPhone,
       },
-      meta: {
-        order_id: orderId,
-        user_id: user.id,
-        kind: 'distributor_signup',
-      },
-      customizations: {
-        title: 'Loveli Luxury — Distributor signup',
-        description: `Starter package ${bundle.name}`,
-      },
+      description: `Starter package ${bundle.name}`,
     })
-    link = fw.link
   } catch (e) {
     return NextResponse.json(
       { error: 'Payment provider unavailable', detail: (e as Error).message },
@@ -376,5 +382,5 @@ export async function POST(req: Request) {
     )
   }
 
-  return NextResponse.json({ orderId, orderNumber, redirectUrl: link })
+  return NextResponse.json({ orderId, orderNumber, ...result })
 }

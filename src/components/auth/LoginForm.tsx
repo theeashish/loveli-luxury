@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export function LoginForm() {
-  const params = useSearchParams()
-  // Default to homepage when no `next` is provided. Admin routes set
-  // their own `?next=/admin/...` via middleware redirects, so this only
-  // affects bare /login visits (e.g. from the public header).
-  const next = params.get('next') ?? '/'
+export function LoginForm({ next: nextProp }: { next?: string }) {
+  // When the caller provided an explicit safe `next`, honour it
+  // verbatim. Otherwise hand off to /post-login which routes by role
+  // (admin → /admin, distributor → /account/distributor, else → /account).
+  const hasExplicitNext =
+    !!nextProp && nextProp.startsWith('/') && !nextProp.startsWith('//')
+  const next = hasExplicitNext ? nextProp : '/post-login'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,43 +27,56 @@ export function LoginForm() {
       setError(error.message)
       return
     }
-    // Hard navigation rather than router.push so middleware runs on the
-    // request, picks up the freshly-set Supabase auth cookies, and the
-    // destination's server component sees the session immediately.
-    // router.push() can race the cookie propagation in production builds
-    // and bounce an auth-required page back to /login.
+    // Hard navigation so middleware runs on the request and the
+    // destination's server component sees the freshly-set session cookies.
     window.location.assign(next)
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div>
-        <label className="block text-xs uppercase tracking-[0.2em] mb-2">Email</label>
+        <label
+          htmlFor="email"
+          className="mb-2 block text-[11px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--foreground))]"
+        >
+          Email
+        </label>
         <input
+          id="email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className="w-full rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--background))]/60 px-4 py-3 text-sm outline-none transition focus:border-[hsl(var(--primary))] focus:ring-2 focus:ring-[hsl(var(--primary))]/30"
         />
       </div>
       <div>
-        <label className="block text-xs uppercase tracking-[0.2em] mb-2">Password</label>
+        <label
+          htmlFor="password"
+          className="mb-2 block text-[11px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--foreground))]"
+        >
+          Password
+        </label>
         <input
+          id="password"
           type="password"
           required
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className="w-full rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--background))]/60 px-4 py-3 text-sm outline-none transition focus:border-[hsl(var(--primary))] focus:ring-2 focus:ring-[hsl(var(--primary))]/30"
         />
       </div>
-      {error ? <p className="text-sm text-red-500">{error}</p> : null}
+      {error ? (
+        <p className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+          {error}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={busy}
-        className="w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+        className="mt-2 w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90 disabled:opacity-50"
       >
         {busy ? 'Signing in…' : 'Sign in'}
       </button>

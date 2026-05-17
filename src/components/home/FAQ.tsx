@@ -1,8 +1,3 @@
-'use client'
-
-import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-
 const ITEMS = [
   {
     q: 'How long does a Loveli Luxury fragrance last?',
@@ -27,64 +22,40 @@ const ITEMS = [
 ] as const
 
 export function FAQ() {
-  const [open, setOpen] = useState<number | null>(0)
-
   return (
     <section
       id="faq"
       className="relative border-t border-[hsl(var(--border))]/60 py-24"
     >
       <div className="mx-auto max-w-3xl px-6">
-        <motion.header
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.8 }}
-          className="mb-12 text-center"
-        >
+        <header className="mb-12 text-center">
           <p className="text-eyebrow">Quiet answers</p>
           <h2 className="mt-3 font-serif text-4xl tracking-tight md:text-5xl">
             Things people <em className="italic text-[hsl(var(--primary))]">ask</em>.
           </h2>
-        </motion.header>
+        </header>
 
         <div className="divide-y divide-[hsl(var(--border))]/60 border-y border-[hsl(var(--border))]/60">
-          {ITEMS.map((item, i) => {
-            const isOpen = open === i
-            return (
-              <div key={item.q}>
-                <button
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left transition hover:text-[hsl(var(--primary))]"
+          {ITEMS.map((item, i) => (
+            <details
+              key={item.q}
+              {...(i === 0 ? { open: true } : {})}
+              className="group [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-left transition hover:text-[hsl(var(--primary))]">
+                <span className="font-serif text-lg md:text-xl">{item.q}</span>
+                <span
+                  aria-hidden
+                  className="text-[hsl(var(--primary))] transition-transform duration-300 group-open:rotate-45"
                 >
-                  <span className="font-serif text-lg md:text-xl">{item.q}</span>
-                  <span
-                    className={`text-[hsl(var(--primary))] transition-transform duration-500 ${
-                      isOpen ? 'rotate-45' : ''
-                    }`}
-                    aria-hidden
-                  >
-                    +
-                  </span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen ? (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <p className="pb-6 pr-10 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-                        {item.a}
-                      </p>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-            )
-          })}
+                  +
+                </span>
+              </summary>
+              <p className="pb-6 pr-10 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+                {item.a}
+              </p>
+            </details>
+          ))}
         </div>
       </div>
     </section>

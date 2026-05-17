@@ -65,8 +65,9 @@ export default async function OrderDetailPage({
 }) {
   const supabase = createClient()
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) redirect(`/login?next=/account/orders/${params.id}`)
 
   const orderId = Number(params.id)

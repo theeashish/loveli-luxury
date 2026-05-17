@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
-import { initiateMpesaPayout } from '@/lib/flutterwave/service'
+import { initiateB2C, buildCallbackUrl } from '@/lib/payhero/service'
+import { publicEnv } from '@/lib/env'
 import { getServerEnv } from '@/lib/env'
 
 const idSchema = z.object({
@@ -96,20 +97,36 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw new Error('Payout is not in pending state.')
   }
 
-  const reference = `PAYOUT-${payoutId}-${row.period_year}${String(row.period_month).padStart(2, '0')}`
   const amountKes = Number(BigInt(row.net_total_minor) / 100n)
 
   try {
-    const transfer = await initiateMpesaPayout({
-      msisdn: row.payout_msisdn,
+    const callbackUrl = buildCallbackUrl(
+      publicEnv.NEXT_PUBLIC_APP_URL,
+      '/api/payhero/payout-webhook',
+    )
+    const transfer = await initiateB2C({
       amountKes,
-      reference,
-      narration: `Loveli payout ${row.period_year}-${String(row.period_month).padStart(2, '0')}`,
+      phone: row.payout_msisdn,
+      payoutId,
+      callbackUrl,
+      customerName: `Loveli distributor ${payoutId}`,
     })
 
-    await service
-      .from('payouts')
-      .update({ flutterwave_transfer_id: transfer.flutterwaveTransferId })
+    // TODO(types): regenerate database.ts post-migration-019; payouts
+    // has new payhero_transfer_reference + provider columns from 019.
+    await (
+      service.from('payouts') as unknown as {
+        update: (v: Record<string, unknown>) => {
+          eq: (col: string, val: unknown) => Promise<{
+            error: { message: string } | null
+          }>
+        }
+      }
+    )
+      .update({
+        provider: 'payhero',
+        payhero_transfer_reference: transfer.reference ?? null,
+      })
       .eq('id', payoutId)
 
     await service.from('audit_log').insert({
@@ -118,7 +135,8 @@ export async function initiatePayout(formData: FormData): Promise<void> {
       resource_type: 'payouts',
       resource_id: String(payoutId),
       after_data: {
-        flutterwave_transfer_id: transfer.flutterwaveTransferId,
+        provider: 'payhero',
+        payhero_reference: transfer.reference ?? null,
         amount_kes: amountKes,
         msisdn: row.payout_msisdn,
       },

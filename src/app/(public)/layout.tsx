@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Toaster } from 'sonner'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
-import { SmoothScroll } from '@/components/chrome/SmoothScroll'
-import { CustomCursor } from '@/components/chrome/CustomCursor'
-import { ScrollProgress } from '@/components/chrome/ScrollProgress'
+import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
+import { HeaderAuth } from '@/components/header/HeaderAuth'
+import { MobileMenu } from '@/components/header/MobileMenu'
+import { PublicFooter } from '@/components/footer/PublicFooter'
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
@@ -16,9 +18,6 @@ const NAV = [
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <SmoothScroll />
-      <CustomCursor />
-      <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <Link href="/" className="group flex flex-col leading-none">
@@ -45,47 +44,33 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             >
               Boss Scents
             </Link>
+            <Suspense fallback={null}>
+              {/* Server component — renders nothing for signed-out
+                  users, admins, or existing distributors. */}
+              <AffiliateUpgradeLink />
+            </Suspense>
+            <Suspense fallback={null}>
+              <HeaderAuth variant="desktop" />
+            </Suspense>
             <CartIndicator />
           </nav>
-          <div className="md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
             <CartIndicator />
+            <MobileMenu
+              nav={NAV}
+              authSlot={
+                <Suspense fallback={null}>
+                  <HeaderAuth variant="mobile" />
+                </Suspense>
+              }
+            />
           </div>
         </div>
       </header>
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]">
-        <div className="mx-auto max-w-7xl px-6 py-14 text-sm text-[hsl(var(--muted-foreground))]">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
-            <div className="md:col-span-2">
-              <p className="font-serif text-2xl text-[hsl(var(--foreground))]">Loveli Luxury Scents</p>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed">
-                Hand-crafted Eau de Parfum from Nairobi. Quietly distinctive, generously
-                long-wearing, made to be remembered.
-              </p>
-            </div>
-            <div>
-              <p className="text-eyebrow">Shop</p>
-              <ul className="mt-4 space-y-2">
-                <li><Link className="hover:text-[hsl(var(--primary))]" href="/shop">All fragrances</Link></li>
-                <li><Link className="hover:text-[hsl(var(--primary))]" href="/bundles">Bundles</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-eyebrow">Company</p>
-              <ul className="mt-4 space-y-2">
-                <li><Link className="hover:text-[hsl(var(--primary))]" href="/#story">Our story</Link></li>
-                <li><Link className="hover:text-[hsl(var(--primary))]" href="/#faq">FAQ</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--border))]/60 pt-8 text-xs sm:flex-row">
-            <p>© {new Date().getFullYear()} Loveli Luxury International</p>
-            <p>Hand-crafted in Nairobi · Shipped with intention</p>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
 
       <CartDrawer />
       <Toaster richColors position="top-right" theme="dark" />

@@ -73,6 +73,10 @@ tmp/
 .tmp/
 *.local
 
+# Session handoffs — contain plaintext secrets (webhook tokens, etc.)
+# Keep these in the working tree as living notes; never commit them.
+HANDOFF.md
+
 # OS
 Icon
 .Trashes

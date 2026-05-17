@@ -10,18 +10,17 @@
  *   - If email confirmation is off in Supabase, the user is signed in
  *     immediately and we redirect to `next` (defaults to the homepage).
  *
- * The profiles row is created either by a Supabase trigger on auth.users
- * (recommended) or lazily on first authenticated request. We don't insert
- * directly here — that requires the service role.
+ * `next` is passed from the server page (already validated) so we don't
+ * use useSearchParams here — that hook forces a Suspense bailout and
+ * causes a visible flash on first paint.
  */
 
 import { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export function SignupForm() {
-  const params = useSearchParams()
-  const next = params.get('next') ?? '/'
+export function SignupForm({ next: nextProp }: { next?: string }) {
+  const next =
+    nextProp && nextProp.startsWith('/') && !nextProp.startsWith('//') ? nextProp : '/'
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -65,8 +64,6 @@ export function SignupForm() {
       return
     }
 
-    // If email confirmation is enabled in the Supabase project, `session`
-    // will be null and the user needs to click a link in their inbox.
     if (!data.session) {
       setInfo(
         `Check your inbox at ${email} for a confirmation link to finish setting up your account.`,
@@ -74,19 +71,22 @@ export function SignupForm() {
       return
     }
 
-    // Hard navigation so middleware runs and the server-rendered next
-    // page sees the freshly-set session cookies. See LoginForm for the
-    // long explanation; same race condition applies on signup.
     window.location.assign(next)
   }
 
+  const inputClass =
+    'w-full rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--background))]/60 px-4 py-3 text-sm outline-none transition focus:border-[hsl(var(--primary))] focus:ring-2 focus:ring-[hsl(var(--primary))]/30'
+  const labelClass =
+    'mb-2 block text-[11px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--foreground))]'
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div>
-        <label className="mb-2 block text-xs uppercase tracking-[0.2em]">
+        <label htmlFor="fullName" className={labelClass}>
           Full name
         </label>
         <input
+          id="fullName"
           type="text"
           required
           minLength={2}
@@ -94,63 +94,72 @@ export function SignupForm() {
           autoComplete="name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className={inputClass}
         />
       </div>
       <div>
-        <label className="mb-2 block text-xs uppercase tracking-[0.2em]">Email</label>
+        <label htmlFor="email" className={labelClass}>
+          Email
+        </label>
         <input
+          id="email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className={inputClass}
         />
       </div>
       <div>
-        <label className="mb-2 block text-xs uppercase tracking-[0.2em]">
+        <label htmlFor="password" className={labelClass}>
           Password
         </label>
         <input
+          id="password"
           type="password"
           required
           minLength={8}
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className={inputClass}
         />
-        <p className="mt-1 text-[10px] text-[hsl(var(--muted-foreground))]">
+        <p className="mt-1.5 text-[11px] text-[hsl(var(--muted-foreground))]">
           At least 8 characters.
         </p>
       </div>
       <div>
-        <label className="mb-2 block text-xs uppercase tracking-[0.2em]">
+        <label htmlFor="confirm" className={labelClass}>
           Confirm password
         </label>
         <input
+          id="confirm"
           type="password"
           required
           minLength={8}
           autoComplete="new-password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm"
+          className={inputClass}
         />
       </div>
-      {error ? <p className="text-sm text-red-500">{error}</p> : null}
+      {error ? (
+        <p className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+          {error}
+        </p>
+      ) : null}
       {info ? (
-        <p className="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">
+        <p className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
           {info}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={busy}
-        className="w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+        className="mt-2 w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90 disabled:opacity-50"
       >
-        {busy ? 'Creating account…' : 'Create account'}
+        {busy ? 'Creating account…' : 'Create my account'}
       </button>
     </form>
   )

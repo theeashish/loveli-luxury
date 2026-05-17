@@ -22,7 +22,6 @@ const publicSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().min(1),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
-  NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY: z.string().min(10),
   NEXT_PUBLIC_GA4_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_META_PIXEL_ID: z.string().optional(),
   NEXT_PUBLIC_TIKTOK_PIXEL_ID: z.string().optional(),
@@ -33,9 +32,6 @@ const publicSchema = z.object({
 // -----------------------------------------------------------------------------
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
-  FLUTTERWAVE_SECRET_KEY: z.string().min(10),
-  FLUTTERWAVE_ENCRYPTION_KEY: z.string().min(10),
-  FLUTTERWAVE_WEBHOOK_SECRET_HASH: z.string().min(20),
   REVALIDATE_SECRET: z.string().min(32),
   // Bearer secret for /api/cron/monthly-close. Required only at the call
   // site; the route reads it lazily so a missing value doesn't break boot.
@@ -56,6 +52,20 @@ const serverSchema = z.object({
   ENABLE_DISTRIBUTOR_SIGNUP: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_PAYOUTS: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_MAINTENANCE_MODE: z.string().transform((v) => v === 'true').default('false'),
+  // PayHero (Kenya M-Pesa STK + B2C). Validated lazily inside the
+  // service at call time; checkout init throws cleanly when missing.
+  //
+  // PAYHERO_AUTH_TOKEN: the pre-generated Basic auth TOKEN from the
+  //   PayHero dashboard's "API Keys" page. PayHero does the base64
+  //   encoding for you — you paste the token value (no "Basic " prefix).
+  // PAYHERO_WEBHOOK_TOKEN: an opaque secret we generate ourselves and
+  //   embed in the callback URL we register with PayHero. PayHero does
+  //   NOT sign webhooks, so the URL secret is the only signal that the
+  //   POST came from PayHero (or from someone who knows the URL).
+  PAYHERO_AUTH_TOKEN: z.preprocess(emptyToUndef, z.string().optional()),
+  PAYHERO_CHANNEL_ID_STK: z.preprocess(emptyToUndef, z.string().optional()),
+  PAYHERO_CHANNEL_ID_B2C: z.preprocess(emptyToUndef, z.string().optional()),
+  PAYHERO_WEBHOOK_TOKEN: z.preprocess(emptyToUndef, z.string().min(20).optional()),
 })
 
 // -----------------------------------------------------------------------------
@@ -67,7 +77,6 @@ const publicResult = publicSchema.safeParse({
   NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY,
   NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
   NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
   NEXT_PUBLIC_TIKTOK_PIXEL_ID: process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
@@ -91,9 +100,6 @@ export function getServerEnv() {
 
   const result = serverSchema.safeParse({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    FLUTTERWAVE_SECRET_KEY: process.env.FLUTTERWAVE_SECRET_KEY,
-    FLUTTERWAVE_ENCRYPTION_KEY: process.env.FLUTTERWAVE_ENCRYPTION_KEY,
-    FLUTTERWAVE_WEBHOOK_SECRET_HASH: process.env.FLUTTERWAVE_WEBHOOK_SECRET_HASH,
     REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
     CRON_SECRET: process.env.CRON_SECRET,
     SENTRY_DSN: process.env.SENTRY_DSN,
@@ -106,6 +112,10 @@ export function getServerEnv() {
     ENABLE_DISTRIBUTOR_SIGNUP: process.env.ENABLE_DISTRIBUTOR_SIGNUP,
     ENABLE_PAYOUTS: process.env.ENABLE_PAYOUTS,
     ENABLE_MAINTENANCE_MODE: process.env.ENABLE_MAINTENANCE_MODE,
+    PAYHERO_AUTH_TOKEN: process.env.PAYHERO_AUTH_TOKEN,
+    PAYHERO_CHANNEL_ID_STK: process.env.PAYHERO_CHANNEL_ID_STK,
+    PAYHERO_CHANNEL_ID_B2C: process.env.PAYHERO_CHANNEL_ID_B2C,
+    PAYHERO_WEBHOOK_TOKEN: process.env.PAYHERO_WEBHOOK_TOKEN,
   })
 
   if (!result.success) {

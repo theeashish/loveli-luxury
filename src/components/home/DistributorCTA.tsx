@@ -1,24 +1,11 @@
-'use client'
+import Link from 'next/link'
 
-import { animate, motion, useInView } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
-import { MagneticLink } from '@/components/chrome/MagneticLink'
-
-function CountUp({ to, suffix = '', duration = 1.6 }: { to: number; suffix?: string; duration?: number }) {
-  const ref = useRef<HTMLSpanElement | null>(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
-  const [v, setV] = useState(0)
-  useEffect(() => {
-    if (!inView) return
-    const ctrl = animate(0, to, {
-      duration,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: (n) => setV(n),
-    })
-    return () => ctrl.stop()
-  }, [inView, to, duration])
-  return <span ref={ref}>{Math.round(v)}{suffix}</span>
-}
+const STATS = [
+  { v: '8', l: 'Ranks to climb' },
+  { v: '7', l: 'Commission levels' },
+  { v: '40%', l: 'Of PV paid out' },
+  { v: '250k', l: 'Top monthly salary' },
+] as const
 
 export function DistributorCTA() {
   return (
@@ -32,72 +19,35 @@ export function DistributorCTA() {
         }}
       />
       <div className="mx-auto max-w-4xl px-6 text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7 }}
-          className="text-eyebrow"
-        >
-          Join the family
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, delay: 0.1 }}
-          className="mt-5 font-serif text-[clamp(2.25rem,5vw,4rem)] leading-[1.05] tracking-tight"
-        >
+        <p className="text-eyebrow">Join the family</p>
+        <h2 className="mt-5 font-serif text-[clamp(2.25rem,5vw,4rem)] leading-[1.05] tracking-tight">
           Wear the brand. <em className="italic text-[hsl(var(--primary))]">Build the dream</em>.
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, delay: 0.25 }}
-          className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]"
-        >
-          Invite-only. Pay your registration, activate with a starter package, and
-          maintain personal sales every month. Earn retail profit on every bottle plus
-          commission across 7 levels — and from Manager rank up, a lifetime monthly
-          salary as high as Kes 250,000.
-        </motion.p>
+        </h2>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
+          Invite-only. Pay your registration, activate with a starter package, and maintain
+          personal sales every month. Earn retail profit on every bottle plus commission across
+          7 levels — and from Manager rank up, a lifetime monthly salary as high as
+          Kes 250,000.
+        </p>
 
-        <motion.ul
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, delay: 0.4 }}
-          className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4"
-        >
-          {[
-            { node: <CountUp to={8} />, v: 'Ranks to climb' },
-            { node: <CountUp to={7} />, v: 'Commission levels' },
-            { node: <CountUp to={40} suffix="%" />, v: 'Of PV paid out' },
-            { node: <><CountUp to={250} />k</>, v: 'Top monthly salary' },
-          ].map((s) => (
-            <li key={s.v} className="text-center">
-              <p className="font-serif text-3xl text-[hsl(var(--primary))]">{s.node}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.2em]">{s.v}</p>
+        <ul className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4">
+          {STATS.map((s) => (
+            <li key={s.l} className="text-center">
+              <p className="font-serif text-3xl text-[hsl(var(--primary))]">{s.v}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.2em]">{s.l}</p>
             </li>
           ))}
-        </motion.ul>
+        </ul>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, delay: 0.55 }}
-          className="mt-12"
-        >
-          <MagneticLink
+        <div className="mt-12">
+          <Link
             href="/boss-scents"
             className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--primary))] px-10 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--primary-foreground))] transition hover:scale-[1.02]"
           >
             <span className="relative z-10">Explore Boss Scents</span>
             <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-          </MagneticLink>
-        </motion.div>
+          </Link>
+        </div>
       </div>
     </section>
   )

@@ -2,12 +2,12 @@
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.flutterwave.com https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: blob: https://*.supabase.co https://www.facebook.com https://www.google-analytics.com;
   font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.flutterwave.com https://www.google-analytics.com https://*.sentry.io https://analytics.tiktok.com;
-  frame-src 'self' https://checkout.flutterwave.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://backend.payhero.co.ke https://www.google-analytics.com https://*.sentry.io https://analytics.tiktok.com;
+  frame-src 'self';
   object-src 'none';
   base-uri 'self';
   form-action 'self';

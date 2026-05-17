@@ -1,14 +1,17 @@
 /**
  * /distributors/signup — distributor onboarding entry.
  *
- * Login-gated. If the user is already a distributor we redirect them to
- * their portal instead of showing a form they can't submit. Sponsor code is
- * captured from the `ll_sponsor` cookie set by middleware (?ref=...) and
- * pre-filled into the form, but is editable. Submission requires a code
- * regardless of cookie state — invite-only is the rule.
+ * Middleware enforces:
+ *   - signed-in (else 307 to /login)
+ *   - not already a distributor (else 307 to /account/distributor)
+ *
+ * This file is render-only. It does NOT redirect — a redirect after the
+ * layout has streamed leaves the user staring at the empty public chrome
+ * while the browser follows the 307. Every "edge case" branches into an
+ * inline empty-state card instead.
  */
 
-import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -19,7 +22,7 @@ import {
 } from '@/components/distributors/SignupForm'
 
 export const metadata = {
-  title: 'Become a distributor',
+  title: 'Become a Boss',
   robots: { index: false, follow: false },
 }
 
@@ -57,29 +60,77 @@ type BundleRow = {
   starter_package_code: string | null
 }
 
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(50% 70% at 80% 30%, hsl(38 56% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 55% 45% / 0.10) 0%, transparent 60%)',
+        }}
+      />
+      <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-3xl items-center justify-center px-6 py-16 lg:py-24">
+        <div className="w-full rounded-2xl border border-[hsl(var(--primary))]/25 bg-[hsl(var(--muted))]/40 p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] backdrop-blur-sm md:p-12">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BrandHeading({ subtitle }: { subtitle: string }) {
+  return (
+    <header className="text-center">
+      <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
+        Boss Scents International
+      </p>
+      <h1 className="mt-5 font-serif text-5xl italic tracking-tight md:text-6xl">
+        Become a Boss
+      </h1>
+      <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+        {subtitle}
+      </p>
+    </header>
+  )
+}
+
 export default async function DistributorSignupPage() {
+  // Middleware guarantees user is signed in and not already a distributor.
+  // We still need their id for the DB reads.
   const supabase = createClient()
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/distributors/signup')
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
+
+  if (!user) {
+    // Defensive — middleware should have caught this. Render an inline
+    // sign-in prompt instead of redirecting (no more chrome-flash).
+    return (
+      <Shell>
+        <BrandHeading subtitle="Sign in to continue your Boss Scents registration." />
+        <div className="mt-10 text-center">
+          <Link
+            href="/login?next=/distributors/signup"
+            className="inline-flex w-full justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
+          >
+            Sign in
+          </Link>
+        </div>
+      </Shell>
+    )
+  }
 
   const service = createServiceClient()
-
-  // If they already are a distributor, send them to the portal.
-  const existing = await service
-    .from('distributors')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle()
-  if (existing.data) redirect('/account/distributor')
 
   const [profileRes, addressesRes, bundlesRes] = await Promise.all([
     service
       .from('profiles')
       .select('id, email, full_name, phone, national_id, date_of_birth')
       .eq('id', user.id)
-      .single(),
+      .maybeSingle(),
     service
       .from('addresses')
       .select(
@@ -97,8 +148,72 @@ export default async function DistributorSignupPage() {
       .order('retail_price_minor', { ascending: true }),
   ])
 
-  const profile = profileRes.data as ProfileRow | null
-  if (!profile) redirect('/login?next=/distributors/signup')
+  // If profile row missing, lazy-create from the auth user. The DB trigger
+  // SHOULD have done this on signup but during the early operational
+  // period it sometimes doesn't fire (e.g. social-auth providers). Insert
+  // and continue rather than bouncing the user.
+  let profile = profileRes.data as ProfileRow | null
+  if (!profile) {
+    const ins = await service
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: user.email ?? '',
+        full_name:
+          (user.user_metadata?.full_name as string | undefined) ?? '',
+      })
+      .select('id, email, full_name, phone, national_id, date_of_birth')
+      .single()
+    profile = (ins.data as ProfileRow | null) ?? null
+  }
+
+  if (!profile) {
+    return (
+      <Shell>
+        <BrandHeading subtitle="We couldn't load your profile." />
+        <p className="mt-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+          Please contact{' '}
+          <a
+            href="mailto:support@lovelilux.com"
+            className="text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+          >
+            support@lovelilux.com
+          </a>{' '}
+          and reference your sign-in email.
+        </p>
+      </Shell>
+    )
+  }
+
+  const bundles: StarterBundleOption[] = ((bundlesRes.data ?? []) as BundleRow[]).map(
+    (b) => ({
+      id: b.id,
+      slug: b.slug,
+      name: b.name,
+      description: b.description,
+      retailPriceMinor: b.retail_price_minor,
+      starterCode: b.starter_package_code,
+    }),
+  )
+
+  if (bundles.length === 0) {
+    return (
+      <Shell>
+        <BrandHeading subtitle="Starter packages aren't available yet." />
+        <p className="mt-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+          We're loading the season's starter bundles. Check back shortly,
+          or reach{' '}
+          <a
+            href="mailto:support@lovelilux.com"
+            className="text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+          >
+            support@lovelilux.com
+          </a>{' '}
+          if this persists.
+        </p>
+      </Shell>
+    )
+  }
 
   const sponsorCookie = cookies().get('ll_sponsor')?.value ?? ''
 
@@ -118,41 +233,28 @@ export default async function DistributorSignupPage() {
     }),
   )
 
-  const bundles: StarterBundleOption[] = ((bundlesRes.data ?? []) as BundleRow[]).map(
-    (b) => ({
-      id: b.id,
-      slug: b.slug,
-      name: b.name,
-      description: b.description,
-      retailPriceMinor: b.retail_price_minor,
-      starterCode: b.starter_package_code,
-    }),
-  )
-
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
-      <header className="mb-10">
-        <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-          Invite-only
-        </p>
-        <h1 className="mt-2 text-4xl font-light tracking-tight">
-          Become a Loveli distributor
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-[hsl(var(--muted-foreground))]">
-          You'll need a sponsor code from an existing distributor. Choose a
-          starter package, complete KYC, pay via M-Pesa or card, and your
-          distributor account is provisioned the moment payment confirms.
-        </p>
-      </header>
-
-      <DistributorSignupForm
-        defaultPhone={profile.phone ?? ''}
-        defaultNationalId={profile.national_id ?? ''}
-        defaultDateOfBirth={profile.date_of_birth ?? ''}
-        addresses={addresses}
-        bundles={bundles}
-        sponsorCookie={sponsorCookie}
-      />
-    </div>
+    <Shell>
+      <BrandHeading subtitle="Pick a starter package, complete KYC, pay via M-Pesa. Your distributor account activates the moment payment confirms." />
+      <div className="mt-10">
+        <DistributorSignupForm
+          defaultPhone={profile.phone ?? ''}
+          defaultNationalId={profile.national_id ?? ''}
+          defaultDateOfBirth={profile.date_of_birth ?? ''}
+          addresses={addresses}
+          bundles={bundles}
+          sponsorCookie={sponsorCookie}
+        />
+      </div>
+      <p className="mt-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
+        Just want to shop?{' '}
+        <Link
+          href="/signup"
+          className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+        >
+          Create a buyer account →
+        </Link>
+      </p>
+    </Shell>
   )
 }

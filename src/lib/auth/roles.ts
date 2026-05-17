@@ -31,9 +31,16 @@ export class AuthError extends Error {
 
 export async function getSession(): Promise<Session | null> {
   const supabase = createClient() as unknown as Client
+  // Use getSession() (local cookie read) rather than getUser() (network
+  // call). On Vercel Edge, getUser() can intermittently return null even
+  // when the session cookies are present and valid, which bounces
+  // legitimate admins back to /login. The user_roles lookup below is
+  // still RLS-gated, so trusting the cookie here does not weaken the
+  // role check.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) return null
 
   const { data: roles, error } = await supabase

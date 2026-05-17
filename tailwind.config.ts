@@ -20,6 +20,15 @@ const config: Config = {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['var(--font-serif)', 'ui-serif', 'Georgia', 'serif'],
       },
+      keyframes: {
+        'marquee-x': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+      },
+      animation: {
+        'marquee-x': 'marquee-x 38s linear infinite',
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],

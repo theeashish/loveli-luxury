@@ -1,12 +1,9 @@
-'use client'
-
-import { motion } from 'framer-motion'
 import { FRAGRANCES } from '@/lib/catalog/fragrance-meta'
 
 const SEP = '✦'
 
 export function Marquee() {
-  // Two passes side-by-side so the loop is seamless.
+  // Two passes side-by-side so the CSS-only animation loop is seamless.
   const items = FRAGRANCES.map((f) => f.name.toUpperCase())
   const track = [...items, ...items]
 
@@ -15,11 +12,7 @@ export function Marquee() {
       aria-hidden
       className="relative overflow-hidden border-y border-[hsl(var(--border))]/60 bg-[hsl(var(--muted))]/40 py-5"
     >
-      <motion.div
-        className="flex whitespace-nowrap"
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 38, ease: 'linear', repeat: Infinity }}
-      >
+      <div className="flex whitespace-nowrap animate-marquee-x motion-reduce:animate-none">
         {track.map((name, i) => (
           <span
             key={`${name}-${i}`}
@@ -29,7 +22,7 @@ export function Marquee() {
             <span className="text-[hsl(var(--primary))]">{SEP}</span>
           </span>
         ))}
-      </motion.div>
+      </div>
     </section>
   )
 }

@@ -23,8 +23,8 @@ import { z } from 'zod'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { createPaymentLink } from '@/lib/flutterwave/service'
-import { publicEnv } from '@/lib/env'
+import { initiatePayment } from '@/lib/payments/dispatcher'
+import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -358,10 +358,25 @@ export async function POST(req: Request) {
   }
   const orderNumber = orderNumberRes.data as unknown as string
 
-  // 8. Insert order
-  const totalMinor = subtotalMinor // shipping/tax/discount = 0 in Phase 3
-  const orderInsert = await service
-    .from('orders')
+  // 8. Compute the PayHero processing fee from the subtotal and add it
+  //    to the total. The customer sees and pays this fee on top of the
+  //    cart total; PayHero deducts it from what they remit, so the
+  //    business receives the full subtotal.
+  const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+  const totalMinor = subtotalMinor + processingFeeMinor
+
+  // 9. Insert order. TODO(types): regenerate database.ts post-migration-020
+  //    (processing_fee_minor is new).
+  const orderInsert = (await (service.from('orders') as unknown as {
+    insert: (v: Record<string, unknown>) => {
+      select: (cols: string) => {
+        single: () => Promise<{
+          data: { id: number; order_number: string; total_minor: string | number } | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
     .insert({
       order_number: orderNumber,
       user_id: user.id,
@@ -373,14 +388,18 @@ export async function POST(req: Request) {
       shipping_minor: 0,
       tax_minor: 0,
       discount_minor: 0,
+      processing_fee_minor: Number(processingFeeMinor),
       total_minor: Number(totalMinor),
       currency: 'KES',
       sponsor_distributor_id: sponsorDistributorId,
       shipping_address_id: resolvedAddressId,
-      payment_provider: 'flutterwave',
+      payment_provider: 'payhero',
     })
     .select('id, order_number, total_minor')
-    .single()
+    .single()) as {
+    data: { id: number; order_number: string; total_minor: string | number } | null
+    error: { message: string } | null
+  }
   if (orderInsert.error || !orderInsert.data) {
     return NextResponse.json(
       { error: 'Order creation failed', detail: orderInsert.error?.message },
@@ -402,33 +421,22 @@ export async function POST(req: Request) {
     )
   }
 
-  // 10. Create the Flutterwave hosted-checkout link
-  // total_minor is integer cents; FW Charges API uses major units. KES has no
-  // sub-shilling pricing in this catalog, so divide cleanly by 100n.
+  // 10. Initiate payment via the current provider (PayHero STK push or
+  // Flutterwave hosted link, dispatched by PAYMENT_PROVIDER_DEFAULT).
   const amountKes = Number(totalMinor / 100n)
-  const redirectUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/checkout/return`
-
-  let link: string
+  let result
   try {
-    const fw = await createPaymentLink({
-      txRef: orderNumber,
+    result = await initiatePayment({
+      orderId,
+      orderNumber,
       amountKes,
-      redirectUrl,
       customer: {
         email: profile.email,
         name: profile.full_name,
-        phonenumber: customerPhone,
+        phone: customerPhone,
       },
-      meta: {
-        order_id: orderId,
-        user_id: user.id,
-      },
-      customizations: {
-        title: 'Loveli Luxury International',
-        description: `Order ${orderNumber}`,
-      },
+      description: `Order ${orderNumber}`,
     })
-    link = fw.link
   } catch (e) {
     return NextResponse.json(
       { error: 'Payment provider unavailable', detail: (e as Error).message },
@@ -439,6 +447,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     orderId,
     orderNumber,
-    redirectUrl: link,
+    ...result,
   })
 }

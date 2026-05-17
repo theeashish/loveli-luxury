@@ -36,9 +36,13 @@ export default async function DistributorLayout({
   children: React.ReactNode
 }) {
   const supabase = createClient()
+  // getSession() reads cookies locally; getUser() makes a network call that
+  // can intermittently fail on Vercel Edge and produce a login bounce loop.
+  // See /distributors/signup/page.tsx for the long note.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   if (!user) redirect('/login?next=/account/distributor')
 
   const distributor = await getCurrentDistributor()

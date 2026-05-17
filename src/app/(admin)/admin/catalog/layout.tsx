@@ -13,6 +13,8 @@ const NAV = [
   { href: '/admin/catalog/products', label: 'Products' },
   { href: '/admin/catalog/bundles', label: 'Bundles' },
   { href: '/admin/catalog/categories', label: 'Categories' },
+  { href: '/admin/comp/starter-packages', label: 'Starter packages' },
+  { href: '/admin/diagnostics', label: 'Diagnostics' },
 ] as const
 
 export default async function CatalogAdminLayout({ children }: { children: React.ReactNode }) {

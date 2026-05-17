@@ -1,7 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { formatKes } from '@/lib/money'
+import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { StkPushPanel } from '@/components/checkout/StkPushPanel'
 
 export type SignupAddress = {
   id: number
@@ -75,6 +77,9 @@ export function DistributorSignupForm({
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // When PayHero initiates an STK push, we stash the orderNumber and
+  // hand off to StkPushPanel. The form is hidden while the panel polls.
+  const [stkOrderNumber, setStkOrderNumber] = useState<string | null>(null)
 
   const usingNew = addressKey === NEW_ADDRESS_KEY
   const selectedBundle =
@@ -144,22 +149,54 @@ export function DistributorSignupForm({
           window.location.href = json.redirect
           return
         }
-        setError(json?.error ?? 'Signup failed.')
+        const base = json?.error ?? 'Signup failed.'
+        const detail = typeof json?.detail === 'string' ? ` — ${json.detail}` : ''
+        setError(`${base}${detail}`)
         setSubmitting(false)
         return
       }
-      window.location.href = json.redirectUrl
+
+      // PayHero path: server fired an STK push to the customer's phone.
+      // Switch UI to the polling panel — the form is now hidden.
+      if (json.provider === 'payhero' && json.orderNumber) {
+        setStkOrderNumber(json.orderNumber as string)
+        return
+      }
+
+      setError('Payment provider did not return a usable response.')
+      setSubmitting(false)
     } catch (err) {
       setError((err as Error).message)
       setSubmitting(false)
     }
   }
 
+  const onRetryStk = useCallback(() => {
+    setStkOrderNumber(null)
+    setSubmitting(false)
+  }, [])
+
+  // When the STK push is in flight, render only the polling panel.
+  if (stkOrderNumber) {
+    return (
+      <StkPushPanel
+        orderNumber={stkOrderNumber}
+        successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
+        onRetry={onRetryStk}
+        amountLabel={
+          selectedBundle
+            ? formatKes(
+                BigInt(selectedBundle.retailPriceMinor) +
+                  computePayHeroFeeMinor(BigInt(selectedBundle.retailPriceMinor)),
+              )
+            : undefined
+        }
+      />
+    )
+  }
+
   return (
-    <form
-      onSubmit={onSubmit}
-      className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_22rem]"
-    >
+    <form onSubmit={onSubmit} className="space-y-10">
       <div className="space-y-10">
         <Section
           title="Sponsor"
@@ -419,28 +456,45 @@ export function DistributorSignupForm({
         </label>
       </div>
 
-      <aside className="self-start rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-6">
-        <h2 className="mb-5 text-base font-medium">Summary</h2>
-        {selectedBundle ? (
-          <dl className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <dt className="text-[hsl(var(--muted-foreground))]">
-                Starter package
-              </dt>
-              <dd className="font-medium">{selectedBundle.name}</dd>
-            </div>
-            <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
-              <dt>Shipping</dt>
-              <dd>Free</dd>
-            </div>
-            <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--border))] pt-4">
-              <span className="text-sm font-medium">Total</span>
-              <span className="text-xl font-medium tabular-nums">
-                {formatKes(BigInt(selectedBundle.retailPriceMinor))}
-              </span>
-            </div>
-          </dl>
-        ) : (
+      <aside className="rounded-lg border border-[hsl(var(--primary))]/25 bg-[hsl(var(--background))]/40 p-6">
+        <p className="mb-5 text-[11px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+          Summary
+        </p>
+        {selectedBundle ? (() => {
+          const bundleMinor = BigInt(selectedBundle.retailPriceMinor)
+          const feeMinor = computePayHeroFeeMinor(bundleMinor)
+          const totalMinor = bundleMinor + feeMinor
+          return (
+            <dl className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="text-[hsl(var(--muted-foreground))]">
+                  Starter package
+                </dt>
+                <dd className="font-medium">{selectedBundle.name}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-[hsl(var(--muted-foreground))]">Subtotal</dt>
+                <dd className="font-medium tabular-nums">
+                  {formatKes(bundleMinor)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+                <dt>Shipping</dt>
+                <dd>Free</dd>
+              </div>
+              <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
+                <dt>Processing fee</dt>
+                <dd className="tabular-nums">{formatKes(feeMinor)}</dd>
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--border))] pt-4">
+                <span className="text-sm font-medium">Total</span>
+                <span className="text-xl font-medium tabular-nums">
+                  {formatKes(totalMinor)}
+                </span>
+              </div>
+            </dl>
+          )
+        })() : (
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
             Pick a starter package to see the total.
           </p>
@@ -455,12 +509,12 @@ export function DistributorSignupForm({
         <button
           type="submit"
           disabled={submitting || bundleId === null}
-          className="mt-6 w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+          className="mt-6 w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90 disabled:opacity-50"
         >
-          {submitting ? 'Redirecting…' : 'Pay & activate distributor'}
+          {submitting ? 'Redirecting…' : 'Create my account'}
         </button>
         <p className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
-          Card · M-Pesa · Mobile money
+          M-Pesa STK push
         </p>
       </aside>
     </form>
@@ -468,7 +522,7 @@ export function DistributorSignupForm({
 }
 
 const inputCls =
-  'w-full rounded-md border border-[hsl(var(--border))] bg-transparent px-3 py-2 text-sm focus:border-[hsl(var(--primary))] focus:outline-none'
+  'w-full rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--background))]/60 px-4 py-3 text-sm outline-none transition focus:border-[hsl(var(--primary))] focus:ring-2 focus:ring-[hsl(var(--primary))]/30'
 
 function Section({
   title,
@@ -481,9 +535,11 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="text-base font-medium">{title}</h2>
+      <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+        {title}
+      </p>
       {subtitle ? (
-        <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+        <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
           {subtitle}
         </p>
       ) : null}
@@ -503,7 +559,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))]">
+      <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--foreground))]">
         {label}
         {required ? ' *' : ''}
       </span>
