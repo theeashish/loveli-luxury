@@ -64,6 +64,14 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
     if (hasHydrated && isEmpty({ lines })) setError(null)
   }, [hasHydrated, lines])
 
+  // Defined here (before the early returns below) so the hook ordering
+  // stays stable across renders. Used inside the StkPushPanel branch
+  // further down.
+  const onRetryStk = useCallback(() => {
+    setStkOrderNumber(null)
+    setSubmitting(false)
+  }, [])
+
   if (!hasHydrated) {
     return <p className="text-sm text-[hsl(var(--muted-foreground))]">Loading…</p>
   }
@@ -155,11 +163,6 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
       setSubmitting(false)
     }
   }
-
-  const onRetryStk = useCallback(() => {
-    setStkOrderNumber(null)
-    setSubmitting(false)
-  }, [])
 
   // STK polling — render the panel exclusively while the payment is
   // pending so the user isn't tempted to re-submit the form.
