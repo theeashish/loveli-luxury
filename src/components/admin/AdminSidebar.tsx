@@ -52,6 +52,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'System',
     items: [
+      { href: '/admin/system/roles', label: 'User roles' },
       { href: '/admin/diagnostics', label: 'Diagnostics' },
       { href: '/admin/analytics', label: 'Analytics' },
       { href: '/admin/analytics/cohorts', label: 'Cohorts' },
