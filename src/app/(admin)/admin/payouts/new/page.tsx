@@ -7,10 +7,16 @@
  * actual create is the bottom form which posts to the Server Action.
  */
 
-import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { previewDraft } from '@/lib/payouts/draft'
 import { formatKes } from '@/lib/money'
+import {
+  AdminPageHeader,
+  AdminFormSection,
+  adminInputCls,
+  adminPrimaryBtnCls,
+  adminSecondaryBtnCls,
+} from '@/components/admin/forms'
 import { createPayoutDraft } from './actions'
 
 export const dynamic = 'force-dynamic'
@@ -55,7 +61,6 @@ export default async function NewPayoutPage({
 
   const service = createServiceClient()
 
-  // Distributor list for the dropdown — small project, no pagination yet.
   const distRes = await service
     .from('distributors')
     .select('id, user_id, sponsor_code, payout_msisdn')
@@ -92,133 +97,126 @@ export default async function NewPayoutPage({
     preview && 'error' in preview ? (preview as { error: string }).error : null
 
   return (
-    <div className="max-w-3xl">
-      <Link
-        href="/admin/payouts"
-        className="text-xs uppercase tracking-[0.15em] text-neutral-500 hover:text-neutral-900"
-      >
-        ← All payouts
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">New payout</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        Aggregates unpaid commissions, salary, and rank-up bonuses for a single
-        month into a draft. Initiate the M-Pesa transfer from the detail page.
-      </p>
+    <div className="mx-auto max-w-3xl">
+      <AdminPageHeader
+        eyebrow="← All payouts"
+        eyebrowHref="/admin/payouts"
+        title="New payout"
+        subtitle="Aggregates unpaid commissions, salary, and rank-up bonuses for a single month into a draft. Initiate the M-Pesa transfer from the detail page."
+      />
 
-      {/* Preview form (GET) */}
-      <form className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-neutral-200 bg-white p-4 text-sm">
-        <label className="flex flex-1 flex-col">
-          <span className="mb-1 text-xs uppercase tracking-[0.15em] text-neutral-500">
-            Distributor
-          </span>
-          <select
-            name="distributorId"
-            defaultValue={hasFilter ? distributorId : ''}
-            className="rounded-md border border-neutral-300 bg-white px-3 py-2"
-            required
-          >
-            <option value="" disabled>
-              Pick…
-            </option>
-            {distributors.map((d) => (
-              <option key={d.id} value={d.id}>
-                #{d.id} · {distLabel(d)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col">
-          <span className="mb-1 text-xs uppercase tracking-[0.15em] text-neutral-500">
-            Year
-          </span>
-          <input
-            type="number"
-            name="year"
-            min={2024}
-            max={2099}
-            defaultValue={hasFilter ? year : new Date().getUTCFullYear()}
-            className="w-24 rounded-md border border-neutral-300 bg-white px-3 py-2"
-            required
-          />
-        </label>
-        <label className="flex flex-col">
-          <span className="mb-1 text-xs uppercase tracking-[0.15em] text-neutral-500">
-            Month
-          </span>
-          <input
-            type="number"
-            name="month"
-            min={1}
-            max={12}
-            defaultValue={hasFilter ? month : new Date().getUTCMonth() + 1}
-            className="w-20 rounded-md border border-neutral-300 bg-white px-3 py-2"
-            required
-          />
-        </label>
-        <button
-          type="submit"
-          className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm"
+      <div className="space-y-5">
+        <AdminFormSection
+          title="Preview unpaid earnings"
+          subtitle="Pick a distributor and period; we show what would be paid before you commit."
         >
-          Preview
-        </button>
-      </form>
-
-      {previewErr ? (
-        <p className="mt-6 rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-          {previewErr}
-        </p>
-      ) : null}
-
-      {previewOk ? (
-        <section className="mt-6 rounded-lg border border-neutral-200 bg-white p-5">
-          <h2 className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
-            Draft for #{previewOk.distributorId} ·{' '}
-            {previewOk.periodYear}-{String(previewOk.periodMonth).padStart(2, '0')}
-          </h2>
-
-          {previewOk.items.length === 0 ? (
-            <p className="text-sm text-neutral-500">
-              Nothing unpaid for this distributor in this period.
-            </p>
-          ) : (
-            <>
-              <ul className="divide-y divide-neutral-100 text-sm">
-                {previewOk.items.map((it) => (
-                  <li
-                    key={`${it.type}-${it.id}`}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <span className="text-neutral-700">{it.label}</span>
-                    <span className="tabular-nums">
-                      {formatKes(it.amount_minor)}
-                    </span>
-                  </li>
+          <form className="flex flex-wrap items-end gap-3 text-sm">
+            <label className="flex flex-1 min-w-[14rem] flex-col">
+              <span className="mb-1.5 text-sm font-medium text-neutral-800">
+                Distributor
+              </span>
+              <select
+                name="distributorId"
+                defaultValue={hasFilter ? distributorId : ''}
+                className={adminInputCls}
+                required
+              >
+                <option value="" disabled>
+                  Pick…
+                </option>
+                {distributors.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    #{d.id} · {distLabel(d)}
+                  </option>
                 ))}
-              </ul>
-              <dl className="mt-5 space-y-1 border-t border-neutral-200 pt-4 text-sm">
-                <Row label="Commissions" value={formatKes(previewOk.commissionsTotalMinor)} />
-                <Row label="Salary" value={formatKes(previewOk.salaryTotalMinor)} />
-                <Row label="Rank-up bonuses" value={formatKes(previewOk.rankBonusTotalMinor)} />
-                <Row label="Gross" value={formatKes(previewOk.grossTotalMinor)} bold />
-                <Row label="Fees" value={formatKes(0n)} />
-                <Row label="Net" value={formatKes(previewOk.netTotalMinor)} bold />
-              </dl>
+              </select>
+            </label>
+            <label className="flex flex-col">
+              <span className="mb-1.5 text-sm font-medium text-neutral-800">
+                Year
+              </span>
+              <input
+                type="number"
+                name="year"
+                min={2024}
+                max={2099}
+                defaultValue={hasFilter ? year : new Date().getUTCFullYear()}
+                className={`${adminInputCls} w-24`}
+                required
+              />
+            </label>
+            <label className="flex flex-col">
+              <span className="mb-1.5 text-sm font-medium text-neutral-800">
+                Month
+              </span>
+              <input
+                type="number"
+                name="month"
+                min={1}
+                max={12}
+                defaultValue={hasFilter ? month : new Date().getUTCMonth() + 1}
+                className={`${adminInputCls} w-20`}
+                required
+              />
+            </label>
+            <button type="submit" className={adminSecondaryBtnCls}>
+              Preview
+            </button>
+          </form>
+        </AdminFormSection>
 
-              <form action={createPayoutDraft} className="mt-6">
-                <input type="hidden" name="distributorId" value={previewOk.distributorId} />
-                <input type="hidden" name="periodYear" value={previewOk.periodYear} />
-                <input type="hidden" name="periodMonth" value={previewOk.periodMonth} />
-                <button
-                  type="submit"
-                  className="rounded-md bg-neutral-900 px-4 py-2 text-sm text-white"
-                >
-                  Create draft
-                </button>
-              </form>
-            </>
-          )}
-        </section>
-      ) : null}
+        {previewErr ? (
+          <div className="rounded-md border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+            {previewErr}
+          </div>
+        ) : null}
+
+        {previewOk ? (
+          <AdminFormSection
+            title={`Draft for #${previewOk.distributorId} · ${previewOk.periodYear}-${String(previewOk.periodMonth).padStart(2, '0')}`}
+            subtitle="Review the line items below. Create draft writes a pending payout row; M-Pesa initiate is one more click on the detail page."
+          >
+            {previewOk.items.length === 0 ? (
+              <p className="text-sm text-neutral-600">
+                Nothing unpaid for this distributor in this period.
+              </p>
+            ) : (
+              <>
+                <ul className="divide-y divide-neutral-100 text-sm">
+                  {previewOk.items.map((it) => (
+                    <li
+                      key={`${it.type}-${it.id}`}
+                      className="flex items-center justify-between py-2"
+                    >
+                      <span className="text-neutral-800">{it.label}</span>
+                      <span className="tabular-nums text-neutral-900">
+                        {formatKes(it.amount_minor)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <dl className="space-y-1 border-t border-neutral-200 pt-4 text-sm">
+                  <Row label="Commissions" value={formatKes(previewOk.commissionsTotalMinor)} />
+                  <Row label="Salary" value={formatKes(previewOk.salaryTotalMinor)} />
+                  <Row label="Rank-up bonuses" value={formatKes(previewOk.rankBonusTotalMinor)} />
+                  <Row label="Gross" value={formatKes(previewOk.grossTotalMinor)} bold />
+                  <Row label="Fees" value={formatKes(0n)} />
+                  <Row label="Net" value={formatKes(previewOk.netTotalMinor)} bold />
+                </dl>
+
+                <form action={createPayoutDraft} className="pt-2">
+                  <input type="hidden" name="distributorId" value={previewOk.distributorId} />
+                  <input type="hidden" name="periodYear" value={previewOk.periodYear} />
+                  <input type="hidden" name="periodMonth" value={previewOk.periodMonth} />
+                  <button type="submit" className={adminPrimaryBtnCls}>
+                    Create draft
+                  </button>
+                </form>
+              </>
+            )}
+          </AdminFormSection>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -235,10 +233,10 @@ function Row({
   return (
     <div
       className={`flex items-center justify-between ${
-        bold ? 'text-base font-medium' : ''
+        bold ? 'text-base font-medium text-neutral-900' : ''
       }`}
     >
-      <span className={bold ? '' : 'text-neutral-500'}>{label}</span>
+      <span className={bold ? '' : 'text-neutral-600'}>{label}</span>
       <span className="tabular-nums">{value}</span>
     </div>
   )

@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   getBundleById,
@@ -7,6 +6,7 @@ import {
 } from '@/lib/catalog/queries'
 import { AdminBundleForm } from '@/components/catalog/AdminBundleForm'
 import { AdminImageUploader } from '@/components/catalog/AdminImageUploader'
+import { AdminPageHeader } from '@/components/admin/forms'
 import type { ProductDto } from '@/lib/catalog/types'
 
 export const dynamic = 'force-dynamic'
@@ -31,35 +31,25 @@ export default async function EditBundlePage({
   ).filter((p): p is ProductDto => p !== null)
 
   return (
-    <div className="max-w-3xl">
-      <header className="mb-6">
-        <Link
-          href="/admin/catalog/bundles"
-          className="text-sm text-neutral-500 hover:text-neutral-700"
-        >
-          ← Bundles
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">{bundle.name}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          /bundles/<span className="font-mono">{bundle.slug}</span>
-        </p>
-      </header>
+    <div className="mx-auto max-w-3xl">
+      <AdminPageHeader
+        eyebrow="← Bundles"
+        eyebrowHref="/admin/catalog/bundles"
+        title={bundle.name}
+        subtitle={`/bundles/${bundle.slug}`}
+      />
 
       <div className="space-y-8">
-        <section>
-          <AdminBundleForm
-            mode={{ kind: 'edit', bundle }}
-            products={products}
-            initialItems={bundle.items.map((it) => ({
-              variantId: it.variantId,
-              quantity: it.quantity,
-            }))}
-          />
-        </section>
+        <AdminBundleForm
+          mode={{ kind: 'edit', bundle }}
+          products={products}
+          initialItems={bundle.items.map((it) => ({
+            variantId: it.variantId,
+            quantity: it.quantity,
+          }))}
+        />
 
-        <section>
-          <AdminImageUploader scope="bundle" parentId={bundle.id} images={bundle.images} />
-        </section>
+        <AdminImageUploader scope="bundle" parentId={bundle.id} images={bundle.images} />
       </div>
     </div>
   )

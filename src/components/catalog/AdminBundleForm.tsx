@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, type SubmitHandler } from 'react-hook-form'
@@ -16,6 +15,15 @@ import {
   deleteBundle,
 } from '@/lib/catalog/mutations'
 import { formatKes } from '@/lib/money'
+import {
+  AdminActionBar,
+  AdminFormField,
+  AdminFormSection,
+  adminCheckboxCls,
+  adminDangerBtnCls,
+  adminInputCls,
+  adminPrimaryBtnCls,
+} from '@/components/admin/forms'
 import type { BundleDto, ProductDto } from '@/lib/catalog/types'
 
 type Mode = { kind: 'create' } | { kind: 'edit'; bundle: BundleDto }
@@ -151,9 +159,15 @@ export function AdminBundleForm({
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-      {/* IDENTITY */}
-      <Section title="Identity" subtitle="Name, URL slug and a description for the storefront.">
-        <Field label="Name" required error={form.formState.errors.name?.message}>
+      <AdminFormSection
+        title="Identity"
+        subtitle="Name, URL slug and a description for the storefront."
+      >
+        <AdminFormField
+          label="Name"
+          required
+          error={form.formState.errors.name?.message}
+        >
           <input
             type="text"
             {...form.register('name')}
@@ -162,32 +176,38 @@ export function AdminBundleForm({
                 form.setValue('slug', slugify(e.target.value))
               }
             }}
-            className={inputCls}
+            className={adminInputCls}
             placeholder="Discovery Trio"
           />
-        </Field>
+        </AdminFormField>
 
-        <Field
+        <AdminFormField
           label="Slug"
           hint="URL path: /bundles/{slug}. Auto-derived from the name when blank."
         >
-          <input type="text" {...form.register('slug')} className={`${inputCls} font-mono`} />
-        </Field>
+          <input
+            type="text"
+            {...form.register('slug')}
+            className={`${adminInputCls} font-mono`}
+          />
+        </AdminFormField>
 
-        <Field label="Description">
+        <AdminFormField label="Description">
           <textarea
             {...form.register('description')}
             rows={4}
-            className={inputCls}
+            className={adminInputCls}
             placeholder="Short pitch shown on the bundle detail page."
           />
-        </Field>
-      </Section>
+        </AdminFormField>
+      </AdminFormSection>
 
-      {/* PRICING */}
-      <Section title="Pricing" subtitle="Retail is what customers see; distributor price is the commission base.">
+      <AdminFormSection
+        title="Pricing"
+        subtitle="Retail is what customers see; distributor price is the commission base."
+      >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field
+          <AdminFormField
             label="Retail KES"
             required
             error={form.formState.errors.retailKes?.message}
@@ -197,11 +217,11 @@ export function AdminBundleForm({
               type="text"
               inputMode="decimal"
               {...form.register('retailKes')}
-              className={inputCls}
+              className={adminInputCls}
               placeholder="4000"
             />
-          </Field>
-          <Field
+          </AdminFormField>
+          <AdminFormField
             label="Distributor KES"
             required
             error={form.formState.errors.distributorKes?.message}
@@ -211,28 +231,30 @@ export function AdminBundleForm({
               type="text"
               inputMode="decimal"
               {...form.register('distributorKes')}
-              className={inputCls}
+              className={adminInputCls}
               placeholder="2800"
             />
-          </Field>
+          </AdminFormField>
         </div>
-      </Section>
+      </AdminFormSection>
 
-      {/* STARTER PACKAGE */}
-      <Section title="Starter package" subtitle="Mark this bundle as a comp-plan onboarding kit.">
+      <AdminFormSection
+        title="Starter package"
+        subtitle="Mark this bundle as a comp-plan onboarding kit."
+      >
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
             {...form.register('isStarterPackage')}
-            className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+            className={adminCheckboxCls}
           />
-          <span className="text-sm text-neutral-700">
+          <span className="text-sm text-neutral-800">
             Use this bundle as a comp-plan starter package
           </span>
         </label>
         {isStarter ? (
           <div className="mt-4 max-w-[14rem]">
-            <Field
+            <AdminFormField
               label="Starter package code"
               error={form.formState.errors.starterPackageCode?.message}
               hint="Single uppercase letter — A, B, …"
@@ -241,88 +263,62 @@ export function AdminBundleForm({
                 type="text"
                 maxLength={1}
                 {...form.register('starterPackageCode')}
-                className={`${inputCls} w-20 text-center font-mono uppercase`}
+                className={`${adminInputCls} w-20 text-center font-mono uppercase`}
               />
-            </Field>
+            </AdminFormField>
           </div>
         ) : null}
-      </Section>
+      </AdminFormSection>
 
-      {/* CONTENTS */}
-      <Section title="Contents" subtitle="Which product variants ship inside this bundle.">
+      <AdminFormSection
+        title="Contents"
+        subtitle="Which product variants ship inside this bundle."
+      >
         <BundleItemsEditor products={products} items={items} onChange={setItems} />
-      </Section>
+      </AdminFormSection>
 
-      {/* VISIBILITY */}
-      <Section title="Visibility">
+      <AdminFormSection title="Visibility">
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
             {...form.register('isActive')}
-            className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+            className={adminCheckboxCls}
           />
-          <span className="text-sm text-neutral-700">Active — visible on the storefront</span>
+          <span className="text-sm text-neutral-800">
+            Active — visible on the storefront
+          </span>
         </label>
-      </Section>
+      </AdminFormSection>
 
-      {/* ACTION BAR */}
-      <div className="sticky bottom-0 -mx-1 mt-8 flex items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-5 py-4 shadow-sm">
-        <Link
-          href="/admin/catalog/bundles"
-          className="text-sm text-neutral-500 transition hover:text-neutral-900"
-        >
-          Cancel
-        </Link>
-        <div className="flex items-center gap-3">
-          {mode.kind === 'edit' ? (
+      <AdminActionBar
+        cancelHref="/admin/catalog/bundles"
+        secondary={
+          mode.kind === 'edit' ? (
             <button
               type="button"
               onClick={onDelete}
               disabled={isPending}
-              className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+              className={adminDangerBtnCls}
             >
               Delete bundle
             </button>
-          ) : null}
+          ) : undefined
+        }
+        primary={
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-md bg-neutral-900 px-6 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+            className={adminPrimaryBtnCls}
           >
-            {isPending ? 'Saving…' : mode.kind === 'create' ? 'Create bundle' : 'Save changes'}
+            {isPending
+              ? 'Saving…'
+              : mode.kind === 'create'
+                ? 'Create bundle'
+                : 'Save changes'}
           </button>
-        </div>
-      </div>
+        }
+      />
     </form>
-  )
-}
-
-/**
- * Section — a labelled card containing one group of form fields.
- * Gives each chunk of the form a clear visual envelope so the page
- * stops feeling like a wall of inputs.
- */
-function Section({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string
-  subtitle?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="rounded-lg border border-neutral-200 bg-white px-5 py-5 shadow-sm md:px-6 md:py-6">
-      <div className="mb-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-          {title}
-        </h2>
-        {subtitle ? (
-          <p className="mt-1 text-xs text-neutral-500">{subtitle}</p>
-        ) : null}
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
   )
 }
 
@@ -366,10 +362,12 @@ function BundleItemsEditor({
   }
 
   return (
-    <fieldset className="rounded-lg border border-neutral-200 bg-white p-5">
-      <legend className="px-1 text-sm font-medium text-neutral-700">Contents</legend>
-      <p className="mt-1 text-xs text-neutral-500">
-        À-la-carte total: <span className="font-medium tabular-nums">{formatKes(alaCarte)}</span>
+    <div>
+      <p className="text-xs text-neutral-500">
+        À-la-carte total:{' '}
+        <span className="font-medium tabular-nums text-neutral-800">
+          {formatKes(alaCarte)}
+        </span>
       </p>
 
       {items.length === 0 ? (
@@ -438,41 +436,15 @@ function BundleItemsEditor({
             type="button"
             onClick={addItem}
             disabled={!pickVariantId}
-            className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
+            className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
           >
             Add
           </button>
         </div>
       )}
-    </fieldset>
-  )
-}
-
-const inputCls =
-  'w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900'
-
-function Field({
-  label,
-  required,
-  error,
-  hint,
-  children,
-}: {
-  label: string
-  required?: boolean
-  error?: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-sm font-medium text-neutral-700">
-        {label}
-        {required ? <span className="ml-0.5 text-red-600">*</span> : null}
-      </label>
-      {children}
-      {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : null}
-      {hint && !error ? <p className="mt-1 text-xs text-neutral-500">{hint}</p> : null}
     </div>
   )
 }
+
+// Field + inputCls moved to @/components/admin/forms for shared use
+// across all admin forms.

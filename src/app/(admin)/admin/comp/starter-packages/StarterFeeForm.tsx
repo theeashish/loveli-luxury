@@ -1,6 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import {
+  adminInputCls,
+  adminPrimaryBtnCls,
+} from '@/components/admin/forms'
 import { updateStarterJoiningFee } from './actions'
 
 export function StarterFeeForm({
@@ -43,7 +47,7 @@ export function StarterFeeForm({
       <div className="flex-1">
         <label
           htmlFor={`fee-${packageCode}`}
-          className="mb-1 block text-xs font-medium uppercase tracking-[0.15em] text-neutral-600"
+          className="mb-1.5 block text-sm font-medium text-neutral-800"
         >
           Joining fee (KES)
         </label>
@@ -55,13 +59,13 @@ export function StarterFeeForm({
           step={100}
           value={value}
           onChange={(e) => setValue(Number(e.target.value))}
-          className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm tabular-nums focus:border-neutral-900 focus:outline-none"
+          className={`${adminInputCls} tabular-nums`}
         />
       </div>
       <button
         type="submit"
         disabled={!dirty || pending}
-        className="rounded-md bg-neutral-900 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className={adminPrimaryBtnCls}
       >
         {pending ? 'Saving…' : 'Save'}
       </button>
