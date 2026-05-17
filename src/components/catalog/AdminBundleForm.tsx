@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, type SubmitHandler } from 'react-hook-form'
@@ -149,71 +150,88 @@ export function AdminBundleForm({
   const isStarter = form.watch('isStarterPackage')
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <Field label="Name" required error={form.formState.errors.name?.message}>
-        <input
-          type="text"
-          {...form.register('name')}
-          onBlur={(e) => {
-            if (mode.kind === 'create' && !form.getValues('slug')) {
-              form.setValue('slug', slugify(e.target.value))
-            }
-          }}
-          className={inputCls}
-          placeholder="Discovery Trio"
-        />
-      </Field>
-
-      <Field
-        label="Slug"
-        hint="URL path: /bundles/{slug}. Auto-derived from the name when blank."
-      >
-        <input type="text" {...form.register('slug')} className={`${inputCls} font-mono`} />
-      </Field>
-
-      <Field label="Description">
-        <textarea {...form.register('description')} rows={4} className={inputCls} />
-      </Field>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field
-          label="Retail KES"
-          required
-          error={form.formState.errors.retailKes?.message}
-          hint="What customers pay."
-        >
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      {/* IDENTITY */}
+      <Section title="Identity" subtitle="Name, URL slug and a description for the storefront.">
+        <Field label="Name" required error={form.formState.errors.name?.message}>
           <input
             type="text"
-            inputMode="decimal"
-            {...form.register('retailKes')}
+            {...form.register('name')}
+            onBlur={(e) => {
+              if (mode.kind === 'create' && !form.getValues('slug')) {
+                form.setValue('slug', slugify(e.target.value))
+              }
+            }}
             className={inputCls}
+            placeholder="Discovery Trio"
           />
         </Field>
-        <Field
-          label="Distributor KES"
-          required
-          error={form.formState.errors.distributorKes?.message}
-          hint="What distributors pay (commission base)."
-        >
-          <input
-            type="text"
-            inputMode="decimal"
-            {...form.register('distributorKes')}
-            className={inputCls}
-          />
-        </Field>
-      </div>
 
-      <fieldset className="rounded-lg border border-neutral-200 bg-white p-5">
-        <legend className="px-1 text-sm font-medium text-neutral-700">Starter package</legend>
-        <label className="mt-2 flex items-center gap-3">
-          <input type="checkbox" {...form.register('isStarterPackage')} className="h-4 w-4" />
+        <Field
+          label="Slug"
+          hint="URL path: /bundles/{slug}. Auto-derived from the name when blank."
+        >
+          <input type="text" {...form.register('slug')} className={`${inputCls} font-mono`} />
+        </Field>
+
+        <Field label="Description">
+          <textarea
+            {...form.register('description')}
+            rows={4}
+            className={inputCls}
+            placeholder="Short pitch shown on the bundle detail page."
+          />
+        </Field>
+      </Section>
+
+      {/* PRICING */}
+      <Section title="Pricing" subtitle="Retail is what customers see; distributor price is the commission base.">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field
+            label="Retail KES"
+            required
+            error={form.formState.errors.retailKes?.message}
+            hint="What customers pay."
+          >
+            <input
+              type="text"
+              inputMode="decimal"
+              {...form.register('retailKes')}
+              className={inputCls}
+              placeholder="4000"
+            />
+          </Field>
+          <Field
+            label="Distributor KES"
+            required
+            error={form.formState.errors.distributorKes?.message}
+            hint="What distributors pay (commission base)."
+          >
+            <input
+              type="text"
+              inputMode="decimal"
+              {...form.register('distributorKes')}
+              className={inputCls}
+              placeholder="2800"
+            />
+          </Field>
+        </div>
+      </Section>
+
+      {/* STARTER PACKAGE */}
+      <Section title="Starter package" subtitle="Mark this bundle as a comp-plan onboarding kit.">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            {...form.register('isStarterPackage')}
+            className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+          />
           <span className="text-sm text-neutral-700">
             Use this bundle as a comp-plan starter package
           </span>
         </label>
         {isStarter ? (
-          <div className="mt-4">
+          <div className="mt-4 max-w-[14rem]">
             <Field
               label="Starter package code"
               error={form.formState.errors.starterPackageCode?.message}
@@ -228,35 +246,83 @@ export function AdminBundleForm({
             </Field>
           </div>
         ) : null}
-      </fieldset>
+      </Section>
 
-      <BundleItemsEditor products={products} items={items} onChange={setItems} />
+      {/* CONTENTS */}
+      <Section title="Contents" subtitle="Which product variants ship inside this bundle.">
+        <BundleItemsEditor products={products} items={items} onChange={setItems} />
+      </Section>
 
-      <label className="flex items-center gap-3">
-        <input type="checkbox" {...form.register('isActive')} className="h-4 w-4" />
-        <span className="text-sm text-neutral-700">Active — visible on the storefront</span>
-      </label>
+      {/* VISIBILITY */}
+      <Section title="Visibility">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            {...form.register('isActive')}
+            className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+          />
+          <span className="text-sm text-neutral-700">Active — visible on the storefront</span>
+        </label>
+      </Section>
 
-      <div className="flex items-center justify-between border-t border-neutral-200 pt-6">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-neutral-900 px-5 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
+      {/* ACTION BAR */}
+      <div className="sticky bottom-0 -mx-1 mt-8 flex items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-5 py-4 shadow-sm">
+        <Link
+          href="/admin/catalog/bundles"
+          className="text-sm text-neutral-500 transition hover:text-neutral-900"
         >
-          {isPending ? 'Saving…' : mode.kind === 'create' ? 'Create bundle' : 'Save changes'}
-        </button>
-        {mode.kind === 'edit' ? (
+          Cancel
+        </Link>
+        <div className="flex items-center gap-3">
+          {mode.kind === 'edit' ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={isPending}
+              className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60"
+            >
+              Delete bundle
+            </button>
+          ) : null}
           <button
-            type="button"
-            onClick={onDelete}
+            type="submit"
             disabled={isPending}
-            className="rounded-md border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+            className="rounded-md bg-neutral-900 px-6 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
           >
-            Delete bundle
+            {isPending ? 'Saving…' : mode.kind === 'create' ? 'Create bundle' : 'Save changes'}
           </button>
-        ) : null}
+        </div>
       </div>
     </form>
+  )
+}
+
+/**
+ * Section — a labelled card containing one group of form fields.
+ * Gives each chunk of the form a clear visual envelope so the page
+ * stops feeling like a wall of inputs.
+ */
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="rounded-lg border border-neutral-200 bg-white px-5 py-5 shadow-sm md:px-6 md:py-6">
+      <div className="mb-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+          {title}
+        </h2>
+        {subtitle ? (
+          <p className="mt-1 text-xs text-neutral-500">{subtitle}</p>
+        ) : null}
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
   )
 }
 

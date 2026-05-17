@@ -15,17 +15,20 @@ export default async function NewBundlePage() {
   ).filter((p): p is ProductDto => p !== null)
 
   return (
-    <div className="max-w-3xl">
-      <header className="mb-6">
+    <div className="mx-auto max-w-3xl">
+      <header className="mb-8">
         <Link
           href="/admin/catalog/bundles"
-          className="text-sm text-neutral-500 hover:text-neutral-700"
+          className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.2em] text-neutral-500 transition hover:text-neutral-900"
         >
           ← Bundles
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">New bundle</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-900">
+          New bundle
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-neutral-600">
           Bundles power retail combos and the comp-plan starter packages.
+          Define identity, pricing, and contents below.
         </p>
       </header>
 
