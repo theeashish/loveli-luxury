@@ -4,18 +4,30 @@
  * Server-driven checkout initiation. The cart payload from the client is
  * UNTRUSTED and is re-priced + re-validated against the database before any
  * order is written. The order is created in `pending` state with a freshly
- * generated order_number; we hand it to Flutterwave as the tx_ref so both
- * the redirect-return path and the webhook can resolve back to our row.
+ * generated order_number; we hand it to PayHero as the external_reference
+ * so both the polling client and the webhook can resolve back to our row.
  *
  * Auth:        Customer must be signed in (we need profiles.email and the
  *              addresses RLS chain).
  * RLS bypass:  Order/order_items writes go through the service-role client
  *              because there is no customer-INSERT policy on orders by design
  *              (clients never write the ledger or its inputs directly).
- * Idempotency: Each call mints a new order_number and a new FW link. If the
- *              user reloads checkout we'll create another pending order — the
- *              previous one stays orphaned at `pending` forever, which is fine.
- *              A nightly job can sweep stale pendings later.
+ *
+ * IDEMPOTENCY (added in migration 021):
+ *   PayHero charges the merchant wallet per STK push attempt. Two inits
+ *   for the same user = two charges. So on every call we look for an
+ *   existing pending retail order for the user:
+ *     - If one exists and is < STALE_PENDING_MS old, we REUSE it: refire
+ *       STK against the same order_number, update phone if it changed,
+ *       return the existing order. Cart-line / address / sponsor changes
+ *       between attempts are deliberately ignored in the reuse window —
+ *       the user's first authoritative checkout wins until it expires.
+ *     - If one exists and is older, we mark it 'expired' so the partial
+ *       unique index releases the slot, then fall through and build a
+ *       fresh order from the new cart.
+ *   The DB-level guard is `idx_orders_one_pending_retail_per_user` from
+ *   migration 021 — even if the lookup misses (race), the insert will
+ *   fail cleanly with a unique-violation rather than create a duplicate.
  */
 
 import { NextResponse } from 'next/server'
@@ -25,9 +37,25 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
 import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import {
+  decidePendingAction,
+  shouldRefireStk,
+} from '@/lib/payhero/idempotency'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+/** Window during which a still-pending order is reused rather than
+ *  duplicated. See file header for rationale. */
+const STALE_PENDING_MS = 15 * 60 * 1000
+
+/** Refire throttle: PayHero STK push expires at 60s on the customer's
+ *  phone. Within that window, the previous prompt is still live —
+ *  refiring would incur a second wallet fee. The init reuse branch
+ *  skips refire when the prior push hasn't aged out. The explicit
+ *  /api/payhero/retry-stk endpoint ignores this throttle (it only
+ *  fires after the panel's 75s timeout). */
+const STK_REFIRE_THROTTLE_MS = 60 * 1000
 
 // -----------------------------------------------------------------------------
 // Request schema
@@ -111,7 +139,152 @@ export async function POST(req: Request) {
 
   const service = createServiceClient()
 
-  // 3. Resolve shipping address (existing or freshly inserted)
+  // 3. Profile lookup — hoisted from later so the idempotency reuse
+  //    branch can call initiatePayment without re-fetching.
+  const profileRes = await service
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', user.id)
+    .single()
+  if (profileRes.error || !profileRes.data) {
+    return NextResponse.json({ error: 'Profile not found' }, { status: 500 })
+  }
+  const profile = profileRes.data as { email: string; full_name: string }
+
+  // 4. Idempotency guard. See file-header comment.
+  const existingPendingRes = await service
+    .from('orders')
+    .select(
+      'id, order_number, total_minor, customer_phone, created_at',
+    )
+    .eq('user_id', user.id)
+    .eq('kind', 'retail')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (existingPendingRes.error) {
+    return NextResponse.json(
+      {
+        error: 'Pending-order lookup failed',
+        detail: existingPendingRes.error.message,
+      },
+      { status: 500 },
+    )
+  }
+  const existingPending = existingPendingRes.data as
+    | {
+        id: number
+        order_number: string
+        total_minor: string | number
+        customer_phone: string | null
+        created_at: string
+      }
+    | null
+
+  const action = decidePendingAction(existingPending, Date.now(), STALE_PENDING_MS)
+
+  if (action.type === 'reuse' && existingPending) {
+    if (existingPending.customer_phone !== customerPhone) {
+      const phoneUpdate = await (service.from('orders') as unknown as {
+        update: (v: Record<string, unknown>) => {
+          eq: (col: string, val: unknown) => Promise<{
+            error: { message: string } | null
+          }>
+        }
+      })
+        .update({ customer_phone: customerPhone })
+        .eq('id', existingPending.id)
+      if (phoneUpdate.error) {
+        return NextResponse.json(
+          {
+            error: 'Could not update phone on existing order',
+            detail: phoneUpdate.error.message,
+          },
+          { status: 500 },
+        )
+      }
+    }
+    // Refire throttle: skip if the previous STK push is still alive.
+    const recentStkRes = await service
+      .from('payment_attempts')
+      .select('attempted_at')
+      .eq('order_id', existingPending.id)
+      .eq('attempt_type', 'stk_push')
+      .order('attempted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const recentStk = recentStkRes.data as
+      | { attempted_at: string }
+      | null
+
+    if (
+      !shouldRefireStk(
+        recentStk?.attempted_at ?? null,
+        Date.now(),
+        STK_REFIRE_THROTTLE_MS,
+      )
+    ) {
+      return NextResponse.json({
+        orderId: existingPending.id,
+        orderNumber: existingPending.order_number,
+        reused: true,
+        throttled: true,
+        provider: 'payhero',
+        status: 'stk_pushed',
+      })
+    }
+
+    const amountKes = Number(BigInt(existingPending.total_minor) / 100n)
+    let reuseResult
+    try {
+      reuseResult = await initiatePayment({
+        orderId: existingPending.id,
+        orderNumber: existingPending.order_number,
+        amountKes,
+        customer: {
+          email: profile.email,
+          name: profile.full_name,
+          phone: customerPhone,
+        },
+        description: `Order ${existingPending.order_number} (retry)`,
+      })
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'Payment provider unavailable', detail: (e as Error).message },
+        { status: 502 },
+      )
+    }
+    return NextResponse.json({
+      orderId: existingPending.id,
+      orderNumber: existingPending.order_number,
+      reused: true,
+      ...reuseResult,
+    })
+  }
+
+  if (action.type === 'expire') {
+    const expireRes = await (service.from('orders') as unknown as {
+      update: (v: Record<string, unknown>) => {
+        eq: (col: string, val: unknown) => Promise<{
+          error: { message: string } | null
+        }>
+      }
+    })
+      .update({ status: 'expired' })
+      .eq('id', action.orderId)
+    if (expireRes.error) {
+      return NextResponse.json(
+        {
+          error: 'Could not expire prior pending order',
+          detail: expireRes.error.message,
+        },
+        { status: 500 },
+      )
+    }
+  }
+
+  // 5. Resolve shipping address (existing or freshly inserted)
   let resolvedAddressId: number
   if (shippingAddressId !== null) {
     const { data, error } = await service
@@ -152,7 +325,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Address required' }, { status: 400 })
   }
 
-  // 4. Server-side re-pricing + inventory check
+  // 6. Server-side re-pricing + inventory check
   const variantIds = lines
     .filter((l): l is z.infer<typeof variantLineSchema> => l.kind === 'variant')
     .map((l) => l.variantId)
@@ -328,7 +501,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // 5. Resolve sponsor cookie (Step 5 sets it; tolerate absent)
+  // 7. Resolve sponsor cookie (Step 5 sets it; tolerate absent)
   let sponsorDistributorId: number | null = null
   const sponsorCode = cookies().get('ll_sponsor')?.value
   if (sponsorCode) {
@@ -340,39 +513,28 @@ export async function POST(req: Request) {
     if (r.data?.is_active) sponsorDistributorId = r.data.id
   }
 
-  // 6. Profile (for customer_email + name)
-  const profileRes = await service
-    .from('profiles')
-    .select('email, full_name')
-    .eq('id', user.id)
-    .single()
-  if (profileRes.error || !profileRes.data) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 500 })
-  }
-  const profile = profileRes.data
-
-  // 7. Generate order number via RPC
+  // 8. Generate order number via RPC
   const orderNumberRes = await service.rpc('generate_order_number')
   if (orderNumberRes.error || !orderNumberRes.data) {
     return NextResponse.json({ error: 'Order number generation failed' }, { status: 500 })
   }
   const orderNumber = orderNumberRes.data as unknown as string
 
-  // 8. Compute the PayHero processing fee from the subtotal and add it
+  // 9. Compute the PayHero processing fee from the subtotal and add it
   //    to the total. The customer sees and pays this fee on top of the
   //    cart total; PayHero deducts it from what they remit, so the
   //    business receives the full subtotal.
   const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
   const totalMinor = subtotalMinor + processingFeeMinor
 
-  // 9. Insert order. TODO(types): regenerate database.ts post-migration-020
-  //    (processing_fee_minor is new).
+  // 10. Insert order. TODO(types): regenerate database.ts post-migration-020
+  //     (processing_fee_minor is new).
   const orderInsert = (await (service.from('orders') as unknown as {
     insert: (v: Record<string, unknown>) => {
       select: (cols: string) => {
         single: () => Promise<{
           data: { id: number; order_number: string; total_minor: string | number } | null
-          error: { message: string } | null
+          error: { message: string; code?: string } | null
         }>
       }
     }
@@ -398,9 +560,18 @@ export async function POST(req: Request) {
     .select('id, order_number, total_minor')
     .single()) as {
     data: { id: number; order_number: string; total_minor: string | number } | null
-    error: { message: string } | null
+    error: { message: string; code?: string } | null
   }
   if (orderInsert.error || !orderInsert.data) {
+    if (orderInsert.error?.code === '23505') {
+      return NextResponse.json(
+        {
+          error:
+            'Another checkout attempt is already in flight. Please retry in a moment.',
+        },
+        { status: 409 },
+      )
+    }
     return NextResponse.json(
       { error: 'Order creation failed', detail: orderInsert.error?.message },
       { status: 500 },
@@ -408,7 +579,7 @@ export async function POST(req: Request) {
   }
   const orderId = orderInsert.data.id
 
-  // 9. Insert order_items in one batch
+  // 11. Insert order_items in one batch
   const itemsRes = await service
     .from('order_items')
     .insert(itemRows.map((r) => ({ ...r, order_id: orderId })))
@@ -421,8 +592,7 @@ export async function POST(req: Request) {
     )
   }
 
-  // 10. Initiate payment via the current provider (PayHero STK push or
-  // Flutterwave hosted link, dispatched by PAYMENT_PROVIDER_DEFAULT).
+  // 12. Initiate payment via the current provider (PayHero STK push).
   const amountKes = Number(totalMinor / 100n)
   let result
   try {

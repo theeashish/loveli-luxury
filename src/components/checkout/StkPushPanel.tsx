@@ -11,11 +11,17 @@
  * Source of truth is the server-side webhook chain. This panel only
  * READS order state — it never tries to confirm payment from the
  * frontend.
+ *
+ * Retry: "Try again" calls POST /api/payhero/retry-stk against the
+ * SAME order. No new order is created, the external_reference stays
+ * the same, and the webhook dedup logic keeps everything coherent.
+ * This is the core defense against the original "double STK push per
+ * checkout intent" bug.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-type Status = 'awaiting_prompt' | 'paid' | 'failed' | 'timeout'
+type Status = 'awaiting_prompt' | 'paid' | 'failed' | 'timeout' | 'retrying'
 
 const POLL_INTERVAL_MS = 2_500
 const TIMEOUT_MS = 75_000 // 75s; PayHero STK push expires at 60s, give buffer
@@ -24,8 +30,6 @@ interface Props {
   orderNumber: string
   /** Where to send the user once the order flips to paid. */
   successRedirectUrl: string
-  /** Called when the user clicks "Try again" — re-runs the init flow. */
-  onRetry: () => void | Promise<void>
   /** Optional copy override. */
   amountLabel?: string
 }
@@ -33,17 +37,22 @@ interface Props {
 export function StkPushPanel({
   orderNumber,
   successRedirectUrl,
-  onRetry,
   amountLabel,
 }: Props) {
   const [status, setStatus] = useState<Status>('awaiting_prompt')
   const [error, setError] = useState<string | null>(null)
+  // Incrementing this re-arms the polling effect (which keys on it),
+  // letting an explicit "Try again" restart the watch loop after the
+  // retry-stk endpoint successfully re-fires the M-Pesa prompt.
+  const [attemptKey, setAttemptKey] = useState(0)
   const elapsedRef = useRef(0)
   const stoppedRef = useRef(false)
 
   useEffect(() => {
     stoppedRef.current = false
     elapsedRef.current = 0
+    setStatus('awaiting_prompt')
+    setError(null)
 
     const tick = async () => {
       if (stoppedRef.current) return
@@ -57,13 +66,23 @@ export function StkPushPanel({
           // and let the next tick try again.
         } else {
           const json = (await res.json()) as { status: string }
-          if (json.status === 'paid' || json.status === 'fulfilled' || json.status === 'shipped' || json.status === 'delivered') {
+          if (
+            json.status === 'paid' ||
+            json.status === 'fulfilled' ||
+            json.status === 'shipped' ||
+            json.status === 'delivered'
+          ) {
             stoppedRef.current = true
             setStatus('paid')
             window.location.assign(successRedirectUrl)
             return
           }
-          if (json.status === 'cancelled' || json.status === 'refunded') {
+          if (
+            json.status === 'cancelled' ||
+            json.status === 'refunded' ||
+            json.status === 'failed' ||
+            json.status === 'expired'
+          ) {
             stoppedRef.current = true
             setStatus('failed')
             return
@@ -87,7 +106,38 @@ export function StkPushPanel({
       stoppedRef.current = true
       clearTimeout(id)
     }
-  }, [orderNumber, successRedirectUrl])
+  }, [orderNumber, successRedirectUrl, attemptKey])
+
+  const onTryAgain = useCallback(async () => {
+    setStatus('retrying')
+    setError(null)
+    try {
+      const res = await fetch('/api/payhero/retry-stk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderNumber }),
+      })
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string
+        status?: string
+      }
+      if (!res.ok) {
+        setStatus('failed')
+        setError(
+          typeof json?.error === 'string'
+            ? json.error
+            : `Retry failed (HTTP ${res.status})`,
+        )
+        return
+      }
+      // Bump attempt key — useEffect re-runs and re-arms the timer
+      // with status 'awaiting_prompt'.
+      setAttemptKey((k) => k + 1)
+    } catch (e) {
+      setStatus('failed')
+      setError((e as Error).message)
+    }
+  }, [orderNumber])
 
   return (
     <div className="rounded-2xl border border-[hsl(var(--primary))]/25 bg-[hsl(var(--muted))]/40 p-8 text-center backdrop-blur-sm md:p-10">
@@ -107,6 +157,22 @@ export function StkPushPanel({
           </p>
           <p className="mt-6 font-mono text-xs text-[hsl(var(--muted-foreground))]">
             Order {orderNumber}
+          </p>
+        </>
+      ) : null}
+
+      {status === 'retrying' ? (
+        <>
+          <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-[hsl(var(--primary))]/30" />
+          <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
+            Resending
+          </p>
+          <h2 className="mt-3 font-serif text-3xl italic tracking-tight md:text-4xl">
+            Sending a new prompt
+          </h2>
+          <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+            We're re-firing the M-Pesa prompt for order {orderNumber}. Watch
+            your phone.
           </p>
         </>
       ) : null}
@@ -134,13 +200,14 @@ export function StkPushPanel({
             Payment was cancelled
           </h2>
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
-            No money was taken from your M-Pesa. You can try again.
+            No money was taken from your M-Pesa. You can try again with the
+            same order — no duplicate charge.
           </p>
           <button
-            onClick={() => void onRetry()}
+            onClick={() => void onTryAgain()}
             className="mt-8 inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
           >
-            Try again
+            Resend M-Pesa prompt
           </button>
         </>
       ) : null}
@@ -156,13 +223,13 @@ export function StkPushPanel({
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
             The M-Pesa prompt may have expired. If you completed payment,
             it may still settle — check your orders in a minute. Otherwise
-            try again.
+            resend the prompt below — same order, no duplicate charge.
           </p>
           <button
-            onClick={() => void onRetry()}
+            onClick={() => void onTryAgain()}
             className="mt-8 inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
           >
-            Try again
+            Resend M-Pesa prompt
           </button>
         </>
       ) : null}

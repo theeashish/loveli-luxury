@@ -95,6 +95,21 @@ export async function initiateStkPush(args: {
     callback_url: args.callbackUrl,
   }
 
+  // Structured log so duplicate-fire investigations are a one-grep
+  // operation against Vercel logs. If two of these appear for the
+  // same `externalReference` within a minute, that's a fee charged
+  // twice — start the audit there.
+  // eslint-disable-next-line no-console
+  console.log(
+    '[payhero.stk.init]',
+    JSON.stringify({
+      externalReference: args.orderNumber,
+      amountKes: args.amountKes,
+      msisdn: body.phone_number,
+      ts: new Date().toISOString(),
+    }),
+  )
+
   const res = await fetch(`${PAYHERO_API_BASE}/payments`, {
     method: 'POST',
     headers: {

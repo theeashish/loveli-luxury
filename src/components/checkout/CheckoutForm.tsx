@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { useCartStore } from '@/lib/cart/store'
 import { isEmpty, subtotalMinor, totalQty } from '@/lib/cart/selectors'
@@ -63,14 +63,6 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
   useEffect(() => {
     if (hasHydrated && isEmpty({ lines })) setError(null)
   }, [hasHydrated, lines])
-
-  // Defined here (before the early returns below) so the hook ordering
-  // stays stable across renders. Used inside the StkPushPanel branch
-  // further down.
-  const onRetryStk = useCallback(() => {
-    setStkOrderNumber(null)
-    setSubmitting(false)
-  }, [])
 
   if (!hasHydrated) {
     return <p className="text-sm text-[hsl(var(--muted-foreground))]">Loading…</p>
@@ -165,13 +157,14 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
   }
 
   // STK polling — render the panel exclusively while the payment is
-  // pending so the user isn't tempted to re-submit the form.
+  // pending so the user isn't tempted to re-submit the form. The
+  // panel itself owns retry behaviour via /api/payhero/retry-stk —
+  // no duplicate orders can be created from "Try again".
   if (stkOrderNumber) {
     return (
       <StkPushPanel
         orderNumber={stkOrderNumber}
         successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
-        onRetry={onRetryStk}
         amountLabel={formatKes(subtotal + computePayHeroFeeMinor(subtotal))}
       />
     )

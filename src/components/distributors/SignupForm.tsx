@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
 import { StkPushPanel } from '@/components/checkout/StkPushPanel'
@@ -171,18 +171,15 @@ export function DistributorSignupForm({
     }
   }
 
-  const onRetryStk = useCallback(() => {
-    setStkOrderNumber(null)
-    setSubmitting(false)
-  }, [])
-
   // When the STK push is in flight, render only the polling panel.
+  // The panel owns retry behaviour — it calls /api/payhero/retry-stk
+  // against the SAME order_number, so no duplicate orders or PayHero
+  // wallet fees can ever come from "Try again".
   if (stkOrderNumber) {
     return (
       <StkPushPanel
         orderNumber={stkOrderNumber}
         successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
-        onRetry={onRetryStk}
         amountLabel={
           selectedBundle
             ? formatKes(
