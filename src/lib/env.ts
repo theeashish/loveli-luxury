@@ -25,6 +25,11 @@ const publicSchema = z.object({
   NEXT_PUBLIC_GA4_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_META_PIXEL_ID: z.string().optional(),
   NEXT_PUBLIC_TIKTOK_PIXEL_ID: z.string().optional(),
+  // Phase 4a — WhatsApp Concierge floating button. E.164 format
+  // (+254...). When unset the button renders nothing (safe degrade).
+  // Editable post-deploy via Vercel env vars; no code change needed.
+  NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER: z
+    .preprocess(emptyToUndef, z.string().regex(/^\+\d{8,15}$/, 'E.164 phone format').optional()),
 })
 
 // -----------------------------------------------------------------------------
@@ -80,6 +85,8 @@ const publicResult = publicSchema.safeParse({
   NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
   NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
   NEXT_PUBLIC_TIKTOK_PIXEL_ID: process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
+  NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER:
+    process.env.NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER,
 })
 
 if (!publicResult.success) {

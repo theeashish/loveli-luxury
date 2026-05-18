@@ -7,11 +7,12 @@ import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
 import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
+import { WhatsAppConcierge } from '@/components/concierge/WhatsAppConcierge'
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
   { href: '/bundles', label: 'Bundles' },
-  { href: '/#story', label: 'Story' },
+  { href: '/story', label: 'Story' },
   { href: '/#faq', label: 'FAQ' },
 ] as const
 
@@ -74,6 +75,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       <CartDrawer />
       <Toaster richColors position="top-right" theme="dark" />
+      <WhatsAppConcierge />
     </div>
   )
 }
