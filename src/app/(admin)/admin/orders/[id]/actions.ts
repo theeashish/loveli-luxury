@@ -22,6 +22,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getTransactionStatus } from '@/lib/payhero/service'
 // Refunds: PayHero does not yet expose a public refund API in our integration.
 // Admins issue refunds from the PayHero dashboard, then click "Mark refunded"
 // here to update inventory + clawback. See refund() below.
@@ -244,3 +245,183 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
 
 // ALLOWED_ACTIONS lives in ./transitions.ts so this 'use server' file
 // exports only async functions (Next.js constraint).
+
+/**
+ * Admin reconcile action for stuck PayHero orders.
+ *
+ * Calls PayHero's transaction-status endpoint for an order that's still
+ * `pending` despite the customer having paid (typical cause: webhook
+ * delivery failure, dropped callback, or — as observed 2026-05-18 —
+ * a schema-drift bug in webhook_deliveries that made the dedup RPC
+ * throw). If PayHero confirms SUCCESS and amount matches, runs the
+ * same RPC chain the webhook would: mark_order_paid →
+ * provision_distributor (for distributor_signup orders) →
+ * write_commission_ledger → audit_log.
+ *
+ * Same wire-level logic as POST /api/payhero/reconcile, but invoked
+ * as a server action so the admin can trigger it with a form button
+ * instead of having to drop into browser DevTools or curl.
+ *
+ * Idempotent on order state — mark_order_paid short-circuits when the
+ * order is already paid.
+ */
+const reconcileInputSchema = z.object({
+  orderId: z.coerce.number().int().positive(),
+})
+
+export async function reconcilePayheroPayment(formData: FormData): Promise<void> {
+  let session
+  try {
+    session = await requireAdmin()
+  } catch (err) {
+    if (err instanceof AuthError) throw new Error('Forbidden')
+    throw err
+  }
+
+  const parsed = reconcileInputSchema.safeParse({
+    orderId: formData.get('orderId'),
+  })
+  if (!parsed.success) throw new Error('Invalid request')
+  const { orderId } = parsed.data
+
+  const service = createServiceClient()
+
+  // 1. Load the order. TODO(types): regenerate database.ts post-019.
+  const orderRes = (await service
+    .from('orders')
+    .select(
+      'id, order_number, status, total_minor, kind, payment_provider, payhero_checkout_reference',
+    )
+    .eq('id', orderId)
+    .maybeSingle()) as unknown as {
+    data: {
+      id: number
+      order_number: string
+      status: AnyStatus
+      total_minor: string | number
+      kind: string
+      payment_provider: string | null
+      payhero_checkout_reference: string | null
+    } | null
+    error: { message: string } | null
+  }
+  if (orderRes.error || !orderRes.data) throw new Error('Order not found')
+  const order = orderRes.data
+
+  if (order.status !== 'pending') {
+    // Idempotent UX: don't blow up if a concurrent webhook just settled it.
+    revalidatePath(`/admin/orders/${orderId}`)
+    return
+  }
+  if (order.payment_provider !== 'payhero') {
+    throw new Error(
+      `Order provider is '${order.payment_provider}', not payhero — nothing to reconcile.`,
+    )
+  }
+  if (!order.payhero_checkout_reference) {
+    throw new Error(
+      'Order has no PayHero checkout reference. Likely the STK push never returned a reference; cannot reconcile.',
+    )
+  }
+
+  // 2. Ask PayHero for the canonical transaction state.
+  let status
+  try {
+    status = await getTransactionStatus(order.payhero_checkout_reference)
+  } catch (e) {
+    throw new Error(`PayHero status lookup failed: ${(e as Error).message}`)
+  }
+
+  if (status.status !== 'SUCCESS' || !status.success) {
+    throw new Error(
+      `PayHero reports status '${status.status}' for this order — not SUCCESS. ` +
+        `Message: ${status.message ?? '(none)'}. Order left pending.`,
+    )
+  }
+
+  // 3. Amount sanity check.
+  const expectedMajor = Math.round(Number(order.total_minor) / 100)
+  if (typeof status.amount === 'number' && status.amount !== expectedMajor) {
+    throw new Error(
+      `Amount mismatch — expected Kes ${expectedMajor}, PayHero says Kes ${status.amount}. ` +
+        `Refusing to mark paid.`,
+    )
+  }
+
+  const mpesaReceipt =
+    status.provider_reference ?? status.third_party_reference ?? null
+
+  // 4. Stamp the PayHero refs on the order.
+  await (service.from('orders') as unknown as {
+    update: (v: Record<string, unknown>) => {
+      eq: (col: string, val: unknown) => Promise<{
+        error: { message: string } | null
+      }>
+    }
+  })
+    .update({
+      payhero_external_reference: status.external_reference ?? null,
+      payhero_mpesa_receipt: mpesaReceipt,
+    })
+    .eq('id', order.id)
+
+  // 5. Idempotent RPC chain — same one the webhook runs.
+  const paidAt = new Date().toISOString()
+  const markRes = (await service.rpc('mark_order_paid', {
+    p_order_id: order.id,
+    p_provider_ref: mpesaReceipt ?? order.payhero_checkout_reference,
+    p_paid_at: paidAt,
+  })) as { error: { message: string } | null }
+  if (markRes.error) {
+    throw new Error(`mark_order_paid failed: ${markRes.error.message}`)
+  }
+
+  if (order.kind === 'distributor_signup') {
+    const provRes = (await service.rpc('provision_distributor', {
+      p_order_id: order.id,
+    })) as { error: { message: string } | null }
+    if (provRes.error) {
+      throw new Error(
+        `Order marked paid but distributor provisioning failed: ${provRes.error.message}. ` +
+          `Investigate before retrying.`,
+      )
+    }
+  }
+
+  const ledgerRes = (await service.rpc('write_commission_ledger', {
+    p_order_id: order.id,
+  })) as { error: { message: string } | null }
+  if (ledgerRes.error) {
+    // Non-fatal — order is paid. Log warning via audit but don't throw.
+    await service.from('audit_log').insert({
+      actor_id: session.userId,
+      action: 'order.reconcile.ledger_warning',
+      resource_type: 'orders',
+      resource_id: String(orderId),
+      after_data: {
+        provider: 'payhero',
+        warning: ledgerRes.error.message,
+        mpesa_receipt: mpesaReceipt,
+      },
+    })
+  }
+
+  await service.from('audit_log').insert({
+    actor_id: session.userId,
+    action: 'order.reconcile.payhero',
+    resource_type: 'orders',
+    resource_id: String(orderId),
+    before_data: { status: 'pending' },
+    after_data: {
+      status: 'paid',
+      provider: 'payhero',
+      checkout_reference: order.payhero_checkout_reference,
+      mpesa_receipt: mpesaReceipt,
+      reconciled_at: paidAt,
+    },
+  })
+
+  revalidatePath('/admin/orders')
+  revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath('/shop')
+}

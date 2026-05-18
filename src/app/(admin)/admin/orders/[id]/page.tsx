@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatKes } from '@/lib/money'
-import { transitionOrderStatus } from './actions'
+import { transitionOrderStatus, reconcilePayheroPayment } from './actions'
 import { ALLOWED_ACTIONS } from './transitions'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +35,8 @@ type OrderRow = {
   paid_at: string | null
   payment_provider: string | null
   payment_provider_ref: string | null
+  payhero_checkout_reference: string | null
+  payhero_mpesa_receipt: string | null
   shipping_address_id: number | null
   sponsor_distributor_id: number | null
   notes: string | null
@@ -89,7 +91,7 @@ export default async function AdminOrderDetail({
   const orderRes = await service
     .from('orders')
     .select(
-      'id, order_number, status, kind, customer_email, customer_phone, subtotal_minor, shipping_minor, tax_minor, discount_minor, total_minor, currency, created_at, paid_at, payment_provider, payment_provider_ref, shipping_address_id, sponsor_distributor_id, notes, user_id',
+      'id, order_number, status, kind, customer_email, customer_phone, subtotal_minor, shipping_minor, tax_minor, discount_minor, total_minor, currency, created_at, paid_at, payment_provider, payment_provider_ref, payhero_checkout_reference, payhero_mpesa_receipt, shipping_address_id, sponsor_distributor_id, notes, user_id',
     )
     .eq('id', orderId)
     .maybeSingle()
@@ -185,6 +187,42 @@ export default async function AdminOrderDetail({
           {order.status}
         </span>
       </header>
+
+      {order.status === 'pending' && order.payment_provider === 'payhero' ? (
+        <section className="mb-8 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-amber-900">
+            Stuck pending — reconcile with PayHero
+          </h2>
+          <p className="mt-2 text-sm text-amber-900/80">
+            This order has a PayHero checkout reference but never flipped to
+            paid. Click to query PayHero&apos;s transaction-status endpoint and,
+            if it reports SUCCESS with matching amount, run the same
+            <code className="mx-1 rounded bg-amber-100 px-1 font-mono">mark_order_paid</code>
+            chain the webhook would. Safe to click multiple times — idempotent.
+          </p>
+          <form action={reconcilePayheroPayment} className="mt-3">
+            <input type="hidden" name="orderId" value={order.id} />
+            <button
+              type="submit"
+              disabled={!order.payhero_checkout_reference}
+              className="rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+              title={
+                order.payhero_checkout_reference
+                  ? 'Reconcile against PayHero'
+                  : 'No PayHero checkout reference on this order — cannot reconcile'
+              }
+            >
+              Reconcile PayHero payment
+            </button>
+            {!order.payhero_checkout_reference ? (
+              <p className="mt-2 text-xs text-amber-900/70">
+                Missing <code className="font-mono">payhero_checkout_reference</code>;
+                the STK push likely never returned a reference. Cannot reconcile.
+              </p>
+            ) : null}
+          </form>
+        </section>
+      ) : null}
 
       {allowed.length > 0 ? (
         <section className="mb-8 flex flex-wrap gap-3 rounded-lg border border-neutral-200 bg-white p-4">
