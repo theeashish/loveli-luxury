@@ -47,6 +47,8 @@ const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Comp',
     items: [
+      { href: '/admin/comp/tiers', label: 'Partner tiers' },
+      { href: '/admin/comp/partner-qualifications', label: 'Qualifications' },
       { href: '/admin/comp/starter-packages', label: 'Starter packages' },
     ],
   },
