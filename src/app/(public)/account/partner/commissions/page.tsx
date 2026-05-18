@@ -141,7 +141,7 @@ export default async function CommissionsPage({
         <nav className="flex items-center justify-between text-xs uppercase tracking-[0.15em]">
           {page > 1 ? (
             <Link
-              href={`/account/distributor/commissions?page=${page - 1}`}
+              href={`/account/partner/commissions?page=${page - 1}`}
               className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
             >
               ← Previous
@@ -154,7 +154,7 @@ export default async function CommissionsPage({
           </span>
           {page < lastPage ? (
             <Link
-              href={`/account/distributor/commissions?page=${page + 1}`}
+              href={`/account/partner/commissions?page=${page + 1}`}
               className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
             >
               Next →

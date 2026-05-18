@@ -90,3 +90,6 @@ ehthumbs.db
 .vercel
 
 .vercel
+
+# Lighthouse baselines — keep local, not in repo
+lighthouse-*.json

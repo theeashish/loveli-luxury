@@ -1,5 +1,5 @@
 /**
- * /account/distributor/settings/verify — enter the SMS code to confirm a
+ * /account/partner/settings/verify — enter the SMS code to confirm a
  * proposed payout MSISDN change. The code TTL is 15 minutes; after 5
  * failed attempts the row locks and the distributor must request a
  * fresh code from the settings page.
@@ -33,7 +33,7 @@ export default async function VerifyMsisdnPage() {
   const ver = (r.data as VerifyRow | null) ?? null
 
   // If there's no pending verification at all, send them back to settings.
-  if (!ver) redirect('/account/distributor/settings')
+  if (!ver) redirect('/account/partner/settings')
 
   const expired = new Date(ver.expires_at).getTime() <= Date.now()
 
@@ -50,7 +50,7 @@ export default async function VerifyMsisdnPage() {
         <div className="mt-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           The code has expired. Go back to{' '}
           <Link
-            href="/account/distributor/settings"
+            href="/account/partner/settings"
             className="font-medium underline"
           >
             settings
@@ -87,7 +87,7 @@ export default async function VerifyMsisdnPage() {
       )}
 
       <Link
-        href="/account/distributor/settings"
+        href="/account/partner/settings"
         className="mt-6 inline-block text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
       >
         ← Back to settings

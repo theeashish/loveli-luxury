@@ -22,7 +22,7 @@ export default async function SignupPage({
   const loginHref = next
     ? `/login?next=${encodeURIComponent(next)}`
     : '/login'
-  const isJoinFlow = next.startsWith('/distributors/signup')
+  const isJoinFlow = next.startsWith('/partners/signup')
 
   return (
     <div className="relative overflow-hidden">
@@ -63,7 +63,7 @@ export default async function SignupPage({
             <p>
               Want to build a Boss Scents business instead?{' '}
               <Link
-                href="/distributors/signup"
+                href="/partners/signup"
                 className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
               >
                 Become an affiliate →

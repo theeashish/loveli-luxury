@@ -111,6 +111,6 @@ export async function updateStarterJoiningFee(input: {
   })
 
   revalidatePath('/admin/comp/starter-packages')
-  revalidatePath('/distributors/signup')
+  revalidatePath('/partners/signup')
   return { ok: true }
 }

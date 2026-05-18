@@ -4,7 +4,7 @@
  * Site footer. Hidden on /account/* dashboards (those are working
  * surfaces, not browse surfaces — the marketing footer is clutter there
  * for distributors/admins). Visible on /shop, /bundles, /, /login,
- * /signup, /distributors/signup, etc.
+ * /signup, /partners/signup, etc.
  */
 
 import Link from 'next/link'

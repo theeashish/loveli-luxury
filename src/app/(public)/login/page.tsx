@@ -14,8 +14,8 @@ export const dynamic = 'force-dynamic'
 function subtitleFor(next: string): string {
   if (next.startsWith('/admin')) return 'Admin sign-in.'
   if (
-    next.startsWith('/distributors/signup') ||
-    next.startsWith('/account/distributor')
+    next.startsWith('/partners/signup') ||
+    next.startsWith('/account/partner')
   ) {
     return 'Sign in to continue your Boss Scents registration.'
   }
@@ -87,7 +87,7 @@ export default async function LoginPage({
             <p>
               Building a Boss Scents business?{' '}
               <Link
-                href="/distributors/signup"
+                href="/partners/signup"
                 className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
               >
                 Become an affiliate →

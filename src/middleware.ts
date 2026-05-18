@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
   // a Server Component leaves the user staring at a half-rendered shell
   // while Chrome follows the 307.
   const AUTH_REQUIRED_PREFIXES = [
-    '/distributors/signup',
+    '/partners/signup',
     '/account',
     '/checkout',
   ] as const
@@ -108,17 +108,17 @@ export async function middleware(request: NextRequest) {
     return redirectTo(request, safe)
   }
 
-  // Already a distributor and hitting /distributors/signup — send them to
+  // Already a distributor and hitting /partners/signup — send them to
   // their portal before any layout streams (a page-level redirect leaves
   // the chrome flashing). RLS distributors_self_read lets the anon client
   // see their own row.
-  if (path === '/distributors/signup' && user) {
+  if (path === '/partners/signup' && user) {
     const dist = await supabase
       .from('distributors')
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()
-    if (dist.data) return redirectTo(request, '/account/distributor')
+    if (dist.data) return redirectTo(request, '/account/partner')
   }
 
   // Gate /admin/* — only admin and superadmin may enter.

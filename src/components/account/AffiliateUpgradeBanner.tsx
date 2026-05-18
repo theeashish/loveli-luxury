@@ -1,6 +1,6 @@
 /**
- * Reusable "Build a Boss Scents business" banner. Renders only when the
- * signed-in user is NOT yet a distributor. Reads ll_sponsor cookie so we
+ * Reusable "Join the partner program" banner. Renders only when the
+ * signed-in user is NOT yet a partner. Reads ll_sponsor cookie so we
  * can mention "Your sponsor: LL-XX-XXXX" when the user landed through
  * a referral link.
  *
@@ -8,6 +8,10 @@
  *   - /account/orders (above the orders list)
  *   - /account (dashboard, when it exists)
  *   - /checkout/return (after a successful retail order)
+ *
+ * Copy aligned with the brand brief (2026-05-18): no recruitment
+ * language, no lifetime-salary claims, no point-value math in copy.
+ * Position as a career path, not a payout pyramid.
  */
 
 import Link from 'next/link'
@@ -43,13 +47,13 @@ export async function AffiliateUpgradeBanner({
     return (
       <div className="rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--muted))]/40 px-4 py-3 text-sm">
         <span className="text-[hsl(var(--muted-foreground))]">
-          Want to earn from sharing the brand?{' '}
+          Earn alongside the house.{' '}
         </span>
         <Link
-          href="/distributors/signup"
+          href="/partners/signup"
           className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
         >
-          Become an affiliate →
+          Join the partner program →
         </Link>
       </div>
     )
@@ -66,15 +70,17 @@ export async function AffiliateUpgradeBanner({
         }}
       />
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
-        Boss Scents International
+        Partner program
       </p>
       <h2 className="mt-3 font-serif text-3xl italic tracking-tight md:text-4xl">
-        Build a Boss Scents business
+        Build a luxury fragrance business
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-        Earn retail profit on every bottle you sell, plus 7 levels of network
-        commission on Point Value. From Manager rank up, qualify for a lifetime
-        monthly salary up to Kes 250,000.
+        Earn alongside the house on every fragrance you place. Begin as a
+        Concierge Partner with 10% on direct sales and progress through four
+        tiers — Brand Associate, Regional Curator, Prestige Partner — each
+        unlocking richer earnings and access tied to verified retail
+        performance.
       </p>
       {sponsor ? (
         <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
@@ -83,10 +89,10 @@ export async function AffiliateUpgradeBanner({
         </p>
       ) : null}
       <Link
-        href="/distributors/signup"
+        href="/partners/signup"
         className="mt-6 inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
       >
-        Become an affiliate →
+        Join the partner program →
       </Link>
     </div>
   )

@@ -109,11 +109,11 @@ export function DistributorSignupForm({
       return
     }
     if (!agreed) {
-      setError('Please accept the distributor terms to continue.')
+      setError('Please accept the partner agreement to continue.')
       return
     }
     if (bundleId === null) {
-      setError('Pick a starter package.')
+      setError('Pick an onboarding kit.')
       return
     }
 
@@ -143,7 +143,7 @@ export function DistributorSignupForm({
     }
 
     try {
-      const res = await fetch('/api/distributor-signup/init', {
+      const res = await fetch('/api/partner-signup/init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -203,7 +203,7 @@ export function DistributorSignupForm({
       <div className="space-y-10">
         <Section
           title="Sponsor"
-          subtitle="Distributor signup is invite-only. Enter the code from your sponsor."
+          subtitle="The partner program is invite-only. Enter the code from your sponsor."
         >
           <div className="max-w-sm">
             <input
@@ -223,7 +223,7 @@ export function DistributorSignupForm({
           </div>
         </Section>
 
-        <Section title="Starter package" subtitle="Pick the kit you'll be selling.">
+        <Section title="Onboarding kit" subtitle="Pick the kit you'll be placing.">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {bundles.map((b) => (
               <label
@@ -453,7 +453,7 @@ export function DistributorSignupForm({
             className="mt-1"
           />
           <span>
-            I have read and accept the Loveli Luxury Distributor Agreement,
+            I have read and accept the Loveli Luxury Partner Agreement,
             including the compensation plan and code of conduct.
           </span>
         </label>

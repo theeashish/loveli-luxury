@@ -1,9 +1,9 @@
 /**
- * /account/distributor layout — role gate for the distributor portal.
+ * /account/partner layout — role gate for the distributor portal.
  *
  * Three rules:
- *   - Not signed in   → /login?next=/account/distributor
- *   - Signed in but no distributors row → /distributors/signup
+ *   - Not signed in   → /login?next=/account/partner
+ *   - Signed in but no distributors row → /partners/signup
  *   - Distributor exists but inactive   → render with a banner; no portal
  *     features. (Phase 5 will add a re-activation flow; for now we want
  *     the user to see what's happening rather than redirect into a loop.)
@@ -13,21 +13,22 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentDistributor } from '@/lib/distributors/current'
+import { partnerTierForRank } from '@/lib/partners/tiers'
 
 export const metadata = {
-  title: 'Distributor portal',
+  title: 'Partner portal',
   robots: { index: false, follow: false },
 }
 
 export const dynamic = 'force-dynamic'
 
 const NAV = [
-  { href: '/account/distributor', label: 'Overview' },
-  { href: '/account/distributor/downline', label: 'Downline' },
-  { href: '/account/distributor/commissions', label: 'Commissions' },
-  { href: '/account/distributor/share', label: 'Share' },
+  { href: '/account/partner', label: 'Overview' },
+  { href: '/account/partner/downline', label: 'Network' },
+  { href: '/account/partner/commissions', label: 'Commissions' },
+  { href: '/account/partner/share', label: 'Share' },
   { href: '/account/payouts', label: 'Payouts' },
-  { href: '/account/distributor/settings', label: 'Settings' },
+  { href: '/account/partner/settings', label: 'Settings' },
 ] as const
 
 export default async function DistributorLayout({
@@ -38,25 +39,26 @@ export default async function DistributorLayout({
   const supabase = createClient()
   // getSession() reads cookies locally; getUser() makes a network call that
   // can intermittently fail on Vercel Edge and produce a login bounce loop.
-  // See /distributors/signup/page.tsx for the long note.
+  // See /partners/signup/page.tsx for the long note.
   const {
     data: { session },
   } = await supabase.auth.getSession()
   const user = session?.user
-  if (!user) redirect('/login?next=/account/distributor')
+  if (!user) redirect('/login?next=/account/partner')
 
   const distributor = await getCurrentDistributor()
-  if (!distributor) redirect('/distributors/signup')
+  if (!distributor) redirect('/partners/signup')
+
+  const tier = partnerTierForRank(distributor.currentRankPosition)
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 lg:py-16">
       <header className="mb-8">
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-          Distributor
+          Partner
         </p>
-        <h1 className="mt-2 text-4xl font-light tracking-tight">
-          {distributor.currentRankEmoji ? `${distributor.currentRankEmoji} ` : ''}
-          {distributor.currentRankName ?? 'Starter'}
+        <h1 className="mt-2 font-serif text-4xl italic tracking-tight">
+          {tier.displayName}
         </h1>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
           Your sponsor code:{' '}
@@ -68,7 +70,7 @@ export default async function DistributorLayout({
 
       {!distributor.isActive ? (
         <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Your distributor account is currently <strong>inactive</strong>.
+          Your partner account is currently <strong>inactive</strong>.
           Contact support to reactivate.
         </div>
       ) : null}

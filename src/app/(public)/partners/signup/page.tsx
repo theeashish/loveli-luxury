@@ -1,9 +1,9 @@
 /**
- * /distributors/signup — distributor onboarding entry.
+ * /partners/signup — distributor onboarding entry.
  *
  * Middleware enforces:
  *   - signed-in (else 307 to /login)
- *   - not already a distributor (else 307 to /account/distributor)
+ *   - not already a distributor (else 307 to /account/partner)
  *
  * This file is render-only. It does NOT redirect — a redirect after the
  * layout has streamed leaves the user staring at the empty public chrome
@@ -22,7 +22,7 @@ import {
 } from '@/components/distributors/SignupForm'
 
 export const metadata = {
-  title: 'Become a Boss',
+  title: 'Join the partner program',
   robots: { index: false, follow: false },
 }
 
@@ -89,10 +89,10 @@ function BrandHeading({ subtitle }: { subtitle: string }) {
   return (
     <header className="text-center">
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
-        Boss Scents International
+        Loveli Luxury · Partner Program
       </p>
       <h1 className="mt-5 font-serif text-5xl italic tracking-tight md:text-6xl">
-        Become a Boss
+        Begin your partnership
       </h1>
       <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
         {subtitle}
@@ -115,10 +115,10 @@ export default async function DistributorSignupPage() {
     // sign-in prompt instead of redirecting (no more chrome-flash).
     return (
       <Shell>
-        <BrandHeading subtitle="Sign in to continue your Boss Scents registration." />
+        <BrandHeading subtitle="Sign in to continue your partner application." />
         <div className="mt-10 text-center">
           <Link
-            href="/login?next=/distributors/signup"
+            href="/login?next=/partners/signup"
             className="inline-flex w-full justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
           >
             Sign in
@@ -262,7 +262,7 @@ export default async function DistributorSignupPage() {
 
   return (
     <Shell>
-      <BrandHeading subtitle="Pick a starter package, complete KYC, pay via M-Pesa. Your distributor account activates the moment payment confirms." />
+      <BrandHeading subtitle="Pick your onboarding kit, complete KYC, pay via M-Pesa. Your partner account activates the moment payment confirms." />
       <div className="mt-10">
         <DistributorSignupForm
           defaultPhone={profile.phone ?? ''}

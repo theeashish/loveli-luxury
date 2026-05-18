@@ -79,6 +79,22 @@ const nextConfig = {
     ]
   },
 
+  // 301 redirects for the Phase 1 (terminology refactor) slug rename:
+  // /distributors/* → /partners/*, /account/distributor/* → /account/partner/*,
+  // /api/distributor-signup/* → /api/partner-signup/*.
+  // External invite links shared on WhatsApp / Instagram / Twitter still
+  // point at the old slugs — these redirects preserve them. 301 (not 302)
+  // because the rename is permanent.
+  async redirects() {
+    return [
+      { source: '/distributors/signup', destination: '/partners/signup', permanent: true },
+      { source: '/distributors/:path*', destination: '/partners/:path*', permanent: true },
+      { source: '/account/distributor', destination: '/account/partner', permanent: true },
+      { source: '/account/distributor/:path*', destination: '/account/partner/:path*', permanent: true },
+      { source: '/api/distributor-signup/:path*', destination: '/api/partner-signup/:path*', permanent: true },
+    ]
+  },
+
   experimental: {
     serverActions: {
       // Catalog image uploads cap at 8 MB (see image-pipeline.ts MAX_FILE_BYTES).

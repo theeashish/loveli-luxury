@@ -1,5 +1,5 @@
 /**
- * POST /api/distributor-signup/init
+ * POST /api/partner-signup/init
  *
  * Distributor onboarding checkout. Differs from /api/checkout/init in three
  * meaningful ways:
@@ -152,7 +152,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: 'You are already a distributor.',
-        redirect: '/account/distributor',
+        redirect: '/account/partner',
       },
       { status: 409 },
     )

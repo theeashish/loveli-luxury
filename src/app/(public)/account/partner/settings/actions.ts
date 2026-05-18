@@ -8,7 +8,7 @@
  *   verification stamp is cleared. We then mint a 6-digit code, store
  *   its hash in msisdn_verifications, and send the plaintext over SMS
  *   (Phase 7 wave 4). The distributor verifies on
- *   /account/distributor/settings/verify. Admin can still approve
+ *   /account/partner/settings/verify. Admin can still approve
  *   manually from /admin/distributors/verifications as a fallback.
  *
  *   confirmMsisdnCode — verifies the entered code against the stored
@@ -69,11 +69,11 @@ export async function submitPayoutMsisdnChange(formData: FormData): Promise<void
 
   // No-ops kept silent; the user just sees the form re-render.
   if (dist.payout_msisdn === msisdn && dist.payout_msisdn_pending === null) {
-    revalidatePath('/account/distributor/settings')
+    revalidatePath('/account/partner/settings')
     return
   }
   if (dist.payout_msisdn_pending === msisdn) {
-    revalidatePath('/account/distributor/settings')
+    revalidatePath('/account/partner/settings')
     return
   }
 
@@ -151,9 +151,9 @@ export async function submitPayoutMsisdnChange(formData: FormData): Promise<void
     after_data: { payout_msisdn_pending: msisdn },
   })
 
-  revalidatePath('/account/distributor/settings')
-  revalidatePath('/account/distributor')
-  redirect('/account/distributor/settings/verify')
+  revalidatePath('/account/partner/settings')
+  revalidatePath('/account/partner')
+  redirect('/account/partner/settings/verify')
 }
 
 // ---------------------------------------------------------------------------
@@ -262,7 +262,7 @@ export async function confirmMsisdnCode(formData: FormData): Promise<void> {
     after_data: { payout_msisdn: ver.msisdn, verified_at: now },
   })
 
-  revalidatePath('/account/distributor/settings')
-  revalidatePath('/account/distributor')
-  redirect('/account/distributor/settings?verified=1')
+  revalidatePath('/account/partner/settings')
+  revalidatePath('/account/partner')
+  redirect('/account/partner/settings?verified=1')
 }

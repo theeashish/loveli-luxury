@@ -6,7 +6,7 @@
  *             link, plus a separate Sign out form button.
  *
  * Account destination + role label by user state:
- *   - has distributor row              → /account/distributor   · AFFILIATE
+ *   - has distributor row              → /account/partner   · AFFILIATE
  *   - admin / superadmin role          → /admin/catalog          · ADMIN
  *   - else (default)                    → /account/orders         · CUSTOMER
  *
@@ -79,7 +79,7 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
   let accountHref = '/account/orders'
   let roleLabel: RoleLabel = 'CUSTOMER'
   if (distRes.data) {
-    accountHref = '/account/distributor'
+    accountHref = '/account/partner'
     roleLabel = 'AFFILIATE'
   } else if (roles.has('admin') || roles.has('superadmin')) {
     accountHref = '/admin/catalog'

@@ -52,7 +52,7 @@ export default async function DownlinePage() {
   if (ids.length === 0) {
     return (
       <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-6 py-12 text-center text-sm text-[hsl(var(--muted-foreground))]">
-        No one in your downline yet. Share your sponsor link to recruit.
+        No one in your network yet. Share your invite link to begin.
       </div>
     )
   }

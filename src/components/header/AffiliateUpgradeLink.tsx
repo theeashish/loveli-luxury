@@ -1,8 +1,8 @@
 /**
- * Header "Become an affiliate" link. Rendered only for signed-in users
- * who:
+ * Header "Join the partner program" link. Rendered only for signed-in
+ * users who:
  *   - have NO admin/superadmin role (admins don't need this CTA), and
- *   - have NO distributors row (existing affiliates don't need it).
+ *   - have NO distributors row (existing partners don't need it).
  *
  * Server component — runs at the layout level. No extra round trip on
  * the client.
@@ -39,16 +39,16 @@ export async function AffiliateUpgradeLink() {
     ((rolesRes.data ?? []) as Array<{ role: string }>).map((r) => r.role),
   )
 
-  // Hide for admins (no need) and existing distributors (already in).
+  // Hide for admins (no need) and existing partners (already in).
   if (roles.has('admin') || roles.has('superadmin')) return null
   if (distRes.data) return null
 
   return (
     <Link
-      href="/distributors/signup"
+      href="/partners/signup"
       className="hidden text-xs uppercase tracking-[0.25em] text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--primary))] md:inline"
     >
-      Become an affiliate
+      Partner program
     </Link>
   )
 }

@@ -95,22 +95,23 @@ export async function AccountStatusCard() {
         />
         <div className="flex items-center gap-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
-            Boss Scents International
+            Partner program
           </p>
           <span className="inline-block rounded-full border border-[hsl(var(--muted-foreground))]/30 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
             Customer
           </span>
         </div>
         <h2 className="mt-3 font-serif text-3xl italic tracking-tight md:text-4xl">
-          Build a Boss Scents business
+          Build a luxury fragrance business
         </h2>
         <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
           Signed in as <span className="font-mono">{email}</span>
         </p>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-          Earn retail profit on every bottle you sell, plus 7 levels of
-          network commission on Point Value. From Manager rank up, qualify
-          for a lifetime monthly salary up to Kes 250,000.
+          Earn alongside the house on every fragrance you place. Begin as a
+          Concierge Partner with 10% on direct sales; progress through Brand
+          Associate, Regional Curator and Prestige Partner as your verified
+          retail performance grows.
         </p>
         {sponsor ? (
           <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
@@ -121,10 +122,10 @@ export async function AccountStatusCard() {
           </p>
         ) : null}
         <Link
-          href="/distributors/signup"
+          href="/partners/signup"
           className="mt-6 inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
         >
-          Become an affiliate →
+          Join the partner program →
         </Link>
       </section>
     )
@@ -151,8 +152,8 @@ export async function AccountStatusCard() {
         Signed in as <span className="font-mono">{email}</span>
       </p>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-amber-100/90">
-        You started the distributor signup but the M-Pesa payment never
-        confirmed, so no affiliate account was created. The pending orders
+        You started the partner signup but the M-Pesa payment never
+        confirmed, so no partner account was created. The pending orders
         below are those attempts — they don't charge you anything until
         payment confirms.
       </p>
@@ -164,7 +165,7 @@ export async function AccountStatusCard() {
       ) : null}
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
-          href="/distributors/signup"
+          href="/partners/signup"
           className="inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
         >
           Start a fresh signup →

@@ -88,7 +88,7 @@ export function Hero() {
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
             </Link>
             <Link
-              href="/distributors/signup"
+              href="/partners/signup"
               className="text-xs uppercase tracking-[0.25em] text-[hsl(var(--foreground))] underline-offset-8 transition hover:text-[hsl(var(--primary))] hover:underline"
             >
               Become a distributor →

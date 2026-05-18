@@ -26,7 +26,7 @@ export default async function SharePage() {
   if (!me) return null
 
   const shareUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/?ref=${me.sponsorCode}`
-  const signupUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/distributors/signup?ref=${me.sponsorCode}`
+  const signupUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/partners/signup?ref=${me.sponsorCode}`
   const shortUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/r/${me.sponsorCode}`
 
   const [shopQr, signupQr, shortQr] = await Promise.all([
@@ -45,8 +45,8 @@ export default async function SharePage() {
           {me.sponsorCode}
         </p>
         <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-          New buyers and recruits who arrive via your link are tied to you
-          for attribution and downline credit.
+          New buyers and partners who arrive via your link are tied to you
+          for attribution and network credit.
         </p>
       </section>
 
@@ -87,7 +87,7 @@ export default async function SharePage() {
 
         <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-5">
           <p className="text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))]">
-            Distributor recruit link
+            Partner invite link
           </p>
           <p className="mt-2 break-all font-mono text-xs">{signupUrl}</p>
           <div
@@ -95,11 +95,11 @@ export default async function SharePage() {
             dangerouslySetInnerHTML={{ __html: signupQr }}
           />
           <div className="mt-4 flex justify-center">
-            <CopyButton value={signupUrl}>Copy recruit link</CopyButton>
+            <CopyButton value={signupUrl}>Copy invite link</CopyButton>
           </div>
           <p className="mt-3 text-center text-xs text-[hsl(var(--muted-foreground))]">
             Anyone who signs up via this link is locked to you as their
-            sponsor — that's how you grow your downline.
+            sponsor — that&apos;s how you build your partner network.
           </p>
         </div>
       </section>

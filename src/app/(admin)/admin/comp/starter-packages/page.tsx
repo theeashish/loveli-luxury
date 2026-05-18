@@ -131,7 +131,7 @@ export default async function StarterPackagesAdminPage() {
                   {r.bundle && !r.bundle.is_active ? (
                     <p className="mt-2 text-xs text-amber-700">
                       ⚠ Linked bundle is currently inactive — customers won't
-                      see this package on /distributors/signup until you
+                      see this package on /partners/signup until you
                       re-activate it on the catalog page.
                     </p>
                   ) : null}

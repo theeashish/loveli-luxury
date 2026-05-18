@@ -1,7 +1,7 @@
 /**
  * Server-only helper for resolving the current user's distributor record.
  *
- * Used by the /account/distributor/* portal pages and their layout. The
+ * Used by the /account/partner/* portal pages and their layout. The
  * layout enforces the gate (redirect to signup if no row exists); the
  * pages call this again to read identity + rank when rendering. Two
  * round-trips per request are cheap; the alternative (passing the row
@@ -31,8 +31,8 @@ export async function getCurrentDistributor(): Promise<CurrentDistributor | null
   const supabase = createClient()
   // getSession() (local cookie read) — getUser() can return null on
   // Vercel Edge even when the user is signed in, which caused a loop
-  // between /account/distributor and /distributors/signup. See the
-  // long note on /app/(public)/distributors/signup/page.tsx.
+  // between /account/partner and /partners/signup. See the
+  // long note on /app/(public)/partners/signup/page.tsx.
   const {
     data: { session },
   } = await supabase.auth.getSession()

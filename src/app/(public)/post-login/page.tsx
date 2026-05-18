@@ -7,7 +7,7 @@
  *
  *   1. Explicit ?next= (validated) → honour it
  *   2. admin / superadmin role     → /admin
- *   3. has distributors row        → /account/distributor
+ *   3. has distributors row        → /account/partner
  *   4. default (buyer)             → /shop  (browse-first; cart is the buyer's "account")
  *
  * The redirect happens BEFORE any layout streams — this page never
@@ -73,7 +73,7 @@ export default async function PostLoginPage({
   }
 
   if (distRes.data) {
-    redirect('/account/distributor')
+    redirect('/account/partner')
   }
 
   // Default — buyer/customer. Send them to the shop, not orders. Their

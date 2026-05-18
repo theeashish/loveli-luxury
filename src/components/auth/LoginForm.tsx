@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 export function LoginForm({ next: nextProp }: { next?: string }) {
   // When the caller provided an explicit safe `next`, honour it
   // verbatim. Otherwise hand off to /post-login which routes by role
-  // (admin → /admin, distributor → /account/distributor, else → /account).
+  // (admin → /admin, distributor → /account/partner, else → /account).
   const hasExplicitNext =
     !!nextProp && nextProp.startsWith('/') && !nextProp.startsWith('//')
   const next = hasExplicitNext ? nextProp : '/post-login'

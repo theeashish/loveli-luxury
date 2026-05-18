@@ -55,7 +55,7 @@ export default async function DistributorSettingsPage({
           A verification is pending for{' '}
           <span className="font-mono">{row.payout_msisdn_pending}</span>.{' '}
           <Link
-            href="/account/distributor/settings/verify"
+            href="/account/partner/settings/verify"
             className="font-medium underline"
           >
             Enter your code →
