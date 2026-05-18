@@ -60,6 +60,11 @@ type BundleRow = {
   starter_package_code: string | null
 }
 
+type JoiningFeeRow = {
+  bundle_id: number
+  joining_fee_minor: string | number
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative overflow-hidden">
@@ -185,16 +190,38 @@ export default async function DistributorSignupPage() {
     )
   }
 
-  const bundles: StarterBundleOption[] = ((bundlesRes.data ?? []) as BundleRow[]).map(
-    (b) => ({
-      id: b.id,
-      slug: b.slug,
-      name: b.name,
-      description: b.description,
-      retailPriceMinor: b.retail_price_minor,
-      starterCode: b.starter_package_code,
-    }),
+  const bundleRows = (bundlesRes.data ?? []) as BundleRow[]
+
+  // Look up the currently-effective joining fee for each starter bundle.
+  // The server-side init route uses this same `config_starter_packages`
+  // table to compute the order total, so the form's summary MUST include
+  // it too — otherwise the customer sees a price that doesn't match what
+  // we charge. (Source of the "Ksh 1 form, Ksh 2 charged" mismatch fixed
+  // 2026-05-18.)
+  const bundleIds = bundleRows.map((b) => b.id)
+  const joiningFeesRes = bundleIds.length
+    ? await service
+        .from('config_starter_packages')
+        .select('bundle_id, joining_fee_minor')
+        .in('bundle_id', bundleIds)
+        .is('effective_until', null)
+    : { data: [] as JoiningFeeRow[] }
+  const joiningFeeByBundle = new Map<number, string>(
+    ((joiningFeesRes.data ?? []) as JoiningFeeRow[]).map((j) => [
+      j.bundle_id,
+      String(j.joining_fee_minor),
+    ]),
   )
+
+  const bundles: StarterBundleOption[] = bundleRows.map((b) => ({
+    id: b.id,
+    slug: b.slug,
+    name: b.name,
+    description: b.description,
+    retailPriceMinor: b.retail_price_minor,
+    joiningFeeMinor: joiningFeeByBundle.get(b.id) ?? '0',
+    starterCode: b.starter_package_code,
+  }))
 
   if (bundles.length === 0) {
     return (

@@ -25,6 +25,11 @@ export type StarterBundleOption = {
   name: string
   description: string | null
   retailPriceMinor: string
+  /** Currently-effective joining fee from `config_starter_packages`,
+   *  in minor units (cents). The server adds this on top of the bundle
+   *  price at checkout, so the form summary must include it to match
+   *  what the customer is actually charged. */
+  joiningFeeMinor: string
   starterCode: string | null
 }
 
@@ -176,16 +181,17 @@ export function DistributorSignupForm({
   // against the SAME order_number, so no duplicate orders or PayHero
   // wallet fees can ever come from "Try again".
   if (stkOrderNumber) {
+    const liveSubtotal = selectedBundle
+      ? BigInt(selectedBundle.retailPriceMinor) +
+        BigInt(selectedBundle.joiningFeeMinor)
+      : 0n
     return (
       <StkPushPanel
         orderNumber={stkOrderNumber}
         successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
         amountLabel={
           selectedBundle
-            ? formatKes(
-                BigInt(selectedBundle.retailPriceMinor) +
-                  computePayHeroFeeMinor(BigInt(selectedBundle.retailPriceMinor)),
-              )
+            ? formatKes(liveSubtotal + computePayHeroFeeMinor(liveSubtotal))
             : undefined
         }
       />
@@ -459,8 +465,10 @@ export function DistributorSignupForm({
         </p>
         {selectedBundle ? (() => {
           const bundleMinor = BigInt(selectedBundle.retailPriceMinor)
-          const feeMinor = computePayHeroFeeMinor(bundleMinor)
-          const totalMinor = bundleMinor + feeMinor
+          const joiningFeeMinor = BigInt(selectedBundle.joiningFeeMinor)
+          const subtotalMinor = bundleMinor + joiningFeeMinor
+          const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+          const totalMinor = subtotalMinor + processingFeeMinor
           return (
             <dl className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
@@ -470,18 +478,28 @@ export function DistributorSignupForm({
                 <dd className="font-medium">{selectedBundle.name}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-[hsl(var(--muted-foreground))]">Subtotal</dt>
+                <dt className="text-[hsl(var(--muted-foreground))]">Bundle</dt>
                 <dd className="font-medium tabular-nums">
                   {formatKes(bundleMinor)}
                 </dd>
               </div>
+              {joiningFeeMinor > 0n ? (
+                <div className="flex items-center justify-between">
+                  <dt className="text-[hsl(var(--muted-foreground))]">
+                    Joining fee
+                  </dt>
+                  <dd className="font-medium tabular-nums">
+                    {formatKes(joiningFeeMinor)}
+                  </dd>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
                 <dt>Shipping</dt>
                 <dd>Free</dd>
               </div>
               <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
                 <dt>Processing fee</dt>
-                <dd className="tabular-nums">{formatKes(feeMinor)}</dd>
+                <dd className="tabular-nums">{formatKes(processingFeeMinor)}</dd>
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-[hsl(var(--border))] pt-4">
                 <span className="text-sm font-medium">Total</span>
