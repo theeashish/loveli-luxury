@@ -28,8 +28,17 @@ const publicSchema = z.object({
   // Phase 4a — WhatsApp Concierge floating button. E.164 format
   // (+254...). When unset the button renders nothing (safe degrade).
   // Editable post-deploy via Vercel env vars; no code change needed.
-  NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER: z
-    .preprocess(emptyToUndef, z.string().regex(/^\+\d{8,15}$/, 'E.164 phone format').optional()),
+  // Trim whitespace before validating — Vercel env values can pick up
+  // trailing newlines depending on how they were set (e.g. piping with
+  // `echo` instead of `printf`).
+  NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER: z.preprocess(
+    (v) => {
+      if (typeof v !== 'string') return v
+      const trimmed = v.trim()
+      return trimmed === '' ? undefined : trimmed
+    },
+    z.string().regex(/^\+\d{8,15}$/, 'E.164 phone format').optional(),
+  ),
 })
 
 // -----------------------------------------------------------------------------
