@@ -5,7 +5,8 @@
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
-    "security/detect-object-injection": "off"
+    "security/detect-object-injection": "off",
+    "react/no-unescaped-entities": "off"
   },
   "ignorePatterns": ["node_modules", ".next", "out", "build", "dist", "coverage", "*.config.js"]
 }

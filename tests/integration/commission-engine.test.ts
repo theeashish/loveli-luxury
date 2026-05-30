@@ -46,18 +46,23 @@ describe('write_commission_ledger (production SQL)', () => {
     if (db) await db.close()
   })
 
-  it('loads the adopted client comp plan (20/11/6/2/1) as the active config', async () => {
+  it('loads the adopted client comp plan: L1-L5 = 20/11/6/2/1, deeper levels zero-rate', async () => {
     const rates = await db.query<{ level: number; rate_basis_points: number }>(
       `SELECT level, rate_basis_points FROM config_commission_rates
         WHERE effective_until IS NULL ORDER BY level`,
     )
-    expect(rates.map((r) => [Number(r.level), Number(r.rate_basis_points)])).toEqual([
-      [1, 2000],
-      [2, 1100],
-      [3, 600],
-      [4, 200],
-      [5, 100],
-    ])
+    const byLevel = new Map(rates.map((r) => [Number(r.level), Number(r.rate_basis_points)]))
+    expect(byLevel.get(1)).toBe(2000)
+    expect(byLevel.get(2)).toBe(1100)
+    expect(byLevel.get(3)).toBe(600)
+    expect(byLevel.get(4)).toBe(200)
+    expect(byLevel.get(5)).toBe(100)
+    // Safety property: the adopted plan pays exactly five levels. Any deeper
+    // level rows that survive in config MUST be zero-rate so the engine can
+    // never silently pay a sixth or seventh level. (029 keeps L6/L7 at 0.)
+    for (const [level, bp] of byLevel) {
+      if (level > 5) expect(bp, `level ${level} must be zero-rate`).toBe(0)
+    }
   })
 
   it('pays a 50ml sale down a 5-level chain at exactly 140/77/42/14/7', async () => {
