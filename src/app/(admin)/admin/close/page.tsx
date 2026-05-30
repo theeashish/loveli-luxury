@@ -34,8 +34,8 @@ type SearchParams = {
 type SnapshotRow = {
   distributor_id: number
   personal_bottles_sold: number
-  personal_sales_minor: string
-  team_gsv_minor: string
+  personal_sales_minor: string | number
+  team_gsv_minor: string | number
   active_recruits_count: number
   computed_at: string
 }
@@ -43,9 +43,9 @@ type SnapshotRow = {
 type SalaryRow = {
   distributor_id: number
   qualified: boolean
-  fixed_salary_minor: string
-  performance_bonus_minor: string
-  total_minor: string
+  fixed_salary_minor: string | number
+  performance_bonus_minor: string | number
+  total_minor: string | number
   payout_id: number | null
 }
 

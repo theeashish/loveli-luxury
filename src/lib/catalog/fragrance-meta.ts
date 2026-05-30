@@ -50,7 +50,7 @@ export const FRAGRANCES: readonly FragranceMeta[] = [
   {
     slug: 'crimson-noir',
     name: 'Crimson Noir',
-    tagline: 'Experience the essence of craftsmanship.',
+    tagline: 'Dark, warm, unhurried.',
     notes: 'Smoked oud, leather, aged whiskey.',
     mood: 'For rooms warmed by candlelight and conversation.',
     image: '/products/crimson-noir.jpg',
@@ -70,7 +70,7 @@ export const FRAGRANCES: readonly FragranceMeta[] = [
   {
     slug: 'afar',
     name: 'Afar',
-    tagline: 'Embrace the journey.',
+    tagline: 'The romance of far places.',
     notes: 'Saffron, frankincense, gilded rose.',
     mood: 'For the romance of distant rooms.',
     image: '/products/afar.jpg',

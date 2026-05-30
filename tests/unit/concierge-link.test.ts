@@ -59,14 +59,14 @@ describe('buildConciergeMessage', () => {
     expect(
       buildConciergeMessage({ pathname: '/p/rose-noir', productName: 'Rose Noir' }),
     ).toBe(
-      'Hi Loveli Concierge — I\'m browsing Rose Noir and have a question.',
+      'Hi Loveli Concierge, I\'m browsing Rose Noir and have a question.',
     )
   })
 
   it('falls back to generic on PDP without product name', () => {
     expect(
       buildConciergeMessage({ pathname: '/p/rose-noir' }),
-    ).toBe('Hi Loveli Concierge — I\'d like help choosing a fragrance.')
+    ).toBe('Hi Loveli Concierge, I\'d like help choosing a fragrance.')
   })
 
   it('names the bundle on bundle PDPs', () => {
@@ -87,12 +87,12 @@ describe('buildConciergeMessage', () => {
     ).toContain('completing my order')
   })
 
-  it('uses partner-program tone on partner / distributor account paths', () => {
+  it('uses partner-program tone on partner account paths', () => {
     expect(
       buildConciergeMessage({ pathname: '/partners/signup' }),
     ).toContain('partner program')
     expect(
-      buildConciergeMessage({ pathname: '/account/distributor' }),
+      buildConciergeMessage({ pathname: '/account/partner' }),
     ).toContain('partner program')
   })
 
@@ -104,10 +104,10 @@ describe('buildConciergeMessage', () => {
 
   it('default copy on home + other pages', () => {
     expect(buildConciergeMessage({ pathname: '/' })).toBe(
-      'Hi Loveli Concierge — I\'d like help choosing a fragrance.',
+      'Hi Loveli Concierge, I\'d like help choosing a fragrance.',
     )
     expect(buildConciergeMessage({ pathname: '/shop' })).toBe(
-      'Hi Loveli Concierge — I\'d like help choosing a fragrance.',
+      'Hi Loveli Concierge, I\'d like help choosing a fragrance.',
     )
   })
 })

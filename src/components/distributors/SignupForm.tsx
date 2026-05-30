@@ -24,12 +24,12 @@ export type StarterBundleOption = {
   slug: string
   name: string
   description: string | null
-  retailPriceMinor: string
+  retailPriceMinor: string | number
   /** Currently-effective joining fee from `config_starter_packages`,
    *  in minor units (cents). The server adds this on top of the bundle
    *  price at checkout, so the form summary must include it to match
    *  what the customer is actually charged. */
-  joiningFeeMinor: string
+  joiningFeeMinor: string | number
   starterCode: string | null
 }
 
@@ -155,7 +155,7 @@ export function DistributorSignupForm({
           return
         }
         const base = json?.error ?? 'Signup failed.'
-        const detail = typeof json?.detail === 'string' ? ` — ${json.detail}` : ''
+        const detail = typeof json?.detail === 'string' ? ` (${json.detail})` : ''
         setError(`${base}${detail}`)
         setSubmitting(false)
         return

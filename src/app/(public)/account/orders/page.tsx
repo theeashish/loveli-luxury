@@ -23,7 +23,7 @@ type OrderRow = {
   order_number: string
   status: string
   kind: string
-  total_minor: string
+  total_minor: string | number
   currency: string
   created_at: string
 }
@@ -75,7 +75,7 @@ export default async function MyOrdersPage() {
           {signupOrders.length > 0 ? (
             <OrderGroup
               title="Signup attempts"
-              subtitle="Distributor signup orders. Pending rows are attempts where M-Pesa payment did not confirm — they are not perfume purchases."
+              subtitle="Distributor signup orders. Pending rows are attempts where M-Pesa payment did not confirm. They are not perfume purchases."
               orders={signupOrders}
               variant="signup"
             />
@@ -91,7 +91,7 @@ export default async function MyOrdersPage() {
           {retailOrders.length === 0 && signupOrders.length > 0 ? (
             <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-8 py-10 text-center">
               <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                You haven't bought any perfume yet — only signup attempts above.
+                You haven't bought any perfume yet. Only signup attempts above.
               </p>
               <Link
                 href="/shop"

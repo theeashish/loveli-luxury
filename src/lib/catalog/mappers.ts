@@ -11,6 +11,7 @@ import type {
   CategoryDto,
   ProductSummaryDto,
   ProductDto,
+  FragranceMetaDto,
   BundleItemDto,
   BundleDto,
 } from './types'
@@ -40,8 +41,8 @@ type VariantRow = {
   product_id: number
   sku: string
   size_ml: number
-  retail_price_minor: string
-  distributor_price_minor: string
+  retail_price_minor: string | number
+  distributor_price_minor: string | number
   weight_g: number | null
   inventory_qty: number
   is_active: boolean
@@ -62,8 +63,8 @@ type BundleRow = {
   slug: string
   name: string
   description: string | null
-  retail_price_minor: string
-  distributor_price_minor: string
+  retail_price_minor: string | number
+  distributor_price_minor: string | number
   currency: string
   is_starter_package: boolean
   starter_package_code: string | null
@@ -76,7 +77,7 @@ type BundleItemRowHydrated = {
   product_name: string
   product_slug: string
   size_ml: number
-  unit_retail_price_minor: string
+  unit_retail_price_minor: string | number
 }
 
 // -----------------------------------------------------------------------------
@@ -156,10 +157,43 @@ export function mapProductSummary(
   }
 }
 
+export type FragranceMetaRow = {
+  product_id: number
+  top_notes: string[] | null
+  heart_notes: string[] | null
+  base_notes: string[] | null
+  longevity: string | null
+  projection: string | null
+  climate_note: string | null
+  occasions: string[] | null
+  story: string | null
+  scent_family: string | null
+  inspired_by: string | null
+}
+
+export function mapFragranceMeta(
+  row: FragranceMetaRow | null | undefined,
+): FragranceMetaDto | null {
+  if (!row) return null
+  return {
+    topNotes: row.top_notes ?? [],
+    heartNotes: row.heart_notes ?? [],
+    baseNotes: row.base_notes ?? [],
+    longevity: row.longevity,
+    projection: row.projection,
+    climateNote: row.climate_note,
+    occasions: row.occasions ?? [],
+    story: row.story,
+    scentFamily: row.scent_family,
+    inspiredBy: row.inspired_by,
+  }
+}
+
 export function mapProduct(
   product: ProductRow,
   variants: readonly VariantRow[],
   images: readonly ImageRow[],
+  fragranceMeta?: FragranceMetaRow | null,
 ): ProductDto {
   return {
     id: product.id,
@@ -172,6 +206,7 @@ export function mapProduct(
     metaDescription: product.meta_description,
     variants: [...variants].sort((a, b) => a.size_ml - b.size_ml).map(mapVariant),
     images: [...images].sort((a, b) => a.position - b.position).map(mapImage),
+    fragranceMeta: mapFragranceMeta(fragranceMeta),
   }
 }
 

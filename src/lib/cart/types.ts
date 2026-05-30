@@ -12,7 +12,7 @@ export type VariantCartLine = {
   productSlug: string
   name: string
   sizeMl: number
-  unitPriceMinor: string
+  unitPriceMinor: string | number
   qty: number
   image: string | null
   /**
@@ -28,7 +28,7 @@ export type BundleCartLine = {
   bundleId: number
   slug: string
   name: string
-  unitPriceMinor: string
+  unitPriceMinor: string | number
   qty: number
   image: string | null
   /**
@@ -37,6 +37,18 @@ export type BundleCartLine = {
    * `null` if the source DTO didn't carry it.
    */
   alaCarteTotalMinor: string | null
+  /**
+   * Per-variant breakdown of what's inside this bundle, captured at add-time
+   * so the cart / checkout can render the contents without re-fetching the
+   * bundle definition. `undefined` for cart lines added before this feature
+   * shipped — CartLineItem treats `undefined` as "no breakdown available"
+   * and falls back to the bundle name alone.
+   */
+  contents?: ReadonlyArray<{
+    name: string
+    sizeMl: number
+    qty: number
+  }>
 }
 
 export type CartLine = VariantCartLine | BundleCartLine

@@ -68,10 +68,10 @@ export function MobileMenu({ nav, authSlot }: Props) {
             </Link>
           ))}
           <Link
-            href="/boss-scents"
+            href="/partners"
             className="block py-3 text-sm uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:opacity-80"
           >
-            Boss Scents
+            Partners
           </Link>
           <div className="mt-1 flex flex-col border-t border-[hsl(var(--border))]/40 pt-1">
             {authSlot}

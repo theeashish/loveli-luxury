@@ -19,11 +19,11 @@ const serif = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_APP_URL),
   title: {
-    default: 'Loveli Luxury Scents — Where Love Meets Luxury',
+    default: 'Loveli Luxury Scents: Where Love Meets Luxury',
     template: '%s | Loveli Luxury Scents',
   },
   description:
-    'Discover Loveli Luxury Scents. Hand-crafted Eau de Parfum, bottled with intention. Free delivery in Nairobi on orders above Kes 5,000.',
+    'Loveli Luxury Scents. Eau de Parfum blended in small batches, bottled with intention. Free delivery in Nairobi on orders above Kes 5,000.',
   applicationName: publicEnv.NEXT_PUBLIC_APP_NAME,
   authors: [{ name: 'Loveli Luxury International' }],
   generator: 'Next.js',
@@ -35,18 +35,18 @@ export const metadata: Metadata = {
     locale: 'en_KE',
     url: publicEnv.NEXT_PUBLIC_APP_URL,
     siteName: 'Loveli Luxury Scents',
-    title: 'Loveli Luxury Scents — Where Love Meets Luxury',
-    description: 'Hand-crafted Eau de Parfum, bottled with intention.',
+    title: 'Loveli Luxury Scents: Where Love Meets Luxury',
+    description: 'Eau de Parfum, blended in small batches, bottled with intention.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Loveli Luxury Scents',
-    description: 'Hand-crafted Eau de Parfum, bottled with intention.',
+    description: 'Eau de Parfum, blended in small batches, bottled with intention.',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0a0706',
+  themeColor: '#F5F3EF',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,

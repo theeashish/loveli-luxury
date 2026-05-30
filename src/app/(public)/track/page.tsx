@@ -29,7 +29,7 @@ export default function TrackLanding() {
         Where's my order?
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-        Enter your order number — it looks like{' '}
+        Enter your order number. It looks like{' '}
         <span className="font-mono text-[hsl(var(--foreground))]">
           LL-2026-000123
         </span>{' '}
@@ -58,7 +58,7 @@ export default function TrackLanding() {
       <p className="mt-10 text-xs text-[hsl(var(--muted-foreground))]">
         If you've lost your order number, message our{' '}
         <span className="text-[hsl(var(--foreground))]">Concierge</span> via the
-        WhatsApp button — we can look it up by phone or email.
+        WhatsApp button. We can look it up by phone or email.
       </p>
     </div>
   )

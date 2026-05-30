@@ -28,6 +28,13 @@ const NAV_GROUPS: readonly NavGroup[] = [
     ],
   },
   {
+    label: 'Content',
+    items: [
+      { href: '/admin/content/site', label: 'Site content' },
+      { href: '/admin/content/social-proof', label: 'Social proof' },
+    ],
+  },
+  {
     label: 'Operations',
     items: [
       { href: '/admin/orders', label: 'Orders' },
@@ -47,14 +54,14 @@ const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Comp',
     items: [
-      { href: '/admin/comp/tiers', label: 'Partner tiers' },
-      { href: '/admin/comp/partner-qualifications', label: 'Qualifications' },
       { href: '/admin/comp/starter-packages', label: 'Starter packages' },
+      { href: '/admin/comp/commission-health', label: 'Commission health' },
     ],
   },
   {
     label: 'System',
     items: [
+      { href: '/admin/system/users', label: 'Users (superadmin)' },
       { href: '/admin/system/roles', label: 'User roles' },
       { href: '/admin/diagnostics', label: 'Diagnostics' },
       { href: '/admin/analytics', label: 'Analytics' },

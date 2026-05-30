@@ -14,6 +14,7 @@ function Card({ f }: { f: FragranceMeta }) {
           alt={f.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          quality={65}
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-90" />
@@ -31,12 +32,12 @@ function Card({ f }: { f: FragranceMeta }) {
 
 export function FeaturedGrid() {
   return (
-    <section className="relative border-t border-[hsl(var(--border))]/60 py-24">
+    <section className="relative border-t border-[hsl(var(--border))]/60 py-28 md:py-40 lg:py-48">
       <div className="mx-auto max-w-7xl px-6">
-        <header className="mb-14 flex items-end justify-between gap-6">
+        <header className="mb-16 flex items-end justify-between gap-6 md:mb-24">
           <div>
             <p className="text-eyebrow">The collection</p>
-            <h2 className="mt-3 font-serif text-4xl tracking-tight md:text-5xl">
+            <h2 className="mt-5 font-serif text-4xl tracking-tight md:text-5xl">
               Nine stories,{' '}
               <em className="italic text-[hsl(var(--primary))]">one signature</em>.
             </h2>
@@ -49,7 +50,7 @@ export function FeaturedGrid() {
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {FRAGRANCES.map((f) => (
             <Card key={f.slug} f={f} />
           ))}

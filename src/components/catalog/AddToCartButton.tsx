@@ -39,7 +39,7 @@ export function AddToCartButton({
       disabled={isDisabled}
       className={
         className ??
-        'inline-flex w-full items-center justify-center rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+        'inline-flex w-full items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--background))] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
       }
     >
       {isAdding ? 'Added' : disabled ? 'Sold out' : 'Add to cart'}

@@ -30,7 +30,7 @@ export function CopyButton({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md bg-[hsl(var(--primary))] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
+      className="rounded-md bg-[hsl(var(--foreground))] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[hsl(var(--background))]"
     >
       {copied ? 'Copied' : children}
     </button>

@@ -20,7 +20,7 @@ export default async function BundlesIndexPage() {
         <p className="mt-4 max-w-xl text-sm text-[hsl(var(--muted-foreground))]">
           {bundles.length === 0
             ? 'No bundles available right now.'
-            : 'Hand-picked combinations that work together — at a price below the sum of their parts.'}
+            : 'Hand-picked combinations that work together, at a price below the sum of their parts.'}
         </p>
       </header>
 

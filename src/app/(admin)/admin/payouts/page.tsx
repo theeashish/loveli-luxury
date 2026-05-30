@@ -10,8 +10,8 @@ type PayoutRow = {
   period_year: number
   period_month: number
   status: string
-  gross_total_minor: string
-  net_total_minor: string
+  gross_total_minor: string | number
+  net_total_minor: string | number
   flutterwave_transfer_id: string | null
   created_at: string
   initiated_at: string | null

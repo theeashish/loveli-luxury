@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 
 const ContentSecurityPolicy = `
@@ -61,6 +63,15 @@ const nextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Mobile-first Kenyan 4G audience — narrow the device-size matrix so
+    // the optimizer doesn't generate (and the CDN doesn't cache) a long
+    // tail of variants nobody loads. Defaults are 8 device sizes / 8 image
+    // sizes; this is 7 / 6 covering common phone widths through laptop.
+    deviceSizes: [360, 414, 480, 768, 1024, 1280, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256],
+    // Static product photography rarely changes. Cache at the edge for a
+    // year so repeat visitors hit the CDN, not the origin.
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: 'https',
@@ -92,10 +103,15 @@ const nextConfig = {
       { source: '/account/distributor', destination: '/account/partner', permanent: true },
       { source: '/account/distributor/:path*', destination: '/account/partner/:path*', permanent: true },
       { source: '/api/distributor-signup/:path*', destination: '/api/partner-signup/:path*', permanent: true },
+      // /boss-scents comp-plan slug retired → /partners program landing.
+      { source: '/boss-scents', destination: '/partners', permanent: true },
+      // Partner portal sub-tab renamed off the "downline" word.
+      { source: '/account/partner/downline', destination: '/account/partner/network', permanent: true },
     ]
   },
 
   experimental: {
+    instrumentationHook: true,
     serverActions: {
       // Catalog image uploads cap at 8 MB (see image-pipeline.ts MAX_FILE_BYTES).
       // Keep this in sync if that limit moves.
@@ -104,4 +120,10 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  disableLogger: true,
+})

@@ -10,7 +10,7 @@
 
 import { redirect } from 'next/navigation'
 import { Toaster } from 'sonner'
-import { getSession, isAdmin } from '@/lib/auth/roles'
+import { getSession, isAdmin, adminMfaRedirect } from '@/lib/auth/roles'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
 export const metadata = {
@@ -27,6 +27,11 @@ export default async function AdminLayout({
   if (!session) redirect('/?reason=auth')
   if (!isAdmin(session)) redirect('/?reason=forbidden')
 
+  // 2FA step-up gate — inert unless ENFORCE_ADMIN_MFA=true; never locks out
+  // un-enrolled admins (see adminMfaRedirect).
+  const mfaRedirect = await adminMfaRedirect()
+  if (mfaRedirect) redirect(mfaRedirect)
+
   const isSuperadmin = session.roles.has('superadmin')
 
   return (
@@ -35,7 +40,7 @@ export default async function AdminLayout({
         email={session.email ?? session.userId}
         isSuperadmin={isSuperadmin}
       />
-      <main className="overflow-y-auto p-8">{children}</main>
+      <main className="overflow-y-auto p-8 text-neutral-900">{children}</main>
       <Toaster richColors position="top-right" />
     </div>
   )

@@ -65,7 +65,7 @@ export default async function ProfilePage() {
           <h2 className="mb-1 text-base font-medium">Identity</h2>
           <p className="mb-5 text-xs text-[hsl(var(--muted-foreground))]">
             Your email is currently <span className="font-mono">{profile.email}</span>.
-            Use the change-email form below to switch — we'll send a
+            Use the change-email form below to switch. We'll send a
             confirmation link to the new address.
           </p>
           <Field label="Full name" required>
@@ -91,8 +91,8 @@ export default async function ProfilePage() {
           </Field>
           {profile.national_id || profile.date_of_birth ? (
             <p className="mt-2 text-[10px] text-[hsl(var(--muted-foreground))]">
-              KYC details on file: ID {profile.national_id ?? '—'} · DOB{' '}
-              {profile.date_of_birth ?? '—'} · contact support to update.
+              KYC details on file: ID {profile.national_id ?? '-'} · DOB{' '}
+              {profile.date_of_birth ?? '-'} · contact support to update.
             </p>
           ) : null}
         </section>
@@ -155,7 +155,7 @@ export default async function ProfilePage() {
           </Link>
           <button
             type="submit"
-            className="rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
+            className="rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-xs uppercase tracking-[0.15em] text-[hsl(var(--background))]"
           >
             Save changes
           </button>

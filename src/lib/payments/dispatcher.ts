@@ -44,20 +44,35 @@ export interface InitiatePaymentResult {
 }
 
 /**
- * Best-effort audit insert. Swallows any error.
+ * Best-effort audit insert. Never throws; logs the underlying error if one
+ * comes back. Supabase-js returns DB errors in the resolved `{ error }`
+ * object rather than throwing, so the outer try/catch only catches network
+ * failures — we have to inspect `error` explicitly or the failure is silent
+ * (which is exactly how this table sat empty after 15 STK pushes despite
+ * the migration appearing to have "worked"; the real cause was a column
+ * drift on the live table — see migration 030).
+ *
+ * Exported so tests can lock in the non-silent contract.
  */
-async function logAttempt(
+export async function logAttempt(
   service: ReturnType<typeof createServiceClient>,
   row: Record<string, unknown>,
 ): Promise<void> {
   try {
-    await (
+    const { error } = await (
       service.from('payment_attempts' as never) as unknown as {
         insert: (
           v: Record<string, unknown>,
         ) => Promise<{ error: { message: string } | null }>
       }
     ).insert(row)
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[dispatcher] payment_attempts insert failed:',
+        error.message,
+      )
+    }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(
@@ -68,7 +83,8 @@ async function logAttempt(
 }
 
 /**
- * Best-effort order column update.
+ * Best-effort order column update. Same defensive shape as logAttempt:
+ * inspect the returned error so failures stop being silent.
  */
 async function updateOrderProviderRefs(
   service: ReturnType<typeof createServiceClient>,
@@ -76,7 +92,7 @@ async function updateOrderProviderRefs(
   patch: Record<string, unknown>,
 ): Promise<void> {
   try {
-    await (
+    const { error } = await (
       service.from('orders') as unknown as {
         update: (v: Record<string, unknown>) => {
           eq: (col: string, val: unknown) => Promise<{
@@ -87,6 +103,13 @@ async function updateOrderProviderRefs(
     )
       .update(patch)
       .eq('id', orderId)
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[dispatcher] order column update failed:',
+        error.message,
+      )
+    }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(

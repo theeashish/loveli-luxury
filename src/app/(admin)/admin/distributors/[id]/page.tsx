@@ -57,7 +57,7 @@ type RankRow = {
 type LedgerRow = {
   id: number
   level: number
-  amount_minor: string
+  amount_minor: string | number
   earned_at: string
   source_order_id: number
   payout_id: number | null
@@ -147,7 +147,7 @@ export default async function AdminDistributorDetail({
   const audits = (auditRes.data ?? []) as AuditRow[]
   type AdjustmentRow = {
     id: number
-    amount_minor: string
+    amount_minor: string | number
     period_year: number
     period_month: number
     reason: string

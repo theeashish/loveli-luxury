@@ -15,6 +15,7 @@ import { z } from 'zod'
 import { requireAdmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getTransactionStatus } from '@/lib/payhero/service'
+import { applyPaymentSuccess } from '@/lib/payments/apply-payment-success'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -124,77 +125,27 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const mpesaReceipt =
-      status.provider_reference ?? status.third_party_reference ?? null
-
-    // TODO(types): regenerate database.ts post-migration-019.
-    await (service.from('orders') as unknown as {
-      update: (v: Record<string, unknown>) => {
-        eq: (col: string, val: unknown) => Promise<{ error: { message: string } | null }>
-      }
+    const applied = await applyPaymentSuccess(service, {
+      orderId: order.id,
+      orderKind: order.kind,
+      payheroCheckoutReference: order.payhero_checkout_reference ?? '',
+      mpesaReceipt:
+        status.provider_reference ?? status.third_party_reference ?? null,
+      externalReference: status.external_reference ?? null,
+      source: 'reconcile_api',
     })
-      .update({
-        payhero_external_reference: status.external_reference ?? null,
-        payhero_mpesa_receipt: mpesaReceipt,
-      })
-      .eq('id', order.id)
-
-    const paidAt = new Date().toISOString()
-    const markRes = (await service.rpc('mark_order_paid', {
-      p_order_id: order.id,
-      p_provider_ref:
-        mpesaReceipt ?? order.payhero_checkout_reference,
-      p_paid_at: paidAt,
-    })) as { error: { message: string } | null }
-    if (markRes.error) {
+    if (!applied.paid) {
       return NextResponse.json(
-        { error: 'mark_order_paid failed', detail: markRes.error.message },
+        { error: applied.error ?? 'apply failed' },
         { status: 500 },
       )
     }
 
-    if (order.kind === 'distributor_signup') {
-      const provRes = (await service.rpc('provision_distributor', {
-        p_order_id: order.id,
-      })) as { error: { message: string } | null }
-      if (provRes.error) {
-        return NextResponse.json(
-          {
-            ok: true,
-            paid: true,
-            warning: `provisioning failed: ${provRes.error.message}`,
-          },
-          { status: 200 },
-        )
-      }
-    }
-
-    const ledgerRes = (await service.rpc('write_commission_ledger', {
-      p_order_id: order.id,
-    })) as { error: { message: string } | null }
-    if (ledgerRes.error) {
-      return NextResponse.json(
-        {
-          ok: true,
-          paid: true,
-          warning: `ledger write failed: ${ledgerRes.error.message}`,
-        },
-        { status: 200 },
-      )
-    }
-
-    await service.from('audit_log').insert({
-      action: 'payment.reconciled',
-      resource_type: 'order',
-      resource_id: String(order.id),
-      after_data: {
-        provider: 'payhero',
-        checkout_reference: order.payhero_checkout_reference,
-        mpesa_receipt: mpesaReceipt,
-      },
-    })
-
-    return NextResponse.json({ ok: true, paid: true })
+    return NextResponse.json(
+      applied.warnings.length > 0
+        ? { ok: true, paid: true, warnings: applied.warnings }
+        : { ok: true, paid: true },
+    )
   }
 
   // 4. PayHero says non-success. Leave the order pending; report back.

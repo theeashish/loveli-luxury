@@ -21,7 +21,7 @@ type PayoutRow = {
   period_year: number
   period_month: number
   status: string
-  net_total_minor: string
+  net_total_minor: string | number
   currency: string
   initiated_at: string | null
   completed_at: string | null

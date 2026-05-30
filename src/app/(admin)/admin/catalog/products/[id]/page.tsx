@@ -3,6 +3,7 @@ import { getProductById, listCategories } from '@/lib/catalog/queries'
 import { AdminProductForm } from '@/components/catalog/AdminProductForm'
 import { AdminVariantsEditor } from '@/components/catalog/AdminVariantsEditor'
 import { AdminImageUploader } from '@/components/catalog/AdminImageUploader'
+import { AdminFragranceMetaEditor } from '@/components/catalog/AdminFragranceMetaEditor'
 import { AdminPageHeader } from '@/components/admin/forms'
 
 export const dynamic = 'force-dynamic'
@@ -35,6 +36,7 @@ export default async function EditProductPage({
         <AdminProductForm mode={{ kind: 'edit', product }} categories={categories} />
         <AdminVariantsEditor productId={product.id} variants={product.variants} />
         <AdminImageUploader scope="product" parentId={product.id} images={product.images} />
+        <AdminFragranceMetaEditor productId={product.id} initial={product.fragranceMeta} />
       </div>
     </div>
   )

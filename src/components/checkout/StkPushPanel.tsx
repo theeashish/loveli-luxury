@@ -201,7 +201,7 @@ export function StkPushPanel({
           </h2>
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
             No money was taken from your M-Pesa. You can try again with the
-            same order — no duplicate charge.
+            same order, no duplicate charge.
           </p>
           <button
             onClick={() => void onTryAgain()}
@@ -222,8 +222,8 @@ export function StkPushPanel({
           </h2>
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
             The M-Pesa prompt may have expired. If you completed payment,
-            it may still settle — check your orders in a minute. Otherwise
-            resend the prompt below — same order, no duplicate charge.
+            it may still settle. Check your orders in a minute. Otherwise
+            resend the prompt below. Same order, no duplicate charge.
           </p>
           <button
             onClick={() => void onTryAgain()}

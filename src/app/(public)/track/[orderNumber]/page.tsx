@@ -228,8 +228,8 @@ export default async function TrackOrderPage({
               label="Total"
               value={`${order.currency} ${formatKes(BigInt(order.total_minor))}`}
             />
-            <Row label="Buyer phone" value={maskedPhone || '—'} />
-            <Row label="Buyer email" value={maskedEmail || '—'} />
+            <Row label="Buyer phone" value={maskedPhone || '-'} />
+            <Row label="Buyer email" value={maskedEmail || '-'} />
           </div>
           <p className="mt-6 text-xs text-[hsl(var(--muted-foreground))]">
             Need a hand? Message our{' '}

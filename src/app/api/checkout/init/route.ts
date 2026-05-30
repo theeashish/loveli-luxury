@@ -41,6 +41,7 @@ import {
   decidePendingAction,
   shouldRefireStk,
 } from '@/lib/payhero/idempotency'
+import { checkRateLimit, clientIp } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -112,6 +113,15 @@ const requestSchema = z
 // -----------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  // Rate limit (fail-open; no-op until UPSTASH_* is configured).
+  const rl = await checkRateLimit('checkout-init', clientIp(req), { limit: 5, windowSeconds: 60 })
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Too many requests — please wait a moment and try again.' },
+      { status: 429, headers: { 'Retry-After': '60' } },
+    )
+  }
+
   // 1. Auth
   const supabase = createClient()
   const {

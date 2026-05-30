@@ -37,9 +37,24 @@ export function CartLineItem({ line }: { line: CartLine }) {
               {line.name}
             </Link>
             {line.kind === 'bundle' ? (
-              <p className="mt-0.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))]">
-                Bundle
-              </p>
+              <>
+                <p className="mt-0.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))]">
+                  Bundle
+                </p>
+                {line.contents && line.contents.length > 0 ? (
+                  <ul className="mt-2 space-y-0.5 border-l border-[hsl(var(--border))] pl-3 text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">
+                    {line.contents.map((item, i) => (
+                      <li key={`${item.name}-${item.sizeMl}-${i}`} className="flex items-baseline gap-1.5">
+                        <span className="font-mono text-[10px] text-[hsl(var(--primary))]">×{item.qty}</span>
+                        <span>
+                          {item.name}
+                          <span className="ml-1 text-[hsl(var(--muted-foreground))]/80">{item.sizeMl}ml</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </>
             ) : null}
           </div>
           <p className="text-sm tabular-nums text-[hsl(var(--foreground))]">

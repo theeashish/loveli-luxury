@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { Toaster } from 'sonner'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
@@ -7,7 +8,20 @@ import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
 import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
-import { WhatsAppConcierge } from '@/components/concierge/WhatsAppConcierge'
+import { getSection } from '@/lib/content/site'
+
+// Both of these are below-the-fold, client-only widgets — defer them out
+// of the LCP critical path so initial JS ships only what the hero/grid
+// need. Each renders nothing during SSR (loading: () => null), keeping
+// the server payload smaller too.
+const WhatsAppConcierge = dynamic(
+  () => import('@/components/concierge/WhatsAppConcierge').then((m) => m.WhatsAppConcierge),
+  { ssr: false, loading: () => null },
+)
+const WishlistHydrator = dynamic(
+  () => import('@/components/wishlist/WishlistHydrator').then((m) => m.WishlistHydrator),
+  { ssr: false, loading: () => null },
+)
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
@@ -16,7 +30,8 @@ const NAV = [
   { href: '/#faq', label: 'FAQ' },
 ] as const
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  const footerCopy = await getSection('footer')
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/80 backdrop-blur-md">
@@ -40,10 +55,10 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               </Link>
             ))}
             <Link
-              href="/boss-scents"
+              href="/partners"
               className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
             >
-              Boss Scents
+              Partners
             </Link>
             <Suspense fallback={null}>
               {/* Server component — renders nothing for signed-out
@@ -71,11 +86,12 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       <main className="flex-1">{children}</main>
 
-      <PublicFooter />
+      <PublicFooter copy={footerCopy} />
 
       <CartDrawer />
       <Toaster richColors position="top-right" theme="dark" />
       <WhatsAppConcierge />
+      <WishlistHydrator />
     </div>
   )
 }

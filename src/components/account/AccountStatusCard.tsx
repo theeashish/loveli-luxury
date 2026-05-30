@@ -79,7 +79,7 @@ export async function AccountStatusCard() {
 
   const { email, pendingSignupCount, sponsor } = status
 
-  // No pending signup attempts → the classic "Build a Boss Scents business"
+  // No pending signup attempts → the classic "Build a luxury fragrance business"
   // upgrade CTA, but with the signed-in identity surfaced so the user
   // knows whose account they're on.
   if (pendingSignupCount === 0) {
@@ -90,7 +90,7 @@ export async function AccountStatusCard() {
           className="pointer-events-none absolute inset-0 -z-10 opacity-70"
           style={{
             background:
-              'radial-gradient(60% 80% at 100% 0%, hsl(38 56% 60% / 0.15) 0%, transparent 60%)',
+              'radial-gradient(60% 80% at 100% 0%, hsl(38 40% 60% / 0.15) 0%, transparent 60%)',
           }}
         />
         <div className="flex items-center gap-3">
@@ -108,10 +108,10 @@ export async function AccountStatusCard() {
           Signed in as <span className="font-mono">{email}</span>
         </p>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-          Earn alongside the house on every fragrance you place. Begin as a
-          Concierge Partner with 10% on direct sales; progress through Brand
-          Associate, Regional Curator and Prestige Partner as your verified
-          retail performance grows.
+          Earn alongside the house on every fragrance you place. Begin as an
+          Ambassador; progress through Executive, Gold Director, Platinum
+          Director and Crown President as your verified retail performance
+          grows.
         </p>
         {sponsor ? (
           <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
@@ -154,7 +154,7 @@ export async function AccountStatusCard() {
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-amber-100/90">
         You started the partner signup but the M-Pesa payment never
         confirmed, so no partner account was created. The pending orders
-        below are those attempts — they don't charge you anything until
+        below are those attempts. They don't charge you anything until
         payment confirms.
       </p>
       {sponsor ? (

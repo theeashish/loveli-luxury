@@ -36,7 +36,7 @@ type OrderRow = {
   status: string
   kind: string
   customer_email: string
-  total_minor: string
+  total_minor: string | number
   created_at: string
   paid_at: string | null
 }

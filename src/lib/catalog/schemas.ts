@@ -82,7 +82,7 @@ const variantBase = z.object({
 })
 
 const distributorPriceNotAboveRetail = (
-  v: { retailPriceMinor: string; distributorPriceMinor: string },
+  v: { retailPriceMinor: string | number; distributorPriceMinor: string },
 ) => BigInt(v.distributorPriceMinor) <= BigInt(v.retailPriceMinor)
 
 export const createVariantSchema = variantBase.refine(distributorPriceNotAboveRetail, {

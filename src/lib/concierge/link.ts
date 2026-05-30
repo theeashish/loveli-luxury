@@ -54,19 +54,19 @@ export function buildConciergeMessage(args: {
 }): string {
   const { pathname, productName, bundleName } = args
   if (pathname.startsWith('/p/') && productName) {
-    return `Hi Loveli Concierge — I'm browsing ${productName} and have a question.`
+    return `Hi Loveli Concierge, I'm browsing ${productName} and have a question.`
   }
   if (pathname.startsWith('/bundles/') && bundleName) {
-    return `Hi Loveli Concierge — I'm looking at the ${bundleName} bundle and have a question.`
+    return `Hi Loveli Concierge, I'm looking at the ${bundleName} bundle and have a question.`
   }
   if (pathname === '/cart' || pathname.startsWith('/checkout')) {
-    return `Hi Loveli Concierge — I'm completing my order and need a quick hand.`
+    return `Hi Loveli Concierge, I'm completing my order and need a quick hand.`
   }
-  if (pathname.startsWith('/account/distributor') || pathname.startsWith('/partners')) {
-    return `Hi Loveli Concierge — I have a question about the partner program.`
+  if (pathname.startsWith('/account/partner') || pathname.startsWith('/partners')) {
+    return `Hi Loveli Concierge, I have a question about the partner program.`
   }
   if (pathname.startsWith('/track/')) {
-    return `Hi Loveli Concierge — I'd like an update on my order.`
+    return `Hi Loveli Concierge, I'd like an update on my order.`
   }
-  return `Hi Loveli Concierge — I'd like help choosing a fragrance.`
+  return `Hi Loveli Concierge, I'd like help choosing a fragrance.`
 }

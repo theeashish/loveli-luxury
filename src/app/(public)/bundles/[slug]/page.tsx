@@ -4,6 +4,7 @@ import { getBundleBySlug, listActiveBundleSlugs } from '@/lib/catalog/queries'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { BundleContents } from '@/components/catalog/BundleContents'
 import { BundleAddToCart } from '@/components/catalog/BundleAddToCart'
+import { WishlistButton } from '@/components/wishlist/WishlistButton'
 
 // Catalog reads go through the auth-bound Supabase client which calls
 // cookies() at request time — incompatible with static generation
@@ -62,6 +63,9 @@ export default async function BundlePage({ params }: { params: { slug: string } 
 
           <div className="sticky top-6 space-y-6">
             <BundleAddToCart bundle={bundle} />
+            <div className="flex">
+              <WishlistButton bundleId={bundle.id} size="large" />
+            </div>
           </div>
         </div>
       </div>

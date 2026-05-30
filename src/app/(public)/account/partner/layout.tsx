@@ -24,8 +24,9 @@ export const dynamic = 'force-dynamic'
 
 const NAV = [
   { href: '/account/partner', label: 'Overview' },
-  { href: '/account/partner/downline', label: 'Network' },
+  { href: '/account/partner/network', label: 'Network' },
   { href: '/account/partner/commissions', label: 'Commissions' },
+  { href: '/account/partner/earnings', label: 'Earnings' },
   { href: '/account/partner/share', label: 'Share' },
   { href: '/account/payouts', label: 'Payouts' },
   { href: '/account/partner/settings', label: 'Settings' },
@@ -71,7 +72,7 @@ export default async function DistributorLayout({
       {!distributor.isActive ? (
         <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Your partner account is currently <strong>inactive</strong>.
-          Contact support to reactivate.
+          Contact the concierge to reactivate.
         </div>
       ) : null}
 

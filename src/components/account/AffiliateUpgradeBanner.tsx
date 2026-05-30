@@ -66,7 +66,7 @@ export async function AffiliateUpgradeBanner({
         className="pointer-events-none absolute inset-0 -z-10 opacity-70"
         style={{
           background:
-            'radial-gradient(60% 80% at 100% 0%, hsl(38 56% 60% / 0.15) 0%, transparent 60%)',
+            'radial-gradient(60% 80% at 100% 0%, hsl(38 40% 60% / 0.15) 0%, transparent 60%)',
         }}
       />
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
@@ -76,11 +76,10 @@ export async function AffiliateUpgradeBanner({
         Build a luxury fragrance business
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-        Earn alongside the house on every fragrance you place. Begin as a
-        Concierge Partner with 10% on direct sales and progress through four
-        tiers — Brand Associate, Regional Curator, Prestige Partner — each
-        unlocking richer earnings and access tied to verified retail
-        performance.
+        Earn alongside the house on every fragrance you place. Begin as an
+        Ambassador and progress through Executive, Gold Director, Platinum
+        Director, and Crown President. Each rank opens richer earnings and
+        access tied to verified retail performance.
       </p>
       {sponsor ? (
         <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">

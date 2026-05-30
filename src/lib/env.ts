@@ -39,6 +39,8 @@ const publicSchema = z.object({
     },
     z.string().regex(/^\+\d{8,15}$/, 'E.164 phone format').optional(),
   ),
+  // Client-side Sentry DSN (public). Error tracking is a no-op unless set.
+  NEXT_PUBLIC_SENTRY_DSN: z.preprocess(emptyToUndef, z.string().optional()),
 })
 
 // -----------------------------------------------------------------------------
@@ -80,6 +82,12 @@ const serverSchema = z.object({
   PAYHERO_CHANNEL_ID_STK: z.preprocess(emptyToUndef, z.string().optional()),
   PAYHERO_CHANNEL_ID_B2C: z.preprocess(emptyToUndef, z.string().optional()),
   PAYHERO_WEBHOOK_TOKEN: z.preprocess(emptyToUndef, z.string().min(20).optional()),
+  // Upstash Redis for rate limiting. Unset → limiter is a no-op (fail-open).
+  UPSTASH_REDIS_REST_URL: z.preprocess(emptyToUndef, z.string().url().optional()),
+  UPSTASH_REDIS_REST_TOKEN: z.preprocess(emptyToUndef, z.string().min(10).optional()),
+  // Admin 2FA enforcement. 'true' → admins with an enrolled TOTP factor must
+  // pass an aal2 challenge to use /admin. Default off (inert).
+  ENFORCE_ADMIN_MFA: z.string().transform((v) => v === 'true').default('false'),
 })
 
 // -----------------------------------------------------------------------------
@@ -96,6 +104,7 @@ const publicResult = publicSchema.safeParse({
   NEXT_PUBLIC_TIKTOK_PIXEL_ID: process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID,
   NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER:
     process.env.NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER,
+  NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 })
 
 if (!publicResult.success) {
@@ -132,6 +141,9 @@ export function getServerEnv() {
     PAYHERO_CHANNEL_ID_STK: process.env.PAYHERO_CHANNEL_ID_STK,
     PAYHERO_CHANNEL_ID_B2C: process.env.PAYHERO_CHANNEL_ID_B2C,
     PAYHERO_WEBHOOK_TOKEN: process.env.PAYHERO_WEBHOOK_TOKEN,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    ENFORCE_ADMIN_MFA: process.env.ENFORCE_ADMIN_MFA,
   })
 
   if (!result.success) {

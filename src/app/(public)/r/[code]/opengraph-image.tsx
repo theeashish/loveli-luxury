@@ -9,7 +9,7 @@ import { ImageResponse } from 'next/og'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export const runtime = 'nodejs'
-export const alt = 'Loveli Luxury International — distributor invite'
+export const alt = 'Loveli Luxury International — partner invite'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -80,7 +80,7 @@ export default async function OgImage({
               textTransform: 'uppercase',
             }}
           >
-            Independent Business Owner Program
+            Partner Program
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default async function OgImage({
             textTransform: 'uppercase',
           }}
         >
-          <div>theperfumeworld.co.ke</div>
+          <div>loveli-luxury.vercel.app</div>
           <div style={{ color: '#C9A84C', fontFamily: 'monospace' }}>{code}</div>
         </div>
       </div>

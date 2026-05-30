@@ -1,20 +1,19 @@
 /**
- * TierBadge — small display element rendering the partner tier name with
- * the brand's accent treatment. Used everywhere we currently show the
- * 8-rank emoji/name (dashboard header, distributor card, admin detail).
+ * TierBadge — small display element rendering the partner's rank name with
+ * the brand's accent treatment. Used wherever we show a partner's standing
+ * (dashboard header, partner card, network rows, admin detail).
  *
- * Schema is untouched in Phase 1 — pass `rankPosition` (1..8) and the
- * component maps it through `partnerTierForRank` to one of the four
- * customer-facing tiers. Or pass a resolved `tier` to skip the mapping.
+ * Pass `rankPosition` (config_ranks.rank_position, 1..5) and the component
+ * maps it 1:1 to a display rank via `partnerTierForRank`. Or pass a resolved
+ * `tier` to skip the mapping.
  */
 
 import { partnerTierForRank, type PartnerTier } from '@/lib/partners/tiers'
 
 interface TierBadgeProps {
-  /** Internal `config_ranks.position` value (1..8). Maps through the
-   *  Phase-1 bridge to a partner tier. */
+  /** Internal `config_ranks.rank_position` value (1..5). */
   rankPosition?: number | null
-  /** Pre-resolved tier — bypasses the rank-position mapping. */
+  /** Pre-resolved rank — bypasses the rank-position mapping. */
   tier?: PartnerTier
   /** Display variant. */
   variant?: 'pill' | 'card' | 'inline'
@@ -31,7 +30,7 @@ export function TierBadge({
     return (
       <div className="rounded-lg border border-[hsl(var(--primary))]/25 bg-[hsl(var(--muted))]/40 px-5 py-4">
         <p className="text-[11px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-          Your tier
+          Your rank
         </p>
         <h2 className="mt-1 font-serif text-2xl italic tracking-tight">
           {resolved.displayName}

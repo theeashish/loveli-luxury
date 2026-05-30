@@ -21,16 +21,17 @@ export const dynamic = 'force-dynamic'
 
 type SnapshotRow = {
   personal_bottles_sold: number
-  personal_sales_minor: string
-  team_gsv_minor: string
+  personal_sales_minor: string | number
+  team_gsv_minor: string | number
   active_recruits_count: number
+  active_customers_count: number
   computed_at: string
 }
 
 type LedgerRow = {
   id: number
   level: number
-  amount_minor: string
+  amount_minor: string | number
   earned_at: string
   source_order_id: number
 }
@@ -40,7 +41,8 @@ type RankRow = {
   rank_name: string
   emoji: string | null
   min_active_recruits: number
-  min_group_sales_minor: string
+  min_group_sales_minor: string | number
+  min_active_customers: number | null
 }
 
 export default async function DistributorOverviewPage() {
@@ -57,7 +59,7 @@ export default async function DistributorOverviewPage() {
     service
       .from('gsv_snapshots')
       .select(
-        'personal_bottles_sold, personal_sales_minor, team_gsv_minor, active_recruits_count, computed_at',
+        'personal_bottles_sold, personal_sales_minor, team_gsv_minor, active_recruits_count, active_customers_count, computed_at',
       )
       .eq('distributor_id', distributor.id)
       .eq('period_year', year)
@@ -71,7 +73,9 @@ export default async function DistributorOverviewPage() {
       .limit(8),
     service
       .from('config_ranks')
-      .select('rank_position, rank_name, emoji, min_active_recruits, min_group_sales_minor')
+      .select(
+        'rank_position, rank_name, emoji, min_active_recruits, min_group_sales_minor, min_active_customers',
+      )
       .is('effective_until', null)
       .order('rank_position'),
     service
@@ -88,6 +92,7 @@ export default async function DistributorOverviewPage() {
 
   const teamGsv = snapshot ? BigInt(snapshot.team_gsv_minor) : 0n
   const activeRecruits = snapshot?.active_recruits_count ?? 0
+  const activeCustomers = snapshot?.active_customers_count ?? 0
 
   // Next-rank progress — find first rank above the distributor's current
   // rank_position. We're using the live ranks list here; close uses the
@@ -100,7 +105,7 @@ export default async function DistributorOverviewPage() {
   // codes, alt URLs) live on the /share sub-tab.
   const shareUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/r/${distributor.sponsorCode}`
 
-  // Tier resolved from the underlying 8-rank position via the Phase-1 bridge.
+  // Rank resolved 1:1 from config_ranks.rank_position (5 ranks).
   const currentTier = partnerTierForRank(distributor.currentRankPosition)
   const nextTier = nextRank ? partnerTierForRank(nextRank.rank_position) : null
   const tierChangesAtNext = nextTier && nextTier.position !== currentTier.position
@@ -110,7 +115,7 @@ export default async function DistributorOverviewPage() {
       <section className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
         <TierBadge tier={currentTier} variant="card" />
         <div className="hidden text-right text-xs uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))] md:block">
-          Tier {currentTier.position} of 4
+          Rank {currentTier.position} of 5
         </div>
       </section>
 
@@ -124,7 +129,7 @@ export default async function DistributorOverviewPage() {
               {shareUrl}
             </p>
             <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
-              Share this with anyone — every buyer or partner who arrives
+              Share this with anyone. Every buyer or partner who arrives
               through it is locked to you for commission credit.
             </p>
           </div>
@@ -159,13 +164,13 @@ export default async function DistributorOverviewPage() {
         <section className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-6">
           <h2 className="text-base font-medium">
             {tierChangesAtNext
-              ? `Next tier: ${nextTier.displayName}`
+              ? `Next rank: ${nextTier.displayName}`
               : `Progress within ${currentTier.displayName}`}
           </h2>
           <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
             What it takes to advance.
           </p>
-          <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <Progress
               label="Active partners"
               current={activeRecruits}
@@ -184,16 +189,24 @@ export default async function DistributorOverviewPage() {
                 }).format(n)
               }
             />
+            {nextRank.min_active_customers !== null ? (
+              <Progress
+                label="Active customers"
+                current={activeCustomers}
+                target={nextRank.min_active_customers}
+                format={(n) => String(n)}
+              />
+            ) : null}
           </div>
         </section>
       ) : (
         <section className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] p-6">
           <h2 className="text-base font-medium">
-            Highest tier reached
+            Highest rank reached
           </h2>
           <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
             You're at the top of the partner program. Performance is reviewed
-            quarterly per the tier&apos;s retention terms.
+            quarterly per the rank&apos;s retention terms.
           </p>
         </section>
       )}

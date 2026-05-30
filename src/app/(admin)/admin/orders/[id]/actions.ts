@@ -18,11 +18,13 @@
  * snapshots, and the action name.
  */
 
+import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin, AuthError } from '@/lib/auth/roles'
+import { requireAdmin, requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getTransactionStatus } from '@/lib/payhero/service'
+import { applyPaymentSuccess } from '@/lib/payments/apply-payment-success'
 // Refunds: PayHero does not yet expose a public refund API in our integration.
 // Admins issue refunds from the PayHero dashboard, then click "Mark refunded"
 // here to update inventory + clawback. See refund() below.
@@ -99,7 +101,7 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       status: AnyStatus
       payment_provider: string | null
       payment_provider_ref: string | null
-      total_minor: string
+      total_minor: string | number
     }
 
     if (!TRANSITIONS.refund.from.includes(current.status)) {
@@ -348,80 +350,174 @@ export async function reconcilePayheroPayment(formData: FormData): Promise<void>
     )
   }
 
-  const mpesaReceipt =
-    status.provider_reference ?? status.third_party_reference ?? null
-
-  // 4. Stamp the PayHero refs on the order.
-  await (service.from('orders') as unknown as {
-    update: (v: Record<string, unknown>) => {
-      eq: (col: string, val: unknown) => Promise<{
-        error: { message: string } | null
-      }>
-    }
+  // Stamp refs → mark paid → provision (signup) → ledger → v2 preview →
+  // receipt → audit, all in the shared helper. The helper tags the audit
+  // row with the admin actor_id passed in.
+  const applied = await applyPaymentSuccess(service, {
+    orderId: order.id,
+    orderKind: order.kind,
+    payheroCheckoutReference: order.payhero_checkout_reference ?? '',
+    mpesaReceipt:
+      status.provider_reference ?? status.third_party_reference ?? null,
+    externalReference: status.external_reference ?? null,
+    source: 'reconcile_admin',
+    actorId: session.userId,
   })
-    .update({
-      payhero_external_reference: status.external_reference ?? null,
-      payhero_mpesa_receipt: mpesaReceipt,
-    })
-    .eq('id', order.id)
-
-  // 5. Idempotent RPC chain — same one the webhook runs.
-  const paidAt = new Date().toISOString()
-  const markRes = (await service.rpc('mark_order_paid', {
-    p_order_id: order.id,
-    p_provider_ref: mpesaReceipt ?? order.payhero_checkout_reference,
-    p_paid_at: paidAt,
-  })) as { error: { message: string } | null }
-  if (markRes.error) {
-    throw new Error(`mark_order_paid failed: ${markRes.error.message}`)
+  if (!applied.paid) {
+    throw new Error(applied.error ?? 'apply failed')
   }
-
-  if (order.kind === 'distributor_signup') {
-    const provRes = (await service.rpc('provision_distributor', {
-      p_order_id: order.id,
-    })) as { error: { message: string } | null }
-    if (provRes.error) {
-      throw new Error(
-        `Order marked paid but distributor provisioning failed: ${provRes.error.message}. ` +
-          `Investigate before retrying.`,
-      )
+  if (applied.warnings.length > 0) {
+    // Non-fatal warnings — surface in a per-warning audit row so the admin
+    // page can show them. The order is paid; we don't block on these.
+    for (const warning of applied.warnings) {
+      await service.from('audit_log').insert({
+        actor_id: session.userId,
+        action: 'order.reconcile.warning',
+        resource_type: 'orders',
+        resource_id: String(orderId),
+        after_data: { provider: 'payhero', warning },
+      })
     }
   }
-
-  const ledgerRes = (await service.rpc('write_commission_ledger', {
-    p_order_id: order.id,
-  })) as { error: { message: string } | null }
-  if (ledgerRes.error) {
-    // Non-fatal — order is paid. Log warning via audit but don't throw.
-    await service.from('audit_log').insert({
-      actor_id: session.userId,
-      action: 'order.reconcile.ledger_warning',
-      resource_type: 'orders',
-      resource_id: String(orderId),
-      after_data: {
-        provider: 'payhero',
-        warning: ledgerRes.error.message,
-        mpesa_receipt: mpesaReceipt,
-      },
-    })
-  }
-
-  await service.from('audit_log').insert({
-    actor_id: session.userId,
-    action: 'order.reconcile.payhero',
-    resource_type: 'orders',
-    resource_id: String(orderId),
-    before_data: { status: 'pending' },
-    after_data: {
-      status: 'paid',
-      provider: 'payhero',
-      checkout_reference: order.payhero_checkout_reference,
-      mpesa_receipt: mpesaReceipt,
-      reconciled_at: paidAt,
-    },
-  })
 
   revalidatePath('/admin/orders')
   revalidatePath(`/admin/orders/${orderId}`)
   revalidatePath('/shop')
+}
+
+/**
+ * Superadmin-only: void and PURGE an erroneous order entirely.
+ *
+ * Hard-delete is gated by strict preconditions so we can never accidentally
+ * erase a transaction that touched real money or a partner's earnings:
+ *
+ *   1. Status must be `pending`, `cancelled`, `expired`, or `failed`.
+ *   2. paid_at must be NULL.
+ *   3. payhero_mpesa_receipt must be NULL (no real M-Pesa traffic).
+ *   4. Zero rows in commission_ledger reference this order.
+ *
+ * Order_items + payment_attempts cascade-delete via FK. The audit_log row
+ * we write here is preserved (audit is append-only — by design we keep a
+ * record of what the order *was*).
+ */
+const purgeInputSchema = z.object({
+  orderId: z.coerce.number().int().positive(),
+})
+
+export async function purgeOrder(formData: FormData): Promise<void> {
+  let session
+  try {
+    session = await requireSuperadmin()
+  } catch (err) {
+    if (err instanceof AuthError) throw new Error('Forbidden — superadmin required')
+    throw err
+  }
+
+  const parsed = purgeInputSchema.safeParse({ orderId: formData.get('orderId') })
+  if (!parsed.success) throw new Error('Invalid request')
+  const { orderId } = parsed.data
+
+  const service = createServiceClient()
+
+  const orderRes = (await service
+    .from('orders')
+    .select('id, order_number, status, paid_at, total_minor, kind')
+    .eq('id', orderId)
+    .maybeSingle()) as unknown as {
+    data: {
+      id: number
+      order_number: string
+      status: AnyStatus
+      paid_at: string | null
+      total_minor: string | number
+      kind: string
+    } | null
+    error: { message: string } | null
+  }
+  if (orderRes.error || !orderRes.data) throw new Error('Order not found')
+  const order = orderRes.data
+
+  // Pull the PayHero refs separately via a service-cast read (types are stale
+  // for the payhero_* cols on the orders Row type without a fresh regen).
+  const refsRes = (await (service.from('orders') as unknown as {
+    select: (cols: string) => {
+      eq: (col: string, val: unknown) => {
+        maybeSingle: () => Promise<{
+          data: { payhero_mpesa_receipt: string | null } | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
+    .select('payhero_mpesa_receipt')
+    .eq('id', orderId)
+    .maybeSingle())
+  const mpesaReceipt = refsRes.data?.payhero_mpesa_receipt ?? null
+
+  const PURGEABLE_STATUSES: AnyStatus[] = ['pending', 'cancelled', 'failed']
+  // 'expired' is a custom status on the orders.status enum in some envs —
+  // include defensively if it's typed in.
+  const purgeableExtras: string[] = ['expired']
+
+  if (
+    !PURGEABLE_STATUSES.includes(order.status as AnyStatus) &&
+    !purgeableExtras.includes(order.status)
+  ) {
+    throw new Error(
+      `Cannot purge an order in status '${order.status}'. Only pending / cancelled / expired / failed orders are purgeable.`,
+    )
+  }
+  if (order.paid_at) {
+    throw new Error('Cannot purge an order that has a paid_at timestamp.')
+  }
+  if (mpesaReceipt) {
+    throw new Error(
+      `Cannot purge an order with an M-Pesa receipt (${mpesaReceipt}). Real money moved — refund instead.`,
+    )
+  }
+
+  // Commission-ledger guard: refuse if any commission rows reference this order.
+  const ledgerRes = await service
+    .from('commission_ledger')
+    .select('id', { count: 'exact', head: true })
+    .eq('source_order_id', orderId)
+  if (ledgerRes.error) {
+    throw new Error(`Commission ledger check failed: ${ledgerRes.error.message}`)
+  }
+  if ((ledgerRes.count ?? 0) > 0) {
+    throw new Error(
+      `Cannot purge — ${ledgerRes.count} commission ledger row(s) reference this order. Refund/clawback instead.`,
+    )
+  }
+
+  // Snapshot for audit before deletion.
+  const before = {
+    id: order.id,
+    order_number: order.order_number,
+    status: order.status,
+    total_minor: String(order.total_minor),
+    kind: order.kind,
+  }
+
+  // payment_attempts is FK-cascaded from orders, so it deletes with the row.
+  // order_items has ON DELETE CASCADE too (per the original schema).
+  const delRes = await service.from('orders').delete().eq('id', orderId)
+  if (delRes.error) {
+    throw new Error(`Delete failed: ${delRes.error.message}`)
+  }
+
+  await service.from('audit_log').insert({
+    actor_id: session.userId,
+    action: 'order.purged',
+    resource_type: 'orders',
+    resource_id: String(orderId),
+    before_data: before,
+    after_data: {
+      purged_at: new Date().toISOString(),
+      reason: 'Superadmin manual purge of erroneous order',
+    },
+  })
+
+  revalidatePath('/admin/orders')
+  redirect('/admin/orders')
 }

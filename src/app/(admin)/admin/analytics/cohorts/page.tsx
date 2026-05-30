@@ -32,8 +32,8 @@ const PAID_STATUSES = ['paid', 'fulfilled', 'shipped', 'delivered'] as const
 type DistRow = { id: number; starter_paid_at: string }
 type LedgerRow = {
   distributor_id: number
-  amount_minor: string
-  commission_basis_minor: string
+  amount_minor: string | number
+  commission_basis_minor: string | number
   earned_at: string
 }
 
@@ -79,13 +79,13 @@ export default async function CohortsPage() {
   const orders = (ordersRes.data ?? []) as Array<{
     id: number
     sponsor_distributor_id: number | null
-    total_minor: string
+    total_minor: string | number
     paid_at: string
   }>
   const ledger = (ledgerRes.data ?? []) as LedgerRow[]
   const items = (itemsAggRes.data ?? []) as Array<{
     order_id: number
-    commissionable_amount_minor: string
+    commissionable_amount_minor: string | number
   }>
 
   // Cohort assignment: signup month -> distributor ids

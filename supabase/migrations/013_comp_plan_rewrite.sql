@@ -86,8 +86,14 @@ ALTER TABLE config_salary_tiers
   CHECK (rank_position BETWEEN 1 AND 8);
 
 -- New column: monthly personal-sales target in minor units.
+-- `notes` is referenced by this migration's config_ranks seed below but was
+-- historically first CREATEd in migration 014 — so a from-scratch replay
+-- (disaster recovery, CI, integration tests) failed here. Added idempotently
+-- so replay is clean; on the live DB (where the column already exists) this is
+-- a no-op. See docs/site-review (migration-replay hygiene).
 ALTER TABLE config_ranks
-  ADD COLUMN IF NOT EXISTS min_personal_sales_minor BIGINT NOT NULL DEFAULT 0;
+  ADD COLUMN IF NOT EXISTS min_personal_sales_minor BIGINT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS notes TEXT;
 
 
 -- -----------------------------------------------------------------------------

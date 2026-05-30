@@ -31,7 +31,7 @@ export default async function SignupPage({
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(38 56% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 55% 45% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(38 40% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(19 35% 45% / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-7xl items-center justify-center px-6 py-16 lg:py-24">
@@ -44,7 +44,7 @@ export default async function SignupPage({
           </h1>
           <p className="mt-4 text-center text-sm text-[hsl(var(--muted-foreground))]">
             {isJoinFlow
-              ? 'Create your account, then complete your Boss Scents registration.'
+              ? 'Create your account, then complete your partner registration.'
               : 'Shop hand-crafted Eau de Parfum. Track your orders. Five seconds.'}
           </p>
           <div className="mt-10">
@@ -61,12 +61,12 @@ export default async function SignupPage({
               </Link>
             </p>
             <p>
-              Want to build a Boss Scents business instead?{' '}
+              Want to build a luxury fragrance business instead?{' '}
               <Link
                 href="/partners/signup"
                 className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
               >
-                Become an affiliate →
+                Join the partner program →
               </Link>
             </p>
           </div>

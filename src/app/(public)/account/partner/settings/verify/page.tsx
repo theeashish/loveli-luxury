@@ -76,7 +76,7 @@ export default async function VerifyMsisdnPage() {
           </label>
           <button
             type="submit"
-            className="rounded-md bg-[hsl(var(--primary))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
+            className="rounded-md bg-[hsl(var(--foreground))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--background))]"
           >
             Verify
           </button>

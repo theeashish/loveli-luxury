@@ -164,8 +164,8 @@ function VariantRow({ variant, disabled }: { variant: VariantDto; disabled: bool
   const [draft, setDraft] = useState({
     sku: variant.sku,
     sizeMl: String(variant.sizeMl),
-    retailKes: minorToKesInput(variant.retailPriceMinor),
-    distributorKes: minorToKesInput(variant.distributorPriceMinor),
+    retailKes: minorToKesInput(String(variant.retailPriceMinor)),
+    distributorKes: minorToKesInput(String(variant.distributorPriceMinor)),
     inventoryQty: String(variant.inventoryQty),
     isActive: variant.isActive,
   })

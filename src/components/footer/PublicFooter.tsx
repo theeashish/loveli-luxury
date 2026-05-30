@@ -1,13 +1,15 @@
 'use client'
 
 /**
- * Site footer. Hidden on /account/* dashboards (those are working
- * surfaces, not browse surfaces — the marketing footer is clutter there
- * for distributors/admins). Visible on /shop, /bundles, /, /login,
- * /signup, /partners/signup, etc.
+ * Site footer. Hidden on /account/* dashboards (those are working surfaces,
+ * not browse surfaces — the marketing footer is clutter there for
+ * distributors/admins). Visible on /shop, /bundles, /, /login, /signup,
+ * /partners/signup, etc.
  *
- * Phase 4a — expanded into 4 columns: Shop, Brand, Policies, Concierge.
- * Trust signals get explicit real-estate per the brand brief.
+ * Content (brand intro, tagline, copyright line, closing tagline) is admin-
+ * editable via `/admin/content/site/footer`. The parent layout fetches the
+ * content server-side and passes it in as `copy`. Link structure stays in
+ * code because each link ties to a real route.
  */
 
 import Link from 'next/link'
@@ -16,8 +18,9 @@ import {
   buildConciergeLink,
   buildConciergeMessage,
 } from '@/lib/concierge/link'
+import { type FooterContent } from '@/lib/content/site'
 
-export function PublicFooter() {
+export function PublicFooter({ copy }: { copy: FooterContent }) {
   const pathname = usePathname()
 
   if (pathname.startsWith('/account/')) return null
@@ -33,11 +36,10 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-5">
             <p className="font-serif text-2xl text-[hsl(var(--foreground))]">
-              Loveli Luxury Scents
+              {copy.brandName}
             </p>
             <p className="mt-3 max-w-sm text-sm leading-relaxed">
-              The home of modern African luxury fragrance culture. Sourced
-              with discipline, sealed with care, delivered with intention.
+              {copy.tagline}
             </p>
           </div>
 
@@ -57,7 +59,7 @@ export function PublicFooter() {
               <li>
                 <Link
                   className="hover:text-[hsl(var(--primary))]"
-                  href="/boss-scents"
+                  href="/partners"
                 >
                   Partner program
                 </Link>
@@ -133,8 +135,8 @@ export function PublicFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--border))]/60 pt-8 text-xs sm:flex-row">
-          <p>© {new Date().getFullYear()} Loveli Luxury International</p>
-          <p>Hand-crafted in Nairobi · Shipped with intention</p>
+          <p>© {new Date().getFullYear()} {copy.copyrightName}</p>
+          <p>{copy.closingLine}</p>
         </div>
       </div>
     </footer>

@@ -136,7 +136,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
       const json = await res.json()
       if (!res.ok) {
         const base = json?.error ?? 'Checkout failed.'
-        const detail = typeof json?.detail === 'string' ? ` — ${json.detail}` : ''
+        const detail = typeof json?.detail === 'string' ? ` (${json.detail})` : ''
         setError(`${base}${detail}`)
         setSubmitting(false)
         return
@@ -387,7 +387,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-6 w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] disabled:opacity-50"
+          className="mt-6 w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--background))] disabled:opacity-50"
         >
           {submitting ? 'Sending M-Pesa prompt…' : 'Pay with M-Pesa'}
         </button>

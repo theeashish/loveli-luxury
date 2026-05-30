@@ -213,16 +213,16 @@ export async function confirmMsisdnCode(formData: FormData): Promise<void> {
       }
     | null
   if (!ver) {
-    throw new Error('No active verification — request a new code')
+    throw new Error('No active verification. Request a new code')
   }
   if (ver.msisdn !== dist.payout_msisdn_pending) {
-    throw new Error('Verification mismatch — request a new code')
+    throw new Error('Verification mismatch. Request a new code')
   }
   if (new Date(ver.expires_at).getTime() <= Date.now()) {
-    throw new Error('Code expired — request a new one')
+    throw new Error('Code expired. Request a new one')
   }
   if (ver.attempts >= MAX_VERIFICATION_ATTEMPTS) {
-    throw new Error('Too many failed attempts — request a new code')
+    throw new Error('Too many failed attempts. Request a new code')
   }
 
   const expectedHash = hashCode(code, ver.msisdn)

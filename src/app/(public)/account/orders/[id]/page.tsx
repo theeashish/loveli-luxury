@@ -24,11 +24,11 @@ type OrderRow = {
   order_number: string
   status: string
   kind: string
-  subtotal_minor: string
-  shipping_minor: string
-  tax_minor: string
-  discount_minor: string
-  total_minor: string
+  subtotal_minor: string | number
+  shipping_minor: string | number
+  tax_minor: string | number
+  discount_minor: string | number
+  total_minor: string | number
   currency: string
   created_at: string
   paid_at: string | null
@@ -43,8 +43,8 @@ type OrderItemRow = {
   variant_id: number | null
   bundle_id: number | null
   quantity: number
-  unit_price_minor: string
-  line_total_minor: string
+  unit_price_minor: string | number
+  line_total_minor: string | number
 }
 
 type AddressRow = {

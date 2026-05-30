@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/monthly-close",
       "schedule": "0 3 1 * *"
+    },
+    {
+      "path": "/api/cron/commission-reconcile",
+      "schedule": "30 3 * * *"
     }
   ]
 }

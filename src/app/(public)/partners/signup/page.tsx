@@ -56,7 +56,7 @@ type BundleRow = {
   slug: string
   name: string
   description: string | null
-  retail_price_minor: string
+  retail_price_minor: string | number
   starter_package_code: string | null
 }
 
@@ -73,7 +73,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(38 56% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 55% 45% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(38 40% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(19 35% 45% / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-3xl items-center justify-center px-6 py-16 lg:py-24">

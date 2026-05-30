@@ -1,5 +1,5 @@
 /**
- * Tests for the Phase-1 rank→tier display-layer bridge.
+ * Tests for the rank display-layer (5 ranks, 1:1 with config_ranks 1..5).
  */
 
 import { describe, expect, it } from 'vitest'
@@ -9,76 +9,66 @@ import {
   ALL_PARTNER_TIERS,
 } from '../../src/lib/partners/tiers'
 
-describe('partnerTierForRank — 8 internal ranks bucket into 4 customer tiers', () => {
-  it('rank 1 (Team Builder) → Concierge Partner', () => {
-    expect(partnerTierForRank(1).code).toBe('concierge_partner')
-    expect(partnerTierForRank(1).displayName).toBe('Concierge Partner')
+describe('partnerTierForRank — 5 ranks map 1:1', () => {
+  it('rank 1 → Ambassador', () => {
+    expect(partnerTierForRank(1).code).toBe('ambassador')
+    expect(partnerTierForRank(1).displayName).toBe('Ambassador')
   })
 
-  it('rank 2 (Team Leader) → Concierge Partner', () => {
-    expect(partnerTierForRank(2).code).toBe('concierge_partner')
+  it('rank 2 → Executive', () => {
+    expect(partnerTierForRank(2).code).toBe('executive')
+    expect(partnerTierForRank(2).displayName).toBe('Executive')
   })
 
-  it('rank 3 (Supervisor) → Brand Associate', () => {
-    expect(partnerTierForRank(3).code).toBe('brand_associate')
-    expect(partnerTierForRank(3).displayName).toBe('Brand Associate')
+  it('rank 3 → Gold Director', () => {
+    expect(partnerTierForRank(3).code).toBe('gold_director')
+    expect(partnerTierForRank(3).displayName).toBe('Gold Director')
   })
 
-  it('rank 4 (Manager) → Brand Associate', () => {
-    expect(partnerTierForRank(4).code).toBe('brand_associate')
+  it('rank 4 → Platinum Director', () => {
+    expect(partnerTierForRank(4).code).toBe('platinum_director')
+    expect(partnerTierForRank(4).displayName).toBe('Platinum Director')
   })
 
-  it('rank 5 (Senior Manager) → Regional Curator', () => {
-    expect(partnerTierForRank(5).code).toBe('regional_curator')
-    expect(partnerTierForRank(5).displayName).toBe('Regional Curator')
+  it('rank 5 → Crown President', () => {
+    expect(partnerTierForRank(5).code).toBe('crown_president')
+    expect(partnerTierForRank(5).displayName).toBe('Crown President')
   })
 
-  it('rank 6 (Executive Manager) → Regional Curator', () => {
-    expect(partnerTierForRank(6).code).toBe('regional_curator')
+  it('null/undefined/0/-1 collapses to Ambassador (fresh provisioning safe default)', () => {
+    expect(partnerTierForRank(null).code).toBe('ambassador')
+    expect(partnerTierForRank(undefined).code).toBe('ambassador')
+    expect(partnerTierForRank(0).code).toBe('ambassador')
+    expect(partnerTierForRank(-1).code).toBe('ambassador')
   })
 
-  it('rank 7 (Legacy Builder) → Prestige Partner', () => {
-    expect(partnerTierForRank(7).code).toBe('prestige_partner')
-    expect(partnerTierForRank(7).displayName).toBe('Prestige Partner')
-  })
-
-  it('rank 8 (Ambassador) → Prestige Partner', () => {
-    expect(partnerTierForRank(8).code).toBe('prestige_partner')
-  })
-
-  it('null/undefined/0 collapses to Concierge Partner (fresh provisioning safe default)', () => {
-    expect(partnerTierForRank(null).code).toBe('concierge_partner')
-    expect(partnerTierForRank(undefined).code).toBe('concierge_partner')
-    expect(partnerTierForRank(0).code).toBe('concierge_partner')
-    expect(partnerTierForRank(-1).code).toBe('concierge_partner')
-  })
-
-  it('out-of-band rank position > 8 collapses to Prestige Partner', () => {
-    expect(partnerTierForRank(9).code).toBe('prestige_partner')
-    expect(partnerTierForRank(99).code).toBe('prestige_partner')
+  it('out-of-band rank position > 5 caps at Crown President', () => {
+    expect(partnerTierForRank(6).code).toBe('crown_president')
+    expect(partnerTierForRank(99).code).toBe('crown_president')
   })
 })
 
-describe('getPartnerTier — direct lookup by tier position', () => {
-  it('returns the right tier for each of 1-4', () => {
-    expect(getPartnerTier(1).displayName).toBe('Concierge Partner')
-    expect(getPartnerTier(2).displayName).toBe('Brand Associate')
-    expect(getPartnerTier(3).displayName).toBe('Regional Curator')
-    expect(getPartnerTier(4).displayName).toBe('Prestige Partner')
+describe('getPartnerTier — direct lookup by position', () => {
+  it('returns the right rank for each of 1-5', () => {
+    expect(getPartnerTier(1).displayName).toBe('Ambassador')
+    expect(getPartnerTier(2).displayName).toBe('Executive')
+    expect(getPartnerTier(3).displayName).toBe('Gold Director')
+    expect(getPartnerTier(4).displayName).toBe('Platinum Director')
+    expect(getPartnerTier(5).displayName).toBe('Crown President')
   })
 })
 
 describe('ALL_PARTNER_TIERS', () => {
-  it('contains exactly 4 tiers in order', () => {
-    expect(ALL_PARTNER_TIERS).toHaveLength(4)
-    expect(ALL_PARTNER_TIERS.map((t) => t.position)).toEqual([1, 2, 3, 4])
+  it('contains exactly 5 ranks in order', () => {
+    expect(ALL_PARTNER_TIERS).toHaveLength(5)
+    expect(ALL_PARTNER_TIERS.map((t) => t.position)).toEqual([1, 2, 3, 4, 5])
   })
 
-  it('every tier has a tagline and a direct rate label', () => {
+  it('every rank has a tagline and earning labels', () => {
     for (const tier of ALL_PARTNER_TIERS) {
       expect(tier.tagline.length).toBeGreaterThan(10)
-      expect(tier.directRateLabel.length).toBeGreaterThan(0)
-      expect(tier.overrideLabel.length).toBeGreaterThan(0)
+      expect(tier.commissionLabel.length).toBeGreaterThan(0)
+      expect(tier.bonusLabel.length).toBeGreaterThan(0)
     }
   })
 })

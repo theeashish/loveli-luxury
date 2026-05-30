@@ -98,7 +98,7 @@ export async function previewDraft(
 
   for (const c of (commRes.data ?? []) as Array<{
     id: number
-    amount_minor: string
+    amount_minor: string | number
     level: number
     source_order_id: number
   }>) {
@@ -113,7 +113,7 @@ export async function previewDraft(
   }
   for (const s of (salaryRes.data ?? []) as Array<{
     id: number
-    total_minor: string
+    total_minor: string | number
   }>) {
     const a = BigInt(s.total_minor)
     salaryTotal += a
@@ -121,7 +121,7 @@ export async function previewDraft(
   }
   for (const b of (bonusRes.data ?? []) as Array<{
     id: number
-    amount_minor: string
+    amount_minor: string | number
     rank_id: number
   }>) {
     const a = BigInt(b.amount_minor)
@@ -138,7 +138,7 @@ export async function previewDraft(
   // can drop below other component sums if the net adjustment is negative.
   for (const m of (adjRes.data ?? []) as Array<{
     id: number
-    amount_minor: string
+    amount_minor: string | number
     reason: string
   }>) {
     const a = BigInt(m.amount_minor)

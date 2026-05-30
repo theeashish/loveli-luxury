@@ -117,7 +117,7 @@ export function CartDrawer() {
               <Link
                 href="/cart"
                 onClick={close}
-                className="block w-full rounded-md bg-[hsl(var(--primary))] px-6 py-3 text-center text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))] transition hover:opacity-90"
+                className="block w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-center text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--background))] transition hover:opacity-90"
               >
                 Review cart
               </Link>

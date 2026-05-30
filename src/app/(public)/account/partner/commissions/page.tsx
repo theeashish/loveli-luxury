@@ -18,9 +18,9 @@ const PAGE_SIZE = 50
 type LedgerRow = {
   id: number
   level: number
-  amount_minor: string
+  amount_minor: string | number
   rate_basis_points: number
-  commission_basis_minor: string
+  commission_basis_minor: string | number
   earned_at: string
   source_order_id: number
   payout_id: number | null
@@ -61,7 +61,7 @@ export default async function CommissionsPage({
   const total = countRes.count ?? 0
   const rows = (rowsRes.data ?? []) as LedgerRow[]
   const allRows = (totalsRes.data ?? []) as Array<{
-    amount_minor: string
+    amount_minor: string | number
     payout_id: number | null
   }>
   const totalEarned = allRows.reduce((acc, r) => acc + BigInt(r.amount_minor), 0n)

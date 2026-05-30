@@ -1,11 +1,17 @@
-import { FRAGRANCES } from '@/lib/catalog/fragrance-meta'
+/**
+ * Marquee — brand strip on the homepage.
+ *
+ * Content is admin-editable via `/admin/content/site/home_marquee`. Falls
+ * back to MARQUEE_DEFAULTS in lib/content/site.ts if the DB row is missing
+ * or malformed.
+ */
 
-const SEP = '✦'
+import { getSection } from '@/lib/content/site'
 
-export function Marquee() {
+export async function Marquee() {
+  const content = await getSection('home_marquee')
   // Two passes side-by-side so the CSS-only animation loop is seamless.
-  const items = FRAGRANCES.map((f) => f.name.toUpperCase())
-  const track = [...items, ...items]
+  const track = [...content.items, ...content.items]
 
   return (
     <section
@@ -19,7 +25,7 @@ export function Marquee() {
             className="mx-8 inline-flex items-center gap-8 font-serif text-2xl tracking-[0.2em] text-[hsl(var(--muted-foreground))] md:text-3xl"
           >
             {name}
-            <span className="text-[hsl(var(--primary))]">{SEP}</span>
+            <span className="text-[hsl(var(--primary))]">{content.separator}</span>
           </span>
         ))}
       </div>

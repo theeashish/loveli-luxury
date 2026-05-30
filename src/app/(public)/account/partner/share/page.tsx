@@ -56,7 +56,7 @@ export default async function SharePage() {
         </p>
         <p className="mt-2 break-all font-mono text-sm">{shortUrl}</p>
         <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
-          Best for social posts and WhatsApp — unfurls with your branded
+          Best for social posts and WhatsApp. Unfurls with your branded
           card. Redirects to the homepage with your sponsor code locked in.
         </p>
         <div className="mt-4 grid grid-cols-1 items-center gap-4 md:grid-cols-[10rem_1fr]">
@@ -99,7 +99,7 @@ export default async function SharePage() {
           </div>
           <p className="mt-3 text-center text-xs text-[hsl(var(--muted-foreground))]">
             Anyone who signs up via this link is locked to you as their
-            sponsor — that&apos;s how you build your partner network.
+            sponsor. That&apos;s how you build your partner network.
           </p>
         </div>
       </section>

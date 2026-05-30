@@ -49,7 +49,7 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     id: number
     distributor_id: number
     status: string
-    net_total_minor: string
+    net_total_minor: string | number
     payout_msisdn: string | null
     period_year: number
     period_month: number

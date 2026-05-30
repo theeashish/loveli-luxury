@@ -8,8 +8,9 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getSession, isSuperadmin } from '@/lib/auth/roles'
 import { formatKes } from '@/lib/money'
-import { transitionOrderStatus, reconcilePayheroPayment } from './actions'
+import { transitionOrderStatus, reconcilePayheroPayment, purgeOrder } from './actions'
 import { ALLOWED_ACTIONS } from './transitions'
 
 export const dynamic = 'force-dynamic'
@@ -25,11 +26,12 @@ type OrderRow = {
   kind: string
   customer_email: string
   customer_phone: string | null
-  subtotal_minor: string
-  shipping_minor: string
-  tax_minor: string
-  discount_minor: string
-  total_minor: string
+  subtotal_minor: string | number
+  shipping_minor: string | number
+  tax_minor: string | number
+  discount_minor: string | number
+  processing_fee_minor: string | number
+  total_minor: string | number
   currency: string
   created_at: string
   paid_at: string | null
@@ -48,10 +50,10 @@ type OrderItemRow = {
   variant_id: number | null
   bundle_id: number | null
   quantity: number
-  unit_price_minor: string
-  line_total_minor: string
+  unit_price_minor: string | number
+  line_total_minor: string | number
   is_commissionable: boolean
-  commissionable_amount_minor: string
+  commissionable_amount_minor: string | number
 }
 
 type AuditRow = {
@@ -91,12 +93,22 @@ export default async function AdminOrderDetail({
   const orderRes = await service
     .from('orders')
     .select(
-      'id, order_number, status, kind, customer_email, customer_phone, subtotal_minor, shipping_minor, tax_minor, discount_minor, total_minor, currency, created_at, paid_at, payment_provider, payment_provider_ref, payhero_checkout_reference, payhero_mpesa_receipt, shipping_address_id, sponsor_distributor_id, notes, user_id',
+      'id, order_number, status, kind, customer_email, customer_phone, subtotal_minor, shipping_minor, tax_minor, discount_minor, processing_fee_minor, total_minor, currency, created_at, paid_at, payment_provider, payment_provider_ref, payhero_checkout_reference, payhero_mpesa_receipt, shipping_address_id, sponsor_distributor_id, notes, user_id',
     )
     .eq('id', orderId)
     .maybeSingle()
   const order = (orderRes.data as OrderRow | null) ?? null
   if (!order) notFound()
+
+  // Superadmin gate for the purge action. Non-superadmins simply don't see
+  // the button; the server action re-checks regardless.
+  const session = await getSession()
+  const canPurge =
+    session !== null &&
+    isSuperadmin(session) &&
+    (['pending', 'cancelled', 'expired', 'failed'] as AnyStatus[]).includes(order.status) &&
+    order.paid_at === null &&
+    order.payhero_mpesa_receipt === null
 
   const itemsRes = await service
     .from('order_items')
@@ -106,6 +118,14 @@ export default async function AdminOrderDetail({
     .eq('order_id', orderId)
     .order('id')
   const items = (itemsRes.data ?? []) as OrderItemRow[]
+
+  // Reconcile the total for display. Signup orders fold the joining fee into
+  // subtotal_minor but NOT into order_items, so (subtotal − items) is the
+  // joining fee. Surfacing this + the processing fee makes the Total add up
+  // visibly (previously they were invisible, which looked like a double charge).
+  const itemsSumMinor = items.reduce((s, it) => s + BigInt(it.line_total_minor), 0n)
+  const joiningFeeMinor = BigInt(order.subtotal_minor) - itemsSumMinor
+  const processingFeeMinor = BigInt(order.processing_fee_minor)
 
   const variantIds = items.map((i) => i.variant_id).filter((x): x is number => x !== null)
   const bundleIds = items.map((i) => i.bundle_id).filter((x): x is number => x !== null)
@@ -224,6 +244,29 @@ export default async function AdminOrderDetail({
         </section>
       ) : null}
 
+      {canPurge ? (
+        <section className="mb-8 rounded-lg border border-rose-300 bg-rose-50 p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-rose-900">
+            Erroneous order — superadmin purge
+          </h2>
+          <p className="mt-2 text-sm text-rose-900/80">
+            This order has no paid_at, no M-Pesa receipt, no commission rows,
+            and is in a non-final state. Deleting it removes the order, its
+            items, and all payment attempts. The deletion itself is audited and
+            cannot itself be deleted — but the order rows are gone for good.
+          </p>
+          <form action={purgeOrder} className="mt-3">
+            <input type="hidden" name="orderId" value={order.id} />
+            <button
+              type="submit"
+              className="rounded-md border border-rose-400 bg-white px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
+            >
+              Void &amp; purge order
+            </button>
+          </form>
+        </section>
+      ) : null}
+
       {allowed.length > 0 ? (
         <section className="mb-8 flex flex-wrap gap-3 rounded-lg border border-neutral-200 bg-white p-4">
           {allowed.map((a) => {
@@ -304,8 +347,14 @@ export default async function AdminOrderDetail({
           <h2 className="mb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
             Totals
           </h2>
-          <Row label="Subtotal" value={formatKes(BigInt(order.subtotal_minor))} />
+          <Row label="Items" value={formatKes(itemsSumMinor)} />
+          {joiningFeeMinor > 0n ? (
+            <Row label="Joining fee" value={formatKes(joiningFeeMinor)} />
+          ) : null}
           <Row label="Shipping" value={formatKes(BigInt(order.shipping_minor))} />
+          {processingFeeMinor > 0n ? (
+            <Row label="Processing fee" value={formatKes(processingFeeMinor)} />
+          ) : null}
           {BigInt(order.discount_minor) > 0n ? (
             <Row label="Discount" value={`−${formatKes(BigInt(order.discount_minor))}`} />
           ) : null}

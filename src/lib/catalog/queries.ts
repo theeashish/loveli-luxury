@@ -22,6 +22,7 @@ import {
   mapProduct,
   mapProductSummary,
 } from './mappers'
+import type { FragranceMetaRow } from './mappers'
 import type {
   BundleDto,
   CategoryDto,
@@ -101,7 +102,7 @@ export async function getProductBySlug(
   if (error) throw error
   if (!data) return null
 
-  const [variantsRes, imagesRes] = await Promise.all([
+  const [variantsRes, imagesRes, metaRes] = await Promise.all([
     supabase
       .from('product_variants')
       .select()
@@ -112,11 +113,20 @@ export async function getProductBySlug(
       .select()
       .eq('product_id', data.id)
       .order('position', { ascending: true }),
+    // product_fragrance_meta is not in the generated Database types yet (regen
+    // pending, punch-list P3), so read it via an untyped client. A missing row
+    // OR a not-yet-applied table both degrade to no detail block.
+    (supabase as unknown as SupabaseClient)
+      .from('product_fragrance_meta')
+      .select()
+      .eq('product_id', data.id)
+      .maybeSingle(),
   ])
   if (variantsRes.error) throw variantsRes.error
   if (imagesRes.error) throw imagesRes.error
 
-  return mapProduct(data, variantsRes.data ?? [], imagesRes.data ?? [])
+  const fragranceMeta = (metaRes.error ? null : metaRes.data) as FragranceMetaRow | null
+  return mapProduct(data, variantsRes.data ?? [], imagesRes.data ?? [], fragranceMeta)
 }
 
 export async function getProductById(
@@ -130,7 +140,7 @@ export async function getProductById(
   if (error) throw error
   if (!data) return null
 
-  const [variantsRes, imagesRes] = await Promise.all([
+  const [variantsRes, imagesRes, metaRes] = await Promise.all([
     supabase
       .from('product_variants')
       .select()
@@ -141,11 +151,20 @@ export async function getProductById(
       .select()
       .eq('product_id', data.id)
       .order('position', { ascending: true }),
+    // product_fragrance_meta is not in the generated Database types yet (regen
+    // pending, punch-list P3), so read it via an untyped client. A missing row
+    // OR a not-yet-applied table both degrade to no detail block.
+    (supabase as unknown as SupabaseClient)
+      .from('product_fragrance_meta')
+      .select()
+      .eq('product_id', data.id)
+      .maybeSingle(),
   ])
   if (variantsRes.error) throw variantsRes.error
   if (imagesRes.error) throw imagesRes.error
 
-  return mapProduct(data, variantsRes.data ?? [], imagesRes.data ?? [])
+  const fragranceMeta = (metaRes.error ? null : metaRes.data) as FragranceMetaRow | null
+  return mapProduct(data, variantsRes.data ?? [], imagesRes.data ?? [], fragranceMeta)
 }
 
 export async function listActiveProductSlugs(): Promise<string[]> {

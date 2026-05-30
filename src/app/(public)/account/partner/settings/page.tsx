@@ -73,7 +73,7 @@ export default async function DistributorSettingsPage({
         <dl className="mt-5 space-y-2 text-sm">
           <Row
             label="Current"
-            value={row?.payout_msisdn ?? '—'}
+            value={row?.payout_msisdn ?? '-'}
             sub={
               row?.payout_msisdn_verified_at
                 ? `verified ${new Date(row.payout_msisdn_verified_at).toLocaleDateString('en-KE')}`
@@ -111,7 +111,7 @@ export default async function DistributorSettingsPage({
           </label>
           <button
             type="submit"
-            className="rounded-md bg-[hsl(var(--primary))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
+            className="rounded-md bg-[hsl(var(--foreground))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--background))]"
           >
             Submit for verification
           </button>

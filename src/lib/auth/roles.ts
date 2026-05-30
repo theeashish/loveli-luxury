@@ -61,11 +61,50 @@ export function isAdmin(session: Session): boolean {
   return session.roles.has('admin') || session.roles.has('superadmin')
 }
 
+export function isSuperadmin(session: Session): boolean {
+  return session.roles.has('superadmin')
+}
+
 export async function requireAdmin(): Promise<Session> {
   const session = await getSession()
   if (!session) throw new AuthError('UNAUTHENTICATED')
   if (!isAdmin(session)) throw new AuthError('FORBIDDEN')
   return session
+}
+
+export async function requireSuperadmin(): Promise<Session> {
+  const session = await getSession()
+  if (!session) throw new AuthError('UNAUTHENTICATED')
+  if (!isSuperadmin(session)) throw new AuthError('FORBIDDEN')
+  return session
+}
+
+/**
+ * Returns a redirect target if the current admin must complete a 2FA (aal2)
+ * step-up before using /admin, else null.
+ *
+ * INERT unless ENFORCE_ADMIN_MFA=true. FAIL-OPEN: any error → null (no
+ * lockout). Only admins who have actually enrolled a TOTP factor are ever
+ * asked to step up — un-enrolled admins are never blocked. This makes the
+ * gate safe to ship before MFA is enabled on the Supabase project and before
+ * anyone has enrolled.
+ */
+export async function adminMfaRedirect(): Promise<string | null> {
+  const { getServerEnv } = await import('../env')
+  if (!getServerEnv().ENFORCE_ADMIN_MFA) return null
+  try {
+    const supabase = createClient() as unknown as Client
+    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (error || !data) return null
+    // nextLevel === 'aal2' means the user has a verified factor. If the
+    // current session is below aal2, they must challenge.
+    if (data.nextLevel === 'aal2' && data.currentLevel !== 'aal2') {
+      return '/account/security?step_up=1'
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
 export function adminClient(): Client {

@@ -13,13 +13,13 @@ type PayoutRow = {
   period_year: number
   period_month: number
   status: string
-  commissions_total_minor: string
-  salary_total_minor: string
-  rank_bonus_total_minor: string
-  retail_profit_minor: string
-  gross_total_minor: string
-  fees_minor: string
-  net_total_minor: string
+  commissions_total_minor: string | number
+  salary_total_minor: string | number
+  rank_bonus_total_minor: string | number
+  retail_profit_minor: string | number
+  gross_total_minor: string | number
+  fees_minor: string | number
+  net_total_minor: string | number
   currency: string
   payout_method: string
   payout_msisdn: string | null
@@ -70,20 +70,20 @@ export default async function AdminPayoutDetail({
   ])
   const commissions = (commRes.data ?? []) as Array<{
     id: number
-    amount_minor: string
+    amount_minor: string | number
     level: number
     source_order_id: number
     earned_at: string
   }>
   const salaries = (salaryRes.data ?? []) as Array<{
     id: number
-    total_minor: string
+    total_minor: string | number
     period_year: number
     period_month: number
   }>
   const bonuses = (bonusRes.data ?? []) as Array<{
     id: number
-    amount_minor: string
+    amount_minor: string | number
     rank_id: number
     awarded_at: string
   }>

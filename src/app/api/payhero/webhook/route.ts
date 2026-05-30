@@ -24,6 +24,7 @@
 import { revalidatePath } from 'next/cache'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { applyPaymentSuccess } from '@/lib/payments/apply-payment-success'
 import {
   verifyWebhookToken,
   deriveEventId,
@@ -172,60 +173,41 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 8. Stamp the PayHero-specific refs on the order.
-  // TODO(types): regenerate database.ts post-migration-019.
-  const mpesaReceipt =
-    payload.provider_reference ?? payload.third_party_reference ?? null
-  await (service.from('orders') as unknown as {
-    update: (v: Record<string, unknown>) => {
-      eq: (col: string, val: unknown) => Promise<{ error: { message: string } | null }>
-    }
+  // 8 + 9: stamp refs, mark paid, provision (signup), ledger, v2 preview,
+  // receipt, audit_log — all in the shared helper. The webhook-specific
+  // bit is the webhook_deliveries dedup row, which we update via
+  // markProcessed below depending on the outcome.
+  const result = await applyPaymentSuccess(service, {
+    orderId: order.id,
+    orderKind: order.kind,
+    payheroCheckoutReference: payload.reference ?? eventId,
+    mpesaReceipt:
+      payload.provider_reference ?? payload.third_party_reference ?? null,
+    externalReference: externalRef,
+    source: 'webhook',
   })
-    .update({
-      payhero_external_reference: externalRef,
-      payhero_mpesa_receipt: mpesaReceipt,
-    })
-    .eq('id', order.id)
 
-  // 9. The idempotent state machine: mark_order_paid → (signup ?
-  // provision_distributor) → write_commission_ledger.
-  try {
-    const paidAt = new Date().toISOString()
-    const markRes = (await service.rpc('mark_order_paid', {
-      p_order_id: order.id,
-      p_provider_ref: mpesaReceipt ?? payload.reference ?? eventId,
-      p_paid_at: paidAt,
-    })) as { error: { message: string } | null }
-    if (markRes.error) throw new Error(`mark_order_paid: ${markRes.error.message}`)
-
-    if (order.kind === 'distributor_signup') {
-      const provRes = (await service.rpc('provision_distributor', {
-        p_order_id: order.id,
-      })) as { error: { message: string } | null }
-      if (provRes.error) throw new Error(`provision_distributor: ${provRes.error.message}`)
-    }
-
-    const ledgerRes = (await service.rpc('write_commission_ledger', {
-      p_order_id: order.id,
-    })) as { error: { message: string } | null }
-    if (ledgerRes.error) {
-      await markProcessed(
-        service,
-        eventId,
-        `commission_ledger non-fatal: ${ledgerRes.error.message}`,
-      )
-      revalidatePath('/shop')
-      return NextResponse.json({ ok: true, commissionPending: true })
-    }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e)
-    await markProcessed(service, eventId, msg)
-    return NextResponse.json({ error: msg }, { status: 500 })
+  if (!result.paid) {
+    await markProcessed(service, eventId, result.error ?? 'apply failed')
+    return NextResponse.json(
+      { error: result.error ?? 'apply failed' },
+      { status: 500 },
+    )
   }
 
-  await markProcessed(service, eventId, null)
+  await markProcessed(
+    service,
+    eventId,
+    result.warnings.length > 0
+      ? `non-fatal: ${result.warnings.join('; ')}`
+      : null,
+  )
   revalidatePath('/shop')
-  return NextResponse.json({ ok: true })
+  return NextResponse.json(
+    result.warnings.length > 0
+      ? { ok: true, warnings: result.warnings }
+      : { ok: true },
+  )
 }
 
 async function markProcessed(

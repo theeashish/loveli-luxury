@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic'
 type ResolutionRow = {
   id: number
   order_id: number
-  paid_amount_minor: string
+  paid_amount_minor: string | number
   paid_count: number
   resolution: string | null
   deducted_from_payout_id: number | null
@@ -33,7 +33,7 @@ type OrderRow = {
   id: number
   order_number: string
   customer_email: string
-  total_minor: string
+  total_minor: string | number
   paid_at: string | null
 }
 

@@ -38,7 +38,7 @@ type OrderRow = {
   id: number
   order_number: string
   status: string
-  total_minor: string
+  total_minor: string | number
   currency: string
   created_at: string
   user_id: string | null
@@ -155,7 +155,7 @@ export default async function CheckoutReturnPage({
       ) : (
         <p className="mt-6 text-sm text-[hsl(var(--muted-foreground))]">
           Payment has not been confirmed yet. M-Pesa receipts can take a
-          minute to settle — refresh this page in a moment.
+          minute to settle. Refresh this page in a moment.
         </p>
       )}
 
@@ -170,7 +170,7 @@ export default async function CheckoutReturnPage({
         ) : null}
         <Link
           href="/shop"
-          className="rounded-md bg-[hsl(var(--primary))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary-foreground))]"
+          className="rounded-md bg-[hsl(var(--foreground))] px-5 py-2.5 text-xs uppercase tracking-[0.15em] text-[hsl(var(--background))]"
         >
           Continue shopping
         </Link>

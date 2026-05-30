@@ -21,8 +21,8 @@ export type VariantDto = {
   productId: number
   sku: string
   sizeMl: number
-  retailPriceMinor: string
-  distributorPriceMinor: string
+  retailPriceMinor: string | number
+  distributorPriceMinor: string | number
   weightG: number | null
   inventoryQty: number
   isActive: boolean
@@ -47,6 +47,24 @@ export type ProductSummaryDto = {
   minRetailPriceMinor: string | null
 }
 
+export type FragranceMetaDto = {
+  topNotes: string[]
+  heartNotes: string[]
+  baseNotes: string[]
+  /** e.g. "8–10 hours" */
+  longevity: string | null
+  /** e.g. "close", "moderate", "strong" */
+  projection: string | null
+  /** Suitability note for East African climate. */
+  climateNote: string | null
+  /** e.g. ["Office", "Evening", "Date"] */
+  occasions: string[]
+  /** Editorial story, may contain newlines. */
+  story: string | null
+  scentFamily: string | null
+  inspiredBy: string | null
+}
+
 export type ProductDto = {
   id: number
   slug: string
@@ -58,6 +76,7 @@ export type ProductDto = {
   metaDescription: string | null
   variants: VariantDto[]
   images: ImageDto[]
+  fragranceMeta: FragranceMetaDto | null
 }
 
 export type BundleItemDto = {
@@ -66,7 +85,7 @@ export type BundleItemDto = {
   productName: string
   productSlug: string
   sizeMl: number
-  unitRetailPriceMinor: string
+  unitRetailPriceMinor: string | number
 }
 
 export type BundleDto = {
@@ -74,8 +93,8 @@ export type BundleDto = {
   slug: string
   name: string
   description: string | null
-  retailPriceMinor: string
-  distributorPriceMinor: string
+  retailPriceMinor: string | number
+  distributorPriceMinor: string | number
   currency: string
   isStarterPackage: boolean
   starterPackageCode: string | null
@@ -83,5 +102,5 @@ export type BundleDto = {
   items: BundleItemDto[]
   images: ImageDto[]
   /** Sum of items.quantity * variant.retailPrice. Useful for "savings vs à-la-carte". */
-  alaCarteTotalMinor: string
+  alaCarteTotalMinor: string | number
 }
