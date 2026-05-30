@@ -38,6 +38,22 @@ export default defineConfig({
       // run the same modules in plain Node, so swap in a no-op shim. The real
       // package still gates client bundles in production.
       'server-only': path.resolve(__dirname, './tests/shims/server-only.ts'),
+      // pglite ships its contrib extensions behind an `exports` subpath
+      // ("./contrib/*") that Node resolves but Vite's resolver does not, so
+      // the integration harness fails to load under Vitest. Point Vite at the
+      // built files directly. (Node-run scripts don't need this.)
+      '@electric-sql/pglite/contrib/pgcrypto': path.resolve(
+        __dirname,
+        'node_modules/@electric-sql/pglite/dist/contrib/pgcrypto.js',
+      ),
+      '@electric-sql/pglite/contrib/citext': path.resolve(
+        __dirname,
+        'node_modules/@electric-sql/pglite/dist/contrib/citext.js',
+      ),
+      '@electric-sql/pglite/contrib/uuid_ossp': path.resolve(
+        __dirname,
+        'node_modules/@electric-sql/pglite/dist/contrib/uuid_ossp.js',
+      ),
     },
   },
 })

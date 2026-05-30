@@ -59,19 +59,27 @@ export async function createTestDb(): Promise<TestDb> {
       throw new Error(`migration ${f} failed to apply: ${(e as Error).message}`)
     }
   }
+  // Defined as generic function declarations (not object-literal arrow methods)
+  // so the <T> flows through to the return type cleanly under `tsc`.
+  async function query<T extends Row = Row>(sql: string, params?: unknown[]): Promise<T[]> {
+    const res = await db.query<T>(sql, params)
+    return res.rows as T[]
+  }
+  async function one<T extends Row = Row>(sql: string, params?: unknown[]): Promise<T | undefined> {
+    return (await query<T>(sql, params))[0]
+  }
+  async function scalar<T = unknown>(sql: string, params?: unknown[]): Promise<T> {
+    const res = await db.query(sql, params)
+    const first = res.rows[0] as Row | undefined
+    return first ? (Object.values(first)[0] as T) : (undefined as T)
+  }
   return {
-    exec: async (sql) => {
+    exec: async (sql: string) => {
       await db.exec(sql)
     },
-    query: async <T extends Row = Row>(sql: string, params?: unknown[]) =>
-      (await db.query<T>(sql, params)).rows,
-    one: async <T extends Row = Row>(sql: string, params?: unknown[]) =>
-      (await db.query<T>(sql, params)).rows[0],
-    scalar: async <T = unknown>(sql: string, params?: unknown[]) => {
-      const rows = (await db.query(sql, params)).rows as Row[]
-      const first = rows[0]
-      return (first ? (Object.values(first)[0] as T) : (undefined as T))
-    },
+    query,
+    one,
+    scalar,
     close: () => db.close(),
     raw: db,
   }
