@@ -48,8 +48,11 @@ export default defineConfig({
         'src/lib/payhero/idempotency.ts',
         'src/lib/recently-viewed/logic.ts',
         'src/lib/wishlist/logic.ts',
-        'src/lib/mlm/commission-calculator.ts',
-        'src/lib/mlm/salary-calculator.ts',
+        // NB: the commission/salary MONEY math lives in SQL RPCs
+        // (write_commission_ledger, etc.) and is covered by
+        // tests/integration/commission-engine.test.ts against the real schema,
+        // not by a TypeScript re-implementation. The former dead TS calculators
+        // (which encoded a superseded rate sheet) were deleted 2026-05-30.
       ],
       thresholds: {
         lines: 90,
