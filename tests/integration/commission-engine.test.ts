@@ -174,6 +174,32 @@ describe('write_commission_ledger (production SQL)', () => {
     expect(recipients).not.toContain(l3) // gated out
   })
 
+  it('writes NO commissions for an unpaid order (no recruitment-pay leak)', async () => {
+    // The IDS rule pinned at /ids: "Commissions only fire on confirmed retail
+    // sales." Concretely: write_commission_ledger must REFUSE to run on a
+    // pending order. Catches a regression that would otherwise silently pay
+    // commissions on signup/abandoned-cart orders.
+    const [l1] = (await seedChain(db, [1])) as [number, ...number[]]
+    const variant = await seedVariant(db, VARIANT)
+    const { orderId } = await seedPendingOrder(db, {
+      sponsorId: l1,
+      variantId: variant,
+      ...ORDER,
+    })
+    // NOTE: we deliberately did NOT call mark_order_paid. The order is pending.
+    let threw = false
+    try {
+      await db.scalar(`SELECT public.write_commission_ledger($1)`, [orderId])
+    } catch (e) {
+      threw = /is not paid/i.test(String((e as Error).message))
+    }
+    expect(threw).toBe(true)
+    const rows = Number(
+      await db.scalar(`SELECT COUNT(*) FROM commission_ledger WHERE source_order_id = $1`, [orderId]),
+    )
+    expect(rows).toBe(0)
+  })
+
   it('writes no commissions for an order with no sponsor (pure retail)', async () => {
     const variant = await seedVariant(db, VARIANT)
     const [l1] = (await seedChain(db, [1])) as [number, ...number[]]

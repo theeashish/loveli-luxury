@@ -143,6 +143,26 @@ const SCHEMA_HELP: Record<SectionKey, string> = {
                     (e.g. "✦", "·", "—")
   items           — array of strings that scroll across the band.
                     Order in the array is order on screen.`,
+
+  partner_ids: `Fields (Income Disclosure Statement at /ids):
+  eyebrow         — small uppercase line above the headline
+  headline        — display heading; *asterisks* for italic + gold
+  lead            — paragraph under the headline, max ~50 words
+  periodLabel    — free-form period label, e.g. "Q1 2026" or
+                    "January-March 2026". Replace "DATA PENDING".
+  methodology     — paragraph explaining how the numbers were
+                    computed. Defines what "active partner" means.
+  stats           — 3-6 entries, each with:
+    label           — the stat name
+    value           — the headline value (e.g. "KES 4,200", "61%")
+    sub             — caption under the value; include unit/caveat
+  rules           — bullet list of the non-negotiable program rules.
+                    Keep these factual and conservative.
+  footnote        — closing paragraph; include the report-fraud email.
+
+  LOCKED PRINCIPLE — this page is the OPPOSITE of an income claim. Stats
+  must describe REALITY (median, % earning, recoup rate), not best-case.
+  Replace every "DATA PENDING" with verified numbers before launch.`,
 }
 
 export default async function SectionEditPage({

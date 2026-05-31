@@ -386,6 +386,85 @@ export const FIND_YOUR_SCENT_DEFAULTS: FindYourScentContent = {
   ],
 }
 
+/**
+ * partner_ids — the Income Disclosure Statement at /ids.
+ *
+ * Locked design rules (don't soften these in copy edits — they're what
+ * makes the page legally and ethically defensible):
+ *  1. Stats describe REALITY, not projection. Median, % earning > 0, recoup
+ *     rate, top 5% — all distribution facts, never best-case promises.
+ *  2. The simulator (if shown) MUST default to median, not optimistic.
+ *  3. The "Rules of the program" block is non-negotiable: commission only
+ *     on confirmed retail sales; no recruitment commissions; starter is not
+ *     commissionable; refunds trigger clawbacks; no income is guaranteed.
+ *  4. Every figure carries a "DATA PENDING" marker until real numbers exist.
+ *
+ * Edited at /admin/content/site/partner_ids by the owner.
+ */
+export const partnerIdsSchema = z.object({
+  eyebrow: z.string(),
+  /** Use *asterisks* to mark italic + primary-color emphasis. */
+  headline: z.string(),
+  lead: z.string(),
+  /** Free-form reporting-period label (e.g. "January–March 2026"). */
+  periodLabel: z.string(),
+  /** What "active partner" means + how numbers are computed. */
+  methodology: z.string(),
+  stats: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+        sub: z.string(),
+      }),
+    )
+    .min(3)
+    .max(6),
+  /** The non-negotiable program rules — render as a fixed bullet list. */
+  rules: z.array(z.string()).min(3),
+  footnote: z.string(),
+})
+export type PartnerIdsContent = z.infer<typeof partnerIdsSchema>
+export const PARTNER_IDS_DEFAULTS: PartnerIdsContent = {
+  eyebrow: 'Income disclosure',
+  headline: 'What partners *actually* earn',
+  lead: 'We publish this because you deserve real numbers, not a sales pitch. The stats below describe the verified earnings distribution across active Loveli partners over the reporting period. They are not projections, promises, or testimonials.',
+  periodLabel: 'Reporting period — DATA PENDING',
+  methodology:
+    'An "active partner" is one who placed at least one verified retail sale in the 90 days before the period end. All amounts are gross commission earnings before taxes and personal expenses. Refunded and clawed-back commissions are excluded. The same numbers are visible in your partner dashboard under Earnings.',
+  stats: [
+    {
+      label: 'Median monthly earnings',
+      value: 'KES 0',
+      sub: 'Active partners (half earn less, half earn more) — DATA PENDING',
+    },
+    {
+      label: 'Active partners earning more than zero',
+      value: '0%',
+      sub: 'Of all active partners in the period — DATA PENDING',
+    },
+    {
+      label: 'Partners who recouped their starter cost',
+      value: '0%',
+      sub: 'Cumulative earnings >= onboarding cost — DATA PENDING',
+    },
+    {
+      label: 'Top 5% monthly earnings',
+      value: 'KES 0',
+      sub: 'The 95th-percentile active partner — DATA PENDING',
+    },
+  ],
+  rules: [
+    'Commissions only fire on confirmed retail sales. Recruiting a partner pays nothing.',
+    'A partner\'s own starter purchase is not commissionable.',
+    'Refunded orders trigger a clawback against the same partners who earned on them.',
+    'Maintenance: a partner must place verified retail sales each month to remain active.',
+    'No income is guaranteed. Earnings depend entirely on retail performance.',
+  ],
+  footnote:
+    'Loveli Luxury Scents is committed to transparent compensation. If you ever see a recruitment-only pitch in our name, that pitch is not from us. Report it: concierge@loveliluxuryscents.com.',
+}
+
 /** home_marquee — the brand marquee strip. */
 export const marqueeSchema = z.object({
   separator: z.string(),
@@ -493,6 +572,12 @@ export const SECTIONS = {
     defaults: MARQUEE_DEFAULTS,
     label: 'Homepage marquee',
     description: 'The brand marquee strip on the homepage. List items scroll across the band with the separator between them.',
+  },
+  partner_ids: {
+    schema: partnerIdsSchema,
+    defaults: PARTNER_IDS_DEFAULTS,
+    label: 'Income Disclosure Statement (/ids)',
+    description: 'The public Income Disclosure Statement page. Edit the eyebrow, headline, lead paragraph, reporting period label, methodology, the stats grid (median, % earning, recoup rate, etc.), the non-negotiable rules bullets, and the footnote. Keep figures factual; replace "DATA PENDING" placeholders with verified numbers before launch.',
   },
 } as const satisfies Record<string, RegistryEntry<z.ZodTypeAny>>
 

@@ -40,6 +40,19 @@ test.describe('public surfaces render', () => {
     }
   })
 
+  test('/ids renders the Income Disclosure Statement with the locked rules', async ({ page }) => {
+    const res = await page.goto('/ids')
+    expect(res?.status()).toBe(200)
+    const body = (await page.locator('body').textContent()) ?? ''
+    // The non-negotiable rules from the locked design (lib/content/site.ts).
+    // A regression that softens or drops these is a legal-exposure risk.
+    expect(body).toContain('Commissions only fire on confirmed retail sales')
+    expect(body).toContain('Recruiting a partner pays nothing')
+    expect(body).toContain('starter purchase is not commissionable')
+    expect(body).toContain('Refunded orders trigger a clawback')
+    expect(body).toContain('No income is guaranteed')
+  })
+
   test('robots.txt allows / and disallows private routes', async ({ request }) => {
     const res = await request.get('/robots.txt')
     expect(res.status()).toBe(200)

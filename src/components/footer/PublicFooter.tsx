@@ -64,6 +64,14 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
                   Partner program
                 </Link>
               </li>
+              <li>
+                <Link
+                  className="hover:text-[hsl(var(--primary))]"
+                  href="/ids"
+                >
+                  Income disclosure
+                </Link>
+              </li>
             </ul>
           </div>
 
