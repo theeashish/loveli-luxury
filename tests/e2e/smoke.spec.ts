@@ -53,6 +53,16 @@ test.describe('public surfaces render', () => {
     expect(body).toContain('No income is guaranteed')
   })
 
+  test('/api/health (liveness) returns 200', async ({ request }) => {
+    // This is the endpoint our external uptime monitor pings every minute.
+    // A regression that breaks it = blind monitoring = silent outage.
+    const res = await request.get('/api/health')
+    expect(res.status()).toBe(200)
+    const body = await res.json()
+    expect(body.ok).toBe(true)
+    expect(body.mode).toBe('liveness')
+  })
+
   test('robots.txt allows / and disallows private routes', async ({ request }) => {
     const res = await request.get('/robots.txt')
     expect(res.status()).toBe(200)

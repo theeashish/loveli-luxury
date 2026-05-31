@@ -22,6 +22,7 @@ export default function robots(): MetadataRoute.Robots {
         '/cart',
         '/auth',
         '/post-login',
+        '/_inbox', // image inbox; never published
       ],
     },
     sitemap: `${base}/sitemap.xml`,
