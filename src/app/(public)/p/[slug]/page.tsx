@@ -21,8 +21,17 @@ export const dynamic = 'force-dynamic'
 export const dynamicParams = true
 
 export async function generateStaticParams() {
-  const slugs = await listActiveProductSlugs()
-  return slugs.map((slug) => ({ slug }))
+  // Degrade to on-demand rendering when the catalog can't be read at build
+  // time (e.g. CI builds with no database reachable). On Vercel, where the DB
+  // is reachable, this still returns every slug and pre-renders them. Mirrors
+  // the resilient pattern in app/sitemap.ts. dynamicParams defaults to true,
+  // so any slug not listed here is rendered on first request (ISR).
+  try {
+    const slugs = await listActiveProductSlugs()
+    return slugs.map((slug) => ({ slug }))
+  } catch {
+    return []
+  }
 }
 
 function primaryImageUrl(images: ImageDto[]): string | undefined {

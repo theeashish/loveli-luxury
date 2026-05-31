@@ -83,3 +83,10 @@ jobs:
           NEXT_PUBLIC_APP_NAME: Loveli Luxury International
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key_for_ci_build_only
+          # Server-env placeholders so getServerEnv() validation passes during
+          # the build. These are NOT real credentials and never reach a real
+          # service — the catalog pages' generateStaticParams degrade to []
+          # when the (placeholder, unreachable) DB can't be read, so the build
+          # validates compilation + bundling without needing a live database.
+          SUPABASE_SERVICE_ROLE_KEY: placeholder_service_role_key_ci_build_only
+          REVALIDATE_SECRET: placeholder_revalidate_secret_min_32_chars_ci
