@@ -94,6 +94,37 @@ export async function deactivateUser(
     return { ok: false, error: `Role revocation failed: ${revokeRes.error.message}` }
   }
 
+  // 1b. Flip distributors.is_active = FALSE for any distributor row this user
+  // owns. Discovered 2026-05-30: without this, a soft-deleted user's
+  // distributor row stays ACTIVE — meaning the commission engine keeps
+  // including them in the upline chain (write_commission_ledger.is_active=TRUE
+  // filter), and the still-stored payout_msisdn could receive a B2C transfer
+  // against that row. For a money system, the deactivation MUST sever both
+  // the auth identity AND the financial identity.
+  //
+  // We capture the previous state in the audit row below so an engineer can
+  // reverse this cleanly if the user is ever reinstated.
+  const distRes = await (service.from('distributors') as unknown as {
+    update: (v: Record<string, unknown>) => {
+      eq: (col: string, val: unknown) => {
+        select: (cols: string) => Promise<{
+          data: Array<{ id: number; sponsor_code: string }> | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
+    .update({ is_active: false })
+    .eq('user_id', userId)
+    .select('id, sponsor_code')
+  if (distRes.error) {
+    return {
+      ok: false,
+      error: `Distributor deactivation failed: ${distRes.error.message}. Roles were revoked but distributor row(s) are still ACTIVE — re-run to complete.`,
+    }
+  }
+  const deactivatedDistributors = distRes.data ?? []
+
   // 2. Ban for ~100 years + anonymise the email so it can be re-registered.
   const deletedSuffix = `deleted-${userId}@deleted.local`
   const banRes = await service.auth.admin.updateUserById(userId, {
@@ -124,6 +155,8 @@ export async function deactivateUser(
       anonymised_email: deletedSuffix,
       banned_until_hours: 876000,
       revoked_roles_count: revokeRes.count ?? null,
+      deactivated_distributor_ids: deactivatedDistributors.map((d) => d.id),
+      deactivated_sponsor_codes: deactivatedDistributors.map((d) => d.sponsor_code),
     },
   })
 
