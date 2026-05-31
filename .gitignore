@@ -100,3 +100,7 @@ playwright-report/
 test-results/
 blob-report/
 playwright/.cache/
+
+# Raw AI-image inbox — drop files here for `npm run images:optimize`;
+# optimized outputs land in public/products/ and get committed.
+public/_inbox/

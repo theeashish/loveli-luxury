@@ -19,6 +19,8 @@
     "supabase:reset": "supabase db reset",
     "supabase:migrate": "supabase db push",
     "secrets:check": "bash scripts/check-secrets.sh",
+    "images:optimize": "node scripts/optimize-product-images.mjs",
+    "images:verify": "node scripts/verify-product-images.mjs",
     "prepare": "husky install || true"
   },
   "dependencies": {
