@@ -6,13 +6,11 @@
  * State machine:
  *   pending → cancelled
  *   paid    → fulfilled → shipped → delivered
- *   paid|fulfilled|shipped → refunded   (Phase 4: real Flutterwave refund
- *                                        API call + inventory restore.
- *                                        Commission claw-back is NOT yet
- *                                        implemented — refunded ledger
- *                                        rows remain payable; that's a
- *                                        Phase 5 task tied to MLM-law
- *                                        chargeback rules.)
+ *   paid|fulfilled|shipped → refunded   (Phase 4: real PayHero refund call +
+ *                                        inventory restore. Commission claw-
+ *                                        back is implemented in migration 008
+ *                                        — refunded ledger rows are voided
+ *                                        unless already paid out.)
  *
  * Every transition writes an audit_log row with the actor, before/after
  * snapshots, and the action name.

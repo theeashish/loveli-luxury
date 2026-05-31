@@ -7,7 +7,8 @@
  *   - unpaid monthly_salaries (one per period)
  *   - unpaid rank_up_bonuses
  *
- * Phase 3: no Flutterwave fee modelling. fees = 0; net = gross.
+ * No payout-fee modelling yet: fees = 0; net = gross. PayHero B2C fees can be
+ * modelled here later.
  *
  * The functions here are server-only and assume the caller has already
  * verified admin role.

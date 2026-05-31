@@ -2,7 +2,7 @@
  * Service-role Supabase client. BYPASSES RLS.
  *
  * Use ONLY in trusted server contexts:
- *   - Webhook handlers (Flutterwave callbacks)
+ *   - Webhook handlers (PayHero callbacks)
  *   - Commission engine batch jobs
  *   - Monthly salary close
  *   - Payout reconciliation

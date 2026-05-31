@@ -18,7 +18,7 @@ import { FoundingCodeCard } from '@/components/admin/FoundingCodeCard'
 
 export const dynamic = 'force-dynamic'
 // runtime=nodejs because the diagnostics module pulls the service-role
-// client + the Flutterwave/Africa's Talking SDKs that aren't Edge-safe.
+// client + the PayHero/Africa's Talking SDKs that aren't Edge-safe.
 export const runtime = 'nodejs'
 
 const STATUS_META: Record<CheckStatus, { label: string; color: string; bg: string }> = {
