@@ -13,6 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > src/types/database.ts",
     "supabase:reset": "supabase db reset",
     "supabase:migrate": "supabase db push",
@@ -47,6 +49,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.4.6",
+    "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@types/node": "^22.7.4",

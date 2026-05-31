@@ -18,8 +18,26 @@ export async function middleware(request: NextRequest) {
   // Sponsor capture: first-touch attribution. If `?ref=LL-XX-XXXX` is in the
   // URL and the visitor has no sponsor cookie yet, persist it for 30 days.
   // Existing cookies are NOT overwritten — once attributed, always attributed.
+  //
+  // Two subtle correctness invariants this block must preserve, because we
+  // discovered both as live bugs (caught by tests/e2e/smoke.spec.ts):
+  //
+  // 1. The Supabase server client's setAll() below REBUILDS `response =
+  //    NextResponse.next(...)` when refreshing the auth session. That wipes
+  //    any cookies we set on the prior `response` object. So we also set the
+  //    sponsor cookie on `request.cookies` here — `NextResponse.next({ request })`
+  //    propagates from the request, so the rebuilt response still carries it.
+  // 2. The default-sponsor block below checks `request.cookies` to decide
+  //    whether to overwrite. Setting on `request.cookies` here makes the
+  //    default-sponsor branch correctly treat the visitor as already
+  //    attributed, so the referral wins.
+  //
+  // Before this fix, every visit with ?ref= was overwritten by the default
+  // sponsor — meaning commissions routed to the wrong distributor.
   const ref = request.nextUrl.searchParams.get('ref')
   if (ref && SPONSOR_CODE_RE.test(ref) && !request.cookies.get(SPONSOR_COOKIE)) {
+    request.cookies.set(SPONSOR_COOKIE, ref)
+    response = NextResponse.next({ request })
     response.cookies.set(SPONSOR_COOKIE, ref, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

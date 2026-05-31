@@ -6,6 +6,8 @@ export default defineConfig({
     environment: 'node',
     globals: false,
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    // Playwright owns tests/e2e/*.spec.ts; keep Vitest off them.
+    exclude: ['node_modules/**', 'tests/e2e/**', '.next/**'],
     // The integration harness boots a full Postgres (pglite/WASM) and applies
     // all 40+ migrations in a hook — ~15s cold, slower on CI. Pure unit tests
     // finish in ms; these ceilings only ever matter for the DB-backed suite.
