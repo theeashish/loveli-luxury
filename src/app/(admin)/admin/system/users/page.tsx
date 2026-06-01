@@ -86,15 +86,18 @@ export default async function UsersAdminPage() {
           User management
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Deactivation revokes all roles, bans the auth account, and anonymises
-          the email. It is reversible by an engineer with DB access — strictly
-          better than a hard delete which would cascade-orphan downstream rows
-          we want for audit. Protected accounts (
+          Two actions. <strong>Deactivate</strong> revokes all roles, bans the
+          account, anonymises the email, and inactivates any distributor row —
+          reversible, preserves the financial audit trail. <strong>Delete
+          permanently</strong> removes the auth user, profile, addresses, and
+          distributor row entirely; it refuses when the user has audit-required
+          financial history (earned commissions, payouts, or paid orders) and
+          tells you exactly what's blocking. Protected accounts (
           <code className="rounded bg-neutral-100 px-1 text-xs">capernstone</code>,
           <code className="ml-1 rounded bg-neutral-100 px-1 text-xs">ashishke79</code>,
           <code className="ml-1 rounded bg-neutral-100 px-1 text-xs">ashirumaabala1</code>,
           <code className="ml-1 rounded bg-neutral-100 px-1 text-xs">rymiruzz</code>
-          ) are guarded and cannot be deactivated through this UI.
+          ) cannot be touched by either action through this UI.
         </p>
       </header>
 
