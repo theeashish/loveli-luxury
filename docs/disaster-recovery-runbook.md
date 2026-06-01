@@ -207,7 +207,54 @@ Drill log:
 
 | Date | Operator | Outcome | Notes |
 |---|---|---|---|
-| _DRILL NOT YET PERFORMED_ | _Before launch_ | — | — |
+| 2026-05-31 | Claude (automated) | **PASS** | Full schema replay + integration suite against blank pglite. **46 migration files** in `supabase/migrations/` apply with zero errors; commission-engine (8 tests) + security-rls (3 tests) **all 11 passing** in ~25s. Finding: prod's `supabase_migrations.schema_migrations` tracker shows only 18 of the 46 — the early migrations (001–028) were applied directly via SQL before the tracker was consistently used. **Implication**: restore by replaying every `.sql` file in filename order, not by trusting the tracker. (See §"DR drill 2026-05-31 — detailed findings" below.) |
+| _NEXT DRILL DUE_ | Quarterly | — | Add row when complete. |
+
+### DR drill 2026-05-31 — detailed findings
+
+**Drill method.** Two parallel checks performed in this session:
+
+1. **Automated replay** — the integration test harness in
+   `tests/db/harness.ts` loads every file in `supabase/migrations/*.sql`
+   into a fresh in-process Postgres (pglite) and runs the same RPCs the
+   prod money engine runs. Result: **46/46 migrations apply clean from
+   blank; 11/11 integration tests pass** (commission engine end-to-end +
+   RLS invariants). This is run by CI on every push (Build job depends
+   on Test job), so the replay drill is now continuous, not point-in-time.
+
+2. **Cross-check against prod** — pulled the prod migration tracker via
+   the Supabase MCP. Tracker reports 18 applied migrations; the repo
+   carries 46 files. Tracker gap = 28 migrations (001 through 028)
+   that were applied via direct SQL execution (the masterplan's
+   "applied via MCP" or "applied via Supabase connector" pattern,
+   pre-dating the CLI-based migration tracker).
+
+**Finding — restore source of truth.** A naive operator who runs
+`supabase db push` against a fresh project, reading only from the
+tracker, will get a SCHEMA THAT DOES NOT MATCH PROD. The correct restore
+path is:
+
+```bash
+# In a fresh project, replay every file from the REPO, in filename order.
+ls supabase/migrations/*.sql | sort | while read f; do
+  echo "Applying $f"
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
+```
+
+Or, via the Supabase MCP `apply_migration` tool, called in a loop with
+the same file list. The harness already proves this exact replay
+sequence is clean (no migration depends on another being applied via
+the tracker rather than as SQL).
+
+**Recommendation before launch:** consolidate by running
+`supabase migration repair` or by inserting the 28 missing entries into
+`supabase_migrations.schema_migrations` so the tracker matches the
+file system. That removes the gotcha for any future engineer.
+
+**What was NOT tested in this drill.** PITR restore of actual prod data
+to a new project — that requires Supabase Pro and is the path documented
+in §3 "Supabase data loss" above. Recommended before real-money launch.
 
 ---
 
