@@ -113,14 +113,38 @@ Step 2.**
 
 ---
 
-## Step 4 — Add the LIVE credentials in PayHero
+## Step 4 — Add the LIVE C2B credential in PayHero
 
 The form lives at `https://app.payhero.co.ke/credentials/create`
 (PayHero dashboard → Integrations → Custom Credentials → "+ Add credentials").
-You will fill this form **twice** at Go-Live — once for inbound (STK)
-and once for outbound (B2C). Both share the same Consumer Key, Secret,
-Passkey, and Paybill; what differs is the Transaction Type and the
-Callback URL.
+
+**You fill this form ONCE at Go-Live, for the C2B (customer-pays-you)
+direction only.** The Transaction Type dropdown exposes only two
+Safaricom Daraja command IDs:
+
+| Option | What it is | When to use |
+|---|---|---|
+| `CustomerPayBillOnline` | STK Push to a Paybill (Lipa Na M-Pesa Online) | **You** — you're applying for a Paybill, not a Till |
+| `CustomerBuyGoodsOnline` | STK Push to a Till (Buy Goods) | Only if you got a Till instead of a Paybill |
+
+**There is NO B2C option in this form.** PayHero handles B2C payouts
+using THEIR own Safaricom Daraja initiator credentials against their
+licensed B2C float, not customer-provided credentials. That's correct
+architecture — Safaricom B2C requires a CBK-licensed initiator account
+and customers don't carry one. So:
+
+- **C2B inbound** → customer pays your Paybill → uses YOUR Daraja
+  credentials (registered via this form).
+- **B2C outbound** → PayHero pays out from their B2C float to your
+  partners → uses PAYHERO'S Daraja initiator, not yours.
+
+For B2C setup, see Step 4b below.
+
+### Step 4 (C2B) — field-by-field for the Add credentials form
+
+You will fill this form **once** at Go-Live, picking
+`CustomerPayBillOnline`. Both share the same Consumer Key, Secret,
+Passkey, and Paybill that you got at Go-Live.
 
 **Important sandbox-vs-live caveat.** Your account already has ONE
 active sandbox credential (Provider: Mpesa, Short Code 174379, Account
@@ -128,7 +152,7 @@ ID 8846, Status Active). **Do NOT delete or overwrite it** — it's what
 the current sandbox PayHero channel `8238` uses. Just **add** new
 credentials when LIVE values land. Sandbox and live can coexist.
 
-### The PayHero "Add payment credentials" form, field-by-field
+### The PayHero "Add payment credentials" form (C2B)
 
 | Field | Type | Value (LIVE) | Sandbox equivalent (only if PayHero asks you to add a separate sandbox credential — yours already exists) |
 |---|---|---|---|
@@ -173,8 +197,43 @@ After save, PayHero validates the credentials by making a test call
 against Daraja's API. If anything is wrong (wrong Paybill format, wrong
 Passkey, etc.) you get an immediate error. Fix and resubmit.
 
-Once saved, PayHero creates a new LIVE channel ID tied to that
-credential. **Note both channel IDs** — they go into Vercel env in Step 6.
+Once saved, PayHero creates a new LIVE STK channel ID tied to that
+credential. **Note the channel ID** — it goes into Vercel env
+`PAYHERO_CHANNEL_ID_STK` in Step 6.
+
+## Step 4b — B2C setup (separate from the C2B form)
+
+B2C is NOT configured via the "Custom Credentials" form above. The
+exact PayHero surface depends on their UI version, but the likely
+candidates are:
+
+- **Payment Channels** in the left sidebar — look for a section
+  labelled "B2C", "Withdrawals", or "Bulk Payments". This is where the
+  B2C channel ID lives on accounts that have B2C enabled.
+- **Account / Settings → Enable B2C** — some plans require explicitly
+  opting in. If you don't see B2C anywhere in the sidebar, this is the
+  most likely reason.
+- **Raise a Support Ticket** (button bottom-left of the PayHero
+  dashboard) — ask PayHero support to "enable B2C on my account and
+  share the LIVE B2C channel ID once funded." They'll walk you through
+  the float-funding requirement and either auto-create the channel or
+  give you a step-by-step.
+
+You also need to **fund the PayHero B2C wallet** before any payout can
+fire — partner commissions come from this float. Top up via your
+PayHero dashboard's Payments section once B2C is enabled.
+
+When PayHero gives you the LIVE B2C channel ID, it goes into Vercel env
+`PAYHERO_CHANNEL_ID_B2C`. The B2C callback URL
+(`https://loveli-luxury.vercel.app/api/payhero/payout-webhook?key=<token>`)
+is registered against the B2C channel in PayHero, in the same way the
+STK callback is registered against the STK channel.
+
+**Open question** — the exact path through PayHero's UI for adding B2C
+is not pinned in this doc because the dashboard doesn't expose it on
+the C2B-only Custom Credentials form. When you reach this step, the
+fastest path is a PayHero support ticket; they're responsive and they
+manage the float-licensing on the Safaricom side anyway.
 
 ---
 
