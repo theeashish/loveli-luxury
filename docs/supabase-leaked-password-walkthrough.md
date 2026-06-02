@@ -4,6 +4,18 @@ For: the owner. Written: 2026-05-30.
 Project: **Loveli Luxury International** (`thweaebhxsfxuxeosjty`,
 `db.thweaebhxsfxuxeosjty.supabase.co`).
 
+> **STATUS — 2026-06-02 (owner decision):** deferred until Supabase Pro
+> upgrade. The toggle is **gated behind Supabase Pro** ($25/mo); on Free
+> the dashboard exposes the toggle but the save call returns "Failed to
+> update auth configuration: Configuring leaked password protection via
+> HaveIBeenPwned.org is available on Pro Plans and up." Owner chose to
+> skip the upgrade for now. Residual risk accepted at launch with small
+> user base. Interim composition rules (min length 8, letters-and-digits)
+> are applied in the Attack Protection panel \[NOT Pro-gated]. Revisit
+> once user base grows or Pro is greenlit for other reasons (PITR is the
+> next-most-valuable Pro feature for DR — see
+> `docs/disaster-recovery-runbook.md`).
+
 ## What this is and why we want it
 
 Supabase Auth can compare every new or changed password against the
