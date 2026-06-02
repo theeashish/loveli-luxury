@@ -113,27 +113,68 @@ Step 2.**
 
 ---
 
-## Step 4 — Share the LIVE credentials with PayHero
+## Step 4 — Add the LIVE credentials in PayHero
 
-You mentioned PayHero has a page that requests these. Once Step 3
-approves, paste each of these from your Daraja app card into PayHero's
-credential request form:
+The form lives at `https://app.payhero.co.ke/credentials/create`
+(PayHero dashboard → Integrations → Custom Credentials → "+ Add credentials").
+You will fill this form **twice** at Go-Live — once for inbound (STK)
+and once for outbound (B2C). Both share the same Consumer Key, Secret,
+Passkey, and Paybill; what differs is the Transaction Type and the
+Callback URL.
 
-| Field on PayHero side | What you give them |
-|---|---|
-| Consumer Key | LIVE value from your Daraja app card (after Go-Live) |
-| Consumer Secret | LIVE value (use Daraja's "Show" / "Copy" button — keep secure) |
-| Passkey | LIVE LNM Passkey (no longer "N/A") |
-| Short Code | Your Paybill number (no longer "N/A") |
-| Initiator / Security credential (if asked) | For B2C only — Safaricom issues these alongside the LIVE app. Ask PayHero exactly what shape they want them in. |
+**Important sandbox-vs-live caveat.** Your account already has ONE
+active sandbox credential (Provider: Mpesa, Short Code 174379, Account
+ID 8846, Status Active). **Do NOT delete or overwrite it** — it's what
+the current sandbox PayHero channel `8238` uses. Just **add** new
+credentials when LIVE values land. Sandbox and live can coexist.
 
-**Sandbox vs Live**: if PayHero asks you for SANDBOX credentials first
-(to test their integration), use the values from Step 1. When LIVE
-lands, you update the same form with the live values.
+### The PayHero "Add payment credentials" form, field-by-field
 
-**If PayHero's page asks for something not listed above**, screenshot
-that page and send it to me — onboarding pages do change and I want to
-give you exact instructions per their current form, not a guess.
+| Field | Type | Value (LIVE) | Sandbox equivalent (only if PayHero asks you to add a separate sandbox credential — yours already exists) |
+|---|---|---|---|
+| Payment provider | Dropdown | **M-Pesa** | M-Pesa |
+| Consumer Key | Text (sensitive) | LIVE Consumer Key from your Daraja app card (after Go-Live) | Sandbox Consumer Key from the same card today (the `wQvA***` you have) |
+| Consumer Secret | Text (sensitive) | LIVE Consumer Secret | Sandbox Consumer Secret |
+| **Transaction Type** | Dropdown ("Select an option") | **For Credential A: STK Push / M-Pesa Express / C2B.** **For Credential B: B2C / Withdrawal.** Exact option labels depend on what PayHero's dropdown shows — match the obvious one. | Same |
+| Paybill Number | Text | Your LIVE Paybill (e.g. the new number Safaricom issues; NOT 174379) | `174379` (Safaricom universal sandbox Paybill) |
+| Pass Key | Text (sensitive) | LIVE LNM Passkey from your Daraja app card (after Go-Live) | `bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919` (Safaricom universal sandbox Passkey) |
+| Callback URL | Text | **Different per credential.** For STK: `https://loveli-luxury.vercel.app/api/payhero/webhook?key=<PAYHERO_WEBHOOK_TOKEN>` · For B2C: `https://loveli-luxury.vercel.app/api/payhero/payout-webhook?key=<PAYHERO_WEBHOOK_TOKEN>` | Same URLs (the routes work for both sandbox and live; only the env tokens differ) |
+
+### Getting the `PAYHERO_WEBHOOK_TOKEN` value for the Callback URL
+
+The 64-char webhook token is **marked sensitive in Vercel** — `vercel env pull`
+won't put the real value in your local file. To copy it into the
+PayHero form's Callback URL:
+
+1. Vercel dashboard → `loveli-luxury` project → Settings → Environment
+   Variables.
+2. Find `PAYHERO_WEBHOOK_TOKEN` in the list.
+3. Click **Show value** → Copy.
+4. Paste it into the PayHero Callback URL field, replacing the literal
+   text `<PAYHERO_WEBHOOK_TOKEN>` in the URLs above.
+
+Don't ever commit the token to git. Don't paste it into the wrong field.
+The only two places it should ever live are: (a) Vercel env, (b) the
+Callback URL embedded in each PayHero credential.
+
+### Initiator / Security credential — only if PayHero asks for it
+
+The form as shown today does NOT have an Initiator Name or Security
+Credential field. Some PayHero plans surface these for B2C credentials
+because B2C transfers require an Initiator account on Safaricom's side.
+If PayHero adds those fields on the B2C credential (it may differ from
+the STK form), Safaricom issues those values alongside your LIVE B2C
+shortcode — they'll be in the same dashboard area as your LIVE Consumer
+Key/Secret/Passkey.
+
+### "Save credentials" → what happens next
+
+After save, PayHero validates the credentials by making a test call
+against Daraja's API. If anything is wrong (wrong Paybill format, wrong
+Passkey, etc.) you get an immediate error. Fix and resubmit.
+
+Once saved, PayHero creates a new LIVE channel ID tied to that
+credential. **Note both channel IDs** — they go into Vercel env in Step 6.
 
 ---
 
