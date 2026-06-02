@@ -56,14 +56,22 @@ adding friction for users whose passwords aren't compromised.
 
 ## The walkthrough
 
-### Step 1. Open the Supabase Auth Policies page
+### Step 1. Open the Supabase Auth → Attack Protection page
 
-Browser → https://supabase.com/dashboard/project/thweaebhxsfxuxeosjty/auth/policies
+Browser → https://supabase.com/dashboard/project/thweaebhxsfxuxeosjty/auth/protection
 
-(If that link doesn't go directly to the policies tab: log into
+**This setting is NOT under Authentication → Policies.** "Policies" is
+RLS row-level-security (database side), a different thing. Supabase
+reorganized the auth UI; the leaked-password toggle now lives under
+**Authentication → Attack Protection** in the left rail (between *URL
+Configuration* and *Auth Hooks*).
+
+If the direct link above doesn't go straight there: log into
 [supabase.com/dashboard](https://supabase.com/dashboard), pick the **Loveli
-Luxury International** project, then in the left rail click **Authentication
-→ Policies**.)
+Luxury International** project, then in the left rail click
+**Authentication → Attack Protection**. If the wording in your dashboard
+differs (Supabase shipped a redesign in late 2024), it may show as
+"Auth Protection" or "Abuse Protection" — same screen.
 
 ### Step 2. Find the "Password security" panel
 
