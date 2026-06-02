@@ -21,6 +21,7 @@
     "secrets:check": "bash scripts/check-secrets.sh",
     "images:optimize": "node scripts/optimize-product-images.mjs",
     "images:verify": "node scripts/verify-product-images.mjs",
+    "catalog:preflight": "node --env-file=.env.local scripts/catalog-preflight.mjs",
     "prepare": "husky install || true"
   },
   "dependencies": {
