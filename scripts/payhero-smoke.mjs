@@ -67,19 +67,38 @@ function makeArgHelpers(argv) {
   return { flag, value }
 }
 
-// ─── env loader (pure read; logs + exits on miss when called) ──────────────
-function envOrExit(name, { required = true } = {}) {
+// ─── env loader (pure read) ────────────────────────────────────────────────
+// Reads from process.env. Treats empty string the same as undefined (Vercel
+// marks secrets as SENSITIVE — `vercel env pull` then writes name="" to the
+// local file rather than the real value. From this script's point of view
+// that means "not locally readable" not "not set in production". The
+// checkConfig flow handles that distinction by also probing the live
+// diagnostic endpoint where appropriate.
+function envOrNull(name) {
   const v = process.env[name]
-  if (!v || v.trim() === '') {
-    if (required) {
-      console.error(`✗ ${name} is not set in env.`)
-      console.error(`  Pull from Vercel first: vercel env pull .env.production --environment=production`)
-      console.error(`  Then run with: node --env-file=.env.production scripts/payhero-smoke.mjs ...`)
-      process.exit(1)
-    }
-    return null
-  }
+  if (!v || v.trim() === '') return null
   return v.trim()
+}
+
+function envOrExit(name, { required = true } = {}) {
+  const v = envOrNull(name)
+  if (v) return v
+  if (!required) return null
+  console.error(`✗ ${name} is not set in env.`)
+  console.error(`  Pull from Vercel first: vercel env pull .env.local --environment=production`)
+  console.error(`  Then run with: node --env-file=.env.local scripts/payhero-smoke.mjs ...`)
+  console.error(`  (Note: vars marked SENSITIVE in Vercel are intentionally redacted.`)
+  console.error(`   For those, --check-config falls back to the live diagnostic endpoint.)`)
+  process.exit(1)
+}
+
+// Probe the live GET handler at the given path. Returns the JSON response
+// (which on this codebase includes envTokenSet + envTokenLength when token
+// validation fails) or throws on network/HTTP errors.
+async function fetchLiveDiagnostic(appUrl, path) {
+  const res = await fetch(`${appUrl}${path}`, { method: 'GET' })
+  if (!res.ok) throw new Error(`${path} returned HTTP ${res.status}`)
+  return res.json()
 }
 
 // ─── output helpers ────────────────────────────────────────────────────────
@@ -122,65 +141,145 @@ async function confirm(prompt, args) {
 // ─── modes ─────────────────────────────────────────────────────────────────
 
 async function checkConfig() {
-  step('Config sanity check (no PayHero API call)')
+  step('Config sanity check (combines local env + live diagnostic probe)')
   const appUrl = envOrExit('NEXT_PUBLIC_APP_URL')
-  const token = envOrExit('PAYHERO_AUTH_TOKEN')
-  const channelStk = envOrExit('PAYHERO_CHANNEL_ID_STK', { required: false })
-  const channelB2c = envOrExit('PAYHERO_CHANNEL_ID_B2C', { required: false })
-  const webhook = envOrExit('PAYHERO_WEBHOOK_TOKEN')
+  const tokenLocal = envOrNull('PAYHERO_AUTH_TOKEN')
+  const channelStk = envOrNull('PAYHERO_CHANNEL_ID_STK')
+  const channelB2c = envOrNull('PAYHERO_CHANNEL_ID_B2C')
+  const webhookLocal = envOrNull('PAYHERO_WEBHOOK_TOKEN')
 
   if (!appUrl.startsWith('https://')) fail(`NEXT_PUBLIC_APP_URL must be HTTPS in prod (got ${appUrl})`)
   else ok(`NEXT_PUBLIC_APP_URL = ${appUrl}`)
 
-  if (token.startsWith('Basic ')) {
-    fail(`PAYHERO_AUTH_TOKEN must NOT include the "Basic " prefix — paste the dashboard token raw.`)
-  } else {
-    ok(`PAYHERO_AUTH_TOKEN set (${token.length} chars)`)
+  // PAYHERO_AUTH_TOKEN and PAYHERO_WEBHOOK_TOKEN are almost always marked
+  // sensitive in Vercel, so they read as empty locally. Probe the live GET
+  // handler at /api/payhero/webhook — its diagnostic response carries
+  // envTokenSet + envTokenLength, computed from the running deployment's
+  // own env. That tells us authoritatively what production thinks.
+  let live = null
+  try {
+    live = await fetchLiveDiagnostic(appUrl, '/api/payhero/webhook')
+  } catch (e) {
+    warn(`Could not probe live diagnostic at ${appUrl}/api/payhero/webhook: ${e.message}`)
   }
 
+  // PAYHERO_AUTH_TOKEN — only verifiable locally; we have no live diagnostic
+  // for it (deliberately — exposing auth-token state would leak the
+  // setness/length, which is an unnecessary side channel).
+  if (tokenLocal) {
+    if (tokenLocal.startsWith('Basic ')) {
+      fail(`PAYHERO_AUTH_TOKEN starts with "Basic " — paste the dashboard token raw, no prefix.`)
+    } else {
+      ok(`PAYHERO_AUTH_TOKEN locally readable (${tokenLocal.length} chars)`)
+    }
+  } else {
+    warn(`PAYHERO_AUTH_TOKEN not in local env — likely marked SENSITIVE in Vercel`)
+    warn(`  Verify in the Vercel dashboard: should be a long base64-ish string with no "Basic " prefix.`)
+  }
+
+  // PAYHERO_CHANNEL_ID_STK — not typically sensitive.
   if (channelStk && /^\d+$/.test(channelStk)) ok(`PAYHERO_CHANNEL_ID_STK = ${channelStk}`)
-  else if (!channelStk) warn(`PAYHERO_CHANNEL_ID_STK unset — STK push will not work`)
+  else if (!channelStk) fail(`PAYHERO_CHANNEL_ID_STK unset — STK push will not work`)
   else fail(`PAYHERO_CHANNEL_ID_STK should be a numeric id, got ${channelStk}`)
 
+  // PAYHERO_CHANNEL_ID_B2C — also not typically sensitive. Missing today.
   if (channelB2c && /^\d+$/.test(channelB2c)) ok(`PAYHERO_CHANNEL_ID_B2C = ${channelB2c}`)
-  else if (!channelB2c) warn(`PAYHERO_CHANNEL_ID_B2C unset — payouts will not work`)
+  else if (!channelB2c) fail(`PAYHERO_CHANNEL_ID_B2C unset — payouts will not work until set in Vercel`)
   else fail(`PAYHERO_CHANNEL_ID_B2C should be a numeric id, got ${channelB2c}`)
 
-  if (webhook.length >= 20) ok(`PAYHERO_WEBHOOK_TOKEN set (${webhook.length} chars)`)
-  else fail(`PAYHERO_WEBHOOK_TOKEN must be at least 20 chars (got ${webhook.length})`)
+  // PAYHERO_WEBHOOK_TOKEN — verify via live diagnostic if not locally readable.
+  if (webhookLocal) {
+    if (webhookLocal.length >= 20) ok(`PAYHERO_WEBHOOK_TOKEN locally readable (${webhookLocal.length} chars)`)
+    else fail(`PAYHERO_WEBHOOK_TOKEN must be at least 20 chars (got ${webhookLocal.length})`)
+  } else if (live && typeof live === 'object' && 'debug' in live) {
+    // .mjs file — no TS syntax. Pure runtime introspection of the JSON
+    // returned by the live diagnostic.
+    const dbg = live.debug ?? {}
+    const tokSet = dbg.envTokenSet === true
+    const tokLen = typeof dbg.envTokenLength === 'number' ? Number(dbg.envTokenLength) : 0
+    if (tokSet && tokLen >= 20) ok(`PAYHERO_WEBHOOK_TOKEN set in PROD (${tokLen} chars, from live diagnostic)`)
+    else if (tokSet) fail(`PAYHERO_WEBHOOK_TOKEN set in prod but only ${tokLen} chars (need >= 20)`)
+    else fail(`PAYHERO_WEBHOOK_TOKEN is NOT set in production — register URL token in Vercel before Go-Live`)
+  } else {
+    warn(`PAYHERO_WEBHOOK_TOKEN not locally readable and no live diagnostic available`)
+  }
 
   step('Expected callback URLs (register THESE in PayHero dashboard)')
-  ok(`STK callback:  ${appUrl}/api/payhero/webhook?key=${webhook}`)
-  ok(`B2C callback:  ${appUrl}/api/payhero/payout-webhook?key=${webhook}`)
+  // We hide the actual token in the printed URL when we couldn't read it
+  // locally — there's no point printing "key=" with nothing after it.
+  const tokenSuffix = webhookLocal ? `key=${webhookLocal}` : `key=<PAYHERO_WEBHOOK_TOKEN>`
+  ok(`STK callback:  ${appUrl}/api/payhero/webhook?${tokenSuffix}`)
+  ok(`B2C callback:  ${appUrl}/api/payhero/payout-webhook?${tokenSuffix}`)
   console.log('\nNote: the B2C callback URL is a DIFFERENT route from STK. Both must')
-  console.log('be registered separately in the PayHero dashboard.\n')
+  console.log('be registered separately in the PayHero dashboard.')
+  if (!webhookLocal) {
+    console.log('To get the actual token value: Vercel dashboard → Project →')
+    console.log('Settings → Environment Variables → PAYHERO_WEBHOOK_TOKEN → "Show".')
+  }
+  console.log('')
 }
 
 async function checkWebhooks() {
   step('Webhook URL reachability + token match')
   const appUrl = envOrExit('NEXT_PUBLIC_APP_URL')
-  const webhook = envOrExit('PAYHERO_WEBHOOK_TOKEN')
+  const webhook = envOrNull('PAYHERO_WEBHOOK_TOKEN')
+
+  // If we can't read the token locally (Vercel sensitive), we can still
+  // verify each route is REACHABLE and the prod env has a token of correct
+  // shape — what we cannot prove is that the token value matches the one
+  // PayHero is configured to send. That match has to be verified by an
+  // actual webhook delivery (smoke step 6 of docs/go-live-mpesa.md).
+  const canDoExactMatchCheck = !!webhook
 
   for (const [label, path] of [
     ['STK', '/api/payhero/webhook'],
     ['B2C', '/api/payhero/payout-webhook'],
   ]) {
-    const url = `${appUrl}${path}?key=${encodeURIComponent(webhook)}`
-    try {
-      const res = await fetch(url, { method: 'GET' })
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        fail(`${label} GET ${path} returned HTTP ${res.status}`)
-        continue
+    if (canDoExactMatchCheck) {
+      const url = `${appUrl}${path}?key=${encodeURIComponent(webhook)}`
+      try {
+        const res = await fetch(url, { method: 'GET' })
+        const body = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          fail(`${label} GET ${path} returned HTTP ${res.status}`)
+          continue
+        }
+        if (body.tokenAccepted === true) {
+          ok(`${label} ${path} → 200 tokenAccepted: true (exact-match verified)`)
+        } else {
+          fail(`${label} ${path} → 200 but tokenAccepted: ${body.tokenAccepted}. Local PAYHERO_WEBHOOK_TOKEN does NOT match prod's.`)
+        }
+      } catch (e) {
+        fail(`${label} ${path} → network error: ${e.message}`)
       }
-      if (body.tokenAccepted === true) {
-        ok(`${label} ${path} → 200 tokenAccepted: true`)
-      } else {
-        fail(`${label} ${path} → 200 but tokenAccepted: ${body.tokenAccepted}. PAYHERO_WEBHOOK_TOKEN in Vercel does not match the value here.`)
+    } else {
+      // Reachability + prod-env-state probe (no exact match).
+      const url = `${appUrl}${path}`
+      try {
+        const res = await fetch(url, { method: 'GET' })
+        const body = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          fail(`${label} GET ${path} returned HTTP ${res.status}`)
+          continue
+        }
+        const dbg = body?.debug ?? {}
+        const set = dbg.envTokenSet === true
+        const len = typeof dbg.envTokenLength === 'number' ? dbg.envTokenLength : 0
+        if (set && len >= 20) {
+          ok(`${label} ${path} → 200, prod env has token (${len} chars). Exact match not verified locally (sensitive var). Smoke step 6 will confirm.`)
+        } else {
+          fail(`${label} ${path} → 200 but prod debug says envTokenSet=${set}, envTokenLength=${len}. Token missing or too short in Vercel.`)
+        }
+      } catch (e) {
+        fail(`${label} ${path} → network error: ${e.message}`)
       }
-    } catch (e) {
-      fail(`${label} ${path} → network error: ${e.message}`)
     }
+  }
+  if (!canDoExactMatchCheck) {
+    console.log('\nNote: PAYHERO_WEBHOOK_TOKEN was not readable locally (likely marked SENSITIVE')
+    console.log('in Vercel — good security hygiene). The check above proves the routes are')
+    console.log('reachable and prod has a token of correct shape; the exact value match is')
+    console.log('confirmed by the first real PayHero callback (smoke step 6).\n')
   }
 }
 

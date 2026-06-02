@@ -23,7 +23,7 @@ type PayoutRow = {
   currency: string
   payout_method: string
   payout_msisdn: string | null
-  flutterwave_transfer_id: string | null
+  payhero_transfer_reference: string | null
   initiated_at: string | null
   completed_at: string | null
   failure_reason: string | null
@@ -42,7 +42,7 @@ export default async function AdminPayoutDetail({
   const r = await service
     .from('payouts')
     .select(
-      'id, distributor_id, period_year, period_month, status, commissions_total_minor, salary_total_minor, rank_bonus_total_minor, retail_profit_minor, gross_total_minor, fees_minor, net_total_minor, currency, payout_method, payout_msisdn, flutterwave_transfer_id, initiated_at, completed_at, failure_reason, created_at',
+      'id, distributor_id, period_year, period_month, status, commissions_total_minor, salary_total_minor, rank_bonus_total_minor, retail_profit_minor, gross_total_minor, fees_minor, net_total_minor, currency, payout_method, payout_msisdn, payhero_transfer_reference, initiated_at, completed_at, failure_reason, created_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -186,8 +186,8 @@ export default async function AdminPayoutDetail({
           {payout.payout_msisdn ? (
             <Row label="MSISDN" value={payout.payout_msisdn} />
           ) : null}
-          {payout.flutterwave_transfer_id ? (
-            <Row label="Transfer id" value={payout.flutterwave_transfer_id} />
+          {payout.payhero_transfer_reference ? (
+            <Row label="Transfer reference" value={payout.payhero_transfer_reference} />
           ) : null}
           {payout.initiated_at ? (
             <Row

@@ -24,13 +24,38 @@ import { getServerEnv } from '@/lib/env'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** GET handler for URL-validation pings. See /api/payhero/webhook for details. */
+/**
+ * GET handler for URL-validation pings. Same response shape as the STK
+ * webhook GET (intentional — both routes must report token presence the
+ * same way so the smoke script in scripts/payhero-smoke.mjs can probe
+ * each without a route-specific branch). The `debug` block reports
+ * whether THIS DEPLOYMENT has a token set; the smoke script reads it to
+ * verify the prod env without needing the actual token value locally
+ * (Vercel marks PAYHERO_WEBHOOK_TOKEN sensitive, so `vercel env pull`
+ * redacts it — that's good hygiene, not a bug).
+ */
 export async function GET(req: NextRequest) {
-  const keyOk = verifyWebhookToken(req.nextUrl.searchParams.get('key'))
+  const receivedKey = req.nextUrl.searchParams.get('key')
+  const keyOk = verifyWebhookToken(receivedKey)
+  let envTokenSet = false
+  let envTokenLength = 0
+  try {
+    const env = getServerEnv()
+    envTokenSet = !!env.PAYHERO_WEBHOOK_TOKEN
+    envTokenLength = env.PAYHERO_WEBHOOK_TOKEN?.length ?? 0
+  } catch {
+    /* ignore — env not validatable means tokenAccepted will be false anyway */
+  }
   return NextResponse.json({
     ok: true,
     hint: 'POST your B2C callback here',
     tokenAccepted: keyOk,
+    debug: {
+      receivedKeyLength: receivedKey?.length ?? 0,
+      envTokenSet,
+      envTokenLength,
+      lengthsMatch: (receivedKey?.length ?? 0) === envTokenLength,
+    },
   })
 }
 

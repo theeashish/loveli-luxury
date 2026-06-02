@@ -13,7 +13,7 @@ type PayoutRow = {
   status: string
   gross_total_minor: string | number
   net_total_minor: string | number
-  flutterwave_transfer_id: string | null
+  payhero_transfer_reference: string | null
   created_at: string
   initiated_at: string | null
   completed_at: string | null
@@ -24,7 +24,7 @@ export default async function AdminPayoutsListPage() {
   const r = await service
     .from('payouts')
     .select(
-      'id, distributor_id, period_year, period_month, status, gross_total_minor, net_total_minor, flutterwave_transfer_id, created_at, initiated_at, completed_at',
+      'id, distributor_id, period_year, period_month, status, gross_total_minor, net_total_minor, payhero_transfer_reference, created_at, initiated_at, completed_at',
     )
     .order('created_at', { ascending: false })
     .limit(200)

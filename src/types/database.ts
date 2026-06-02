@@ -1318,7 +1318,6 @@ export type Database = {
           distributor_id: number
           failure_reason: string | null
           fees_minor: string | number
-          flutterwave_transfer_id: string | null
           gross_total_minor: string | number
           id: number
           initiated_at: string | null
@@ -1343,7 +1342,6 @@ export type Database = {
           distributor_id: number
           failure_reason?: string | null
           fees_minor?: string | number
-          flutterwave_transfer_id?: string | null
           gross_total_minor: string | number
           id?: number
           initiated_at?: string | null
@@ -1368,7 +1366,6 @@ export type Database = {
           distributor_id?: number
           failure_reason?: string | null
           fees_minor?: string | number
-          flutterwave_transfer_id?: string | null
           gross_total_minor?: string | number
           id?: number
           initiated_at?: string | null

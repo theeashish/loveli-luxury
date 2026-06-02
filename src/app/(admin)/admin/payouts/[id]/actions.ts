@@ -20,11 +20,9 @@ const idSchema = z.object({
  *   2. Optimistically lock the row by transitioning status pending → processing
  *      with `.eq('status', 'pending')`. If another caller beat us we abort.
  *   3. Call PayHero B2C /withdraw (see lib/payhero/service.ts initiateB2C).
- *   4. On API success, store the provider transfer reference (historical
- *      column name: flutterwave_transfer_id; now holds the PayHero B2C
- *      reference — column renaming is a separate scheduled refactor) and
- *      initiated_at. On API failure, roll status back to `pending` so the
- *      admin can retry.
+ *   4. On API success, store the provider transfer reference in
+ *      `payouts.payhero_transfer_reference` and stamp `initiated_at`. On
+ *      API failure, roll status back to `pending` so the admin can retry.
  *   5. The terminal status (completed / failed) is set by the webhook.
  */
 export async function initiatePayout(formData: FormData): Promise<void> {
