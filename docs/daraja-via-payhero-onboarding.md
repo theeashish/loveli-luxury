@@ -201,39 +201,100 @@ Once saved, PayHero creates a new LIVE STK channel ID tied to that
 credential. **Note the channel ID** — it goes into Vercel env
 `PAYHERO_CHANNEL_ID_STK` in Step 6.
 
-## Step 4b — B2C setup (separate from the C2B form)
+## Step 4b — B2C setup (CONFIRMED: support-ticket-only, NOT self-serve)
 
-B2C is NOT configured via the "Custom Credentials" form above. The
-exact PayHero surface depends on their UI version, but the likely
-candidates are:
+**Investigation date 2026-06-02.** We walked every menu in the PayHero
+dashboard sidebar. Full list of what exists:
 
-- **Payment Channels** in the left sidebar — look for a section
-  labelled "B2C", "Withdrawals", or "Bulk Payments". This is where the
-  B2C channel ID lives on accounts that have B2C enabled.
-- **Account / Settings → Enable B2C** — some plans require explicitly
-  opting in. If you don't see B2C anywhere in the sidebar, this is the
-  most likely reason.
-- **Raise a Support Ticket** (button bottom-left of the PayHero
-  dashboard) — ask PayHero support to "enable B2C on my account and
-  share the LIVE B2C channel ID once funded." They'll walk you through
-  the float-funding requirement and either auto-create the channel or
-  give you a step-by-step.
+```
+Dashboard
+Account
+Payment Channels → All Channels / Add Channel
+                   (Bank / Paybill / Till tabs — all C2B inbound)
+Payments → Create Pay Link / All Transactions / Pricing / Cost Calculator
+           (all about receiving payments, no outbound)
+Sales → POS Sales / Invoices / Clients / Products / Zoho Books
+        (merchant tools, no payouts)
+API Keys
+Integrations → Custom Credentials / Request Logs / Dynamic QR Code
+               (Custom Credentials Transaction Type = CustomerPayBillOnline
+                or CustomerBuyGoodsOnline only — both C2B)
+Extra Features (New)
+```
 
-You also need to **fund the PayHero B2C wallet** before any payout can
-fire — partner commissions come from this float. Top up via your
-PayHero dashboard's Payments section once B2C is enabled.
+**No B2C / Withdrawals / Bulk Payments / Send Money / Payouts surface
+anywhere in the dashboard.** The entire UI is C2B-focused. B2C is
+enabled by PayHero support server-side and is NOT a self-serve form.
 
-When PayHero gives you the LIVE B2C channel ID, it goes into Vercel env
-`PAYHERO_CHANNEL_ID_B2C`. The B2C callback URL
-(`https://loveli-luxury.vercel.app/api/payhero/payout-webhook?key=<token>`)
-is registered against the B2C channel in PayHero, in the same way the
-STK callback is registered against the STK channel.
+This is actually correct architecture — Safaricom B2C requires a
+CBK-licensed initiator account against a funded float. Customers don't
+bring those; PayHero uses their own licensed initiator against their
+internal B2C float. So the trade-off is: PayHero handles the regulatory
+and float-licensing burden, you handle the support-ticket request.
 
-**Open question** — the exact path through PayHero's UI for adding B2C
-is not pinned in this doc because the dashboard doesn't expose it on
-the C2B-only Custom Credentials form. When you reach this step, the
-fastest path is a PayHero support ticket; they're responsive and they
-manage the float-licensing on the Safaricom side anyway.
+### What to do — send the support ticket
+
+Click **Raise a Support Ticket** in the bottom-left of any PayHero
+page. Send the text below (sandbox version while you're still
+pre-Go-Live; LIVE version after Daraja Go-Live + Paybill arrive).
+
+### Support ticket — sandbox version (send today, to practice B2C in sandbox)
+
+> **Subject:** B2C / payout channel enablement — Loveliluxury account
+>
+> Hi PayHero team,
+>
+> I'm setting up the partner-program payout flow for Loveli Luxury
+> Scents (account: **loveliluxury**). My e-commerce platform already
+> has the inbound STK Push direction working in sandbox via channel
+> `8238`. I now need to add the **B2C / withdrawal direction** so the
+> platform can pay out partner commissions to their M-Pesa numbers.
+>
+> The Add Custom Credentials form only exposes `CustomerPayBillOnline`
+> and `CustomerBuyGoodsOnline` (both C2B), and the Payment Channels
+> section is C2B-only. Could you please:
+>
+> 1. **Enable B2C on my account in sandbox** so I can test the payout
+>    flow against your `POST /api/v2/withdraw` endpoint before Go-Live.
+> 2. **Share the sandbox B2C channel ID** so I can configure it in my
+>    application (we set it as `PAYHERO_CHANNEL_ID_B2C` on our backend).
+> 3. **Confirm what we'll need from Safaricom at Go-Live** for live B2C
+>    — specifically, do you need an Initiator Name + Security
+>    Credential from us, or do you use your own licensed B2C float?
+> 4. **Document the B2C callback flow** — our app receives the
+>    completion webhook at
+>    `https://loveli-luxury.vercel.app/api/payhero/payout-webhook?key=<our_token>`.
+>    Please confirm this URL gets registered against the B2C channel,
+>    just as the STK callback is registered against the STK channel.
+>
+> For reference, our app currently posts to your API with
+> `external_reference: "PO-<payout_id>"` so you can echo it back via
+> webhook.
+>
+> Let me know if you need any additional information.
+>
+> Thanks,
+> Ashish
+
+### Support ticket — LIVE version (send after Daraja Go-Live + Paybill approval)
+
+Same template, replace "sandbox" with "production" throughout, and add
+a final paragraph with the LIVE Paybill number + the date Daraja
+approved Go-Live so they can tie the B2C enablement to that approval.
+
+### What PayHero will likely send back
+
+Expected reply shape:
+- Confirmation that B2C is enabled on your account
+- A numeric B2C channel ID (analogous to the C2B `8238`) — goes into
+  Vercel env as `PAYHERO_CHANNEL_ID_B2C`
+- Possibly a request to fund the PayHero B2C wallet before any
+  transfer will succeed
+- Confirmation that the payout-webhook callback URL has been registered
+
+Once you have the channel ID, set it in Vercel and redeploy. The
+`scripts/payhero-smoke.mjs --b2c` mode will then work end-to-end (in
+sandbox; KES 1 transfers to your own number).
 
 ---
 
