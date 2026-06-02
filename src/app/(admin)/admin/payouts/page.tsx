@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatKes } from '@/lib/money'
+import { BulkFireButton } from './BulkFireButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +29,7 @@ export default async function AdminPayoutsListPage() {
     .order('created_at', { ascending: false })
     .limit(200)
   const rows = (r.data ?? []) as PayoutRow[]
+  const pendingCount = rows.filter((p) => p.status === 'pending').length
 
   return (
     <div className="max-w-6xl">
@@ -35,7 +37,9 @@ export default async function AdminPayoutsListPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Payouts</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Manual draft + initiate workflow. Auto monthly close lands in Phase 4.
+            Monthly cron drafts payouts; admin reviews and fires them. Use the
+            bulk-fire button below to process every eligible pending payout in
+            one click, or click into a row to fire individually.
           </p>
         </div>
         <Link
@@ -45,6 +49,10 @@ export default async function AdminPayoutsListPage() {
           New payout
         </Link>
       </header>
+
+      <div className="mb-6">
+        <BulkFireButton pendingCount={pendingCount} />
+      </div>
 
       <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
         <table className="min-w-full divide-y divide-neutral-200 text-sm">
