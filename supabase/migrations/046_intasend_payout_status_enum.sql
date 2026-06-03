@@ -1,0 +1,32 @@
+-- =============================================================================
+-- 046_intasend_payout_status_enum.sql
+-- =============================================================================
+-- Migration:   046_intasend_payout_status_enum.sql
+-- Date:        2026-06-03
+-- Purpose:     Phase 0 of the PayHero → IntaSend cutover. Extends the
+--              `payout_status` enum with the two states the IntaSend payout
+--              lifecycle introduces.
+--
+-- Why a dedicated migration just for the enum:
+--   `ALTER TYPE ... ADD VALUE` cannot be executed inside a transaction
+--   block (PostgreSQL constraint). Splitting it from the table-level
+--   changes (047) lets the migration runner (or pglite replay harness)
+--   apply each file in its own transaction safely. Without this split,
+--   047 would error on the enum extension and roll back the whole batch.
+--
+-- New states:
+--   - `queued`             : in the dispatch queue, not yet fired
+--   - `pending_approval`   : amount over the auto-fire ceiling; awaits a
+--                            superadmin / staff approval action
+--
+-- Existing states retained (`pending`, `processing`, `completed`,
+-- `failed`, `reversed`). The spec uses `complete` (no 'd'); existing
+-- rows continue to use `completed`. Code reading payouts.status must
+-- treat both as the same terminal success state — the helper in
+-- `src/lib/payouts/*` will hide that surface.
+--
+-- Idempotent — `IF NOT EXISTS` per value.
+-- =============================================================================
+
+ALTER TYPE payout_status ADD VALUE IF NOT EXISTS 'queued' BEFORE 'pending';
+ALTER TYPE payout_status ADD VALUE IF NOT EXISTS 'pending_approval' BEFORE 'pending';

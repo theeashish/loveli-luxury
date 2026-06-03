@@ -1,5 +1,7 @@
 /**
- * Idempotency decision helpers for the PayHero STK push init path.
+ * Idempotency decision helpers for the checkout-init / signup-init STK
+ * push path. Provider-neutral — the same logic applies to PayHero (now
+ * retired) and IntaSend.
  *
  * Extracted into a pure-function module so the decision logic is
  * testable without mocking the Supabase chain. The init routes call
@@ -8,6 +10,10 @@
  * most recent stk_push payment_attempt.
  *
  * No I/O. No imports beyond types. Times in ms throughout.
+ *
+ * History: this lived in `src/lib/payhero/idempotency.ts` until
+ * 2026-06-03; moved to `payments/` (provider-neutral) as part of the
+ * PayHero → IntaSend cutover. Behaviour unchanged.
  */
 
 /** A row shape narrow enough to make decisions on. The init routes
@@ -60,7 +66,7 @@ export function decidePendingAction(
 
 /**
  * Decide whether to actually re-fire an STK push during the reuse
- * branch. Within the PayHero STK push lifetime (60s), the prior prompt
+ * branch. Within the Daraja STK push lifetime (60s), the prior prompt
  * is still live on the customer's phone — firing again would just
  * incur a second wallet fee with no UX gain.
  *

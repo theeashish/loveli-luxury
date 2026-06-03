@@ -357,66 +357,41 @@ export async function runDiagnostics(): Promise<DiagnosticsResult> {
   }
 
   // ---------------------------------------------------------------------
-  // Group: PayHero
+  // Group: IntaSend
+  //
+  // Phase 0 (2026-06-03) status: PayHero has been removed. The IntaSend
+  // integration is being built in Phase 1+. The env-presence checks below
+  // surface what the deployment is missing; the live reachability probe
+  // is added in Phase 1 once the SDK + endpoints land.
   // ---------------------------------------------------------------------
 
-  // STK + auth + webhook token are REQUIRED (PayHero is the only
-  // provider). B2C channel is optional until payouts go live.
-  const phRequiredEnvs: Array<[string, boolean]> = [
-    ['PAYHERO_AUTH_TOKEN', !!env.PAYHERO_AUTH_TOKEN],
-    ['PAYHERO_CHANNEL_ID_STK', !!env.PAYHERO_CHANNEL_ID_STK],
-    ['PAYHERO_WEBHOOK_TOKEN', !!env.PAYHERO_WEBHOOK_TOKEN],
+  const isRequiredEnvs: Array<[string, boolean]> = [
+    ['INTASEND_PUBLISHABLE_KEY', !!env.INTASEND_PUBLISHABLE_KEY],
+    ['INTASEND_SECRET_TOKEN',    !!env.INTASEND_SECRET_TOKEN],
+    ['INTASEND_WALLET_ID',       !!env.INTASEND_WALLET_ID],
+    ['INTASEND_WEBHOOK_CHALLENGE', !!env.INTASEND_WEBHOOK_CHALLENGE],
   ]
-  for (const [name, present] of phRequiredEnvs) {
+  for (const [name, present] of isRequiredEnvs) {
     checks.push({
-      group: 'PayHero',
+      group: 'IntaSend',
       name,
       status: present ? 'ok' : 'fail',
-      detail: present ? 'set' : 'unset (REQUIRED — payments will fail)',
+      detail: present
+        ? 'set'
+        : 'unset (REQUIRED — IntaSend payments will fail until Phase 1 wiring + this env is set)',
       ms: 0,
     })
   }
   checks.push({
-    group: 'PayHero',
-    name: 'PAYHERO_CHANNEL_ID_B2C',
-    status: env.PAYHERO_CHANNEL_ID_B2C ? 'ok' : 'skip',
-    detail: env.PAYHERO_CHANNEL_ID_B2C
-      ? 'set'
-      : 'unset (optional — only needed once distributor payouts go live)',
+    group: 'IntaSend',
+    name: 'INTASEND_TEST (sandbox flag)',
+    status: env.INTASEND_TEST === undefined ? 'skip' : 'ok',
+    detail:
+      env.INTASEND_TEST === undefined
+        ? 'unset — defaults to production. Set INTASEND_TEST=true for sandbox.'
+        : `INTASEND_TEST=${env.INTASEND_TEST ? 'true (sandbox)' : 'false (live)'}`,
     ms: 0,
   })
-
-  if (env.PAYHERO_AUTH_TOKEN) {
-    checks.push(
-      await timed('PayHero', 'API reachable + auth ok', async () => {
-        // Probe transaction-status with a clearly invalid reference.
-        // 401/403 means the token is bad; any other response (4xx with
-        // structured body) means auth was accepted.
-        const res = await fetch(
-          'https://backend.payhero.co.ke/api/v2/transaction-status?reference=diagnostic-invalid',
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Basic ${env.PAYHERO_AUTH_TOKEN}`,
-              Accept: 'application/json',
-            },
-          },
-        )
-        if (res.status === 401 || res.status === 403) {
-          return { status: 'fail', detail: `auth rejected (HTTP ${res.status})` }
-        }
-        return { status: 'ok', detail: `endpoint responded HTTP ${res.status}` }
-      }),
-    )
-  } else {
-    checks.push({
-      group: 'PayHero',
-      name: 'API reachable + auth ok',
-      status: 'fail',
-      detail: 'PAYHERO_AUTH_TOKEN missing — payments will fail',
-      ms: 0,
-    })
-  }
 
   // ---------------------------------------------------------------------
   // Group: SMS

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
-import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import { StkPushPanel } from '@/components/checkout/StkPushPanel'
 
 export type SignupAddress = {
@@ -82,7 +82,7 @@ export function DistributorSignupForm({
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // When PayHero initiates an STK push, we stash the orderNumber and
+  // When the provider initiates an STK push, we stash the orderNumber and
   // hand off to StkPushPanel. The form is hidden while the panel polls.
   const [stkOrderNumber, setStkOrderNumber] = useState<string | null>(null)
 
@@ -161,9 +161,10 @@ export function DistributorSignupForm({
         return
       }
 
-      // PayHero path: server fired an STK push to the customer's phone.
-      // Switch UI to the polling panel — the form is now hidden.
-      if (json.provider === 'payhero' && json.orderNumber) {
+      // Server fired an STK push to the customer's phone (via whichever
+      // provider is active). Switch UI to the polling panel — the form
+      // is now hidden.
+      if (json.orderNumber) {
         setStkOrderNumber(json.orderNumber as string)
         return
       }
@@ -177,8 +178,8 @@ export function DistributorSignupForm({
   }
 
   // When the STK push is in flight, render only the polling panel.
-  // The panel owns retry behaviour — it calls /api/payhero/retry-stk
-  // against the SAME order_number, so no duplicate orders or PayHero
+  // The panel owns retry behaviour — it calls /api/intasend/retry-stk
+  // against the SAME order_number, so no duplicate orders or provider
   // wallet fees can ever come from "Try again".
   if (stkOrderNumber) {
     const liveSubtotal = selectedBundle
@@ -191,7 +192,7 @@ export function DistributorSignupForm({
         successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
         amountLabel={
           selectedBundle
-            ? formatKes(liveSubtotal + computePayHeroFeeMinor(liveSubtotal))
+            ? formatKes(liveSubtotal + computeProcessingFeeMinor(liveSubtotal))
             : undefined
         }
       />
@@ -467,7 +468,7 @@ export function DistributorSignupForm({
           const bundleMinor = BigInt(selectedBundle.retailPriceMinor)
           const joiningFeeMinor = BigInt(selectedBundle.joiningFeeMinor)
           const subtotalMinor = bundleMinor + joiningFeeMinor
-          const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+          const processingFeeMinor = computeProcessingFeeMinor(subtotalMinor)
           const totalMinor = subtotalMinor + processingFeeMinor
           return (
             <dl className="space-y-3 text-sm">

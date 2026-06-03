@@ -68,20 +68,39 @@ const serverSchema = z.object({
   ENABLE_DISTRIBUTOR_SIGNUP: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_PAYOUTS: z.string().transform((v) => v === 'true').default('false'),
   ENABLE_MAINTENANCE_MODE: z.string().transform((v) => v === 'true').default('false'),
-  // PayHero (Kenya M-Pesa STK + B2C). Validated lazily inside the
-  // service at call time; checkout init throws cleanly when missing.
+  // IntaSend (Kenya M-Pesa STK + B2C + card + bank). All server-only.
+  // Phase 1+ of the PayHero → IntaSend migration. Validated lazily inside
+  // src/lib/intasend/client.ts at call time; the collect/payout endpoints
+  // throw cleanly when the required values are missing.
   //
-  // PAYHERO_AUTH_TOKEN: the pre-generated Basic auth TOKEN from the
-  //   PayHero dashboard's "API Keys" page. PayHero does the base64
-  //   encoding for you — you paste the token value (no "Basic " prefix).
-  // PAYHERO_WEBHOOK_TOKEN: an opaque secret we generate ourselves and
-  //   embed in the callback URL we register with PayHero. PayHero does
-  //   NOT sign webhooks, so the URL secret is the only signal that the
-  //   POST came from PayHero (or from someone who knows the URL).
-  PAYHERO_AUTH_TOKEN: z.preprocess(emptyToUndef, z.string().optional()),
-  PAYHERO_CHANNEL_ID_STK: z.preprocess(emptyToUndef, z.string().optional()),
-  PAYHERO_CHANNEL_ID_B2C: z.preprocess(emptyToUndef, z.string().optional()),
-  PAYHERO_WEBHOOK_TOKEN: z.preprocess(emptyToUndef, z.string().min(20).optional()),
+  // INTASEND_PUBLISHABLE_KEY: pk_test_... / pk_live_... — the *publishable*
+  //   key. Despite its name, this is server-only in our setup; it is only
+  //   exposed to the browser if/when we ship the IntaSend inline checkout
+  //   widget (and even then only via a tightly-scoped page-level prop).
+  // INTASEND_SECRET_TOKEN: ISSecretKey_... — the API secret. Never client.
+  // INTASEND_WALLET_ID: the IntaSend wallet that collections land in and
+  //   that payouts draw from. Acts as the platform's float account.
+  // INTASEND_WEBHOOK_CHALLENGE: the shared secret IntaSend signs webhook
+  //   bodies with. Verification is MANDATORY on every webhook (see
+  //   src/lib/intasend/signature.ts in Phase 1). A missing or wrong
+  //   challenge means the webhook handler rejects the call.
+  // INTASEND_TEST: 'true' → sandbox, anything else → production. Defaults
+  //   to production-treat so a missing value never silently downgrades a
+  //   live deploy to sandbox.
+  INTASEND_PUBLISHABLE_KEY: z.preprocess(emptyToUndef, z.string().optional()),
+  INTASEND_SECRET_TOKEN:    z.preprocess(emptyToUndef, z.string().optional()),
+  INTASEND_WALLET_ID:       z.preprocess(emptyToUndef, z.string().optional()),
+  INTASEND_WEBHOOK_CHALLENGE: z.preprocess(emptyToUndef, z.string().min(20).optional()),
+  INTASEND_TEST: z
+    .preprocess(emptyToUndef, z.string().optional())
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
+  // Configurable ceiling above which payouts require a superadmin
+  // approval action before they fire. Stored as KES whole-shilling
+  // integer; the payout endpoint converts to minor units. Defaults to
+  // 100,000 KES if unset.
+  INTASEND_PAYOUT_APPROVAL_CEILING_KES: z
+    .preprocess(emptyToUndef, z.string().optional())
+    .transform((v) => (v === undefined ? 100_000 : Number.parseInt(v, 10))),
   // Upstash Redis for rate limiting. Unset → limiter is a no-op (fail-open).
   UPSTASH_REDIS_REST_URL: z.preprocess(emptyToUndef, z.string().url().optional()),
   UPSTASH_REDIS_REST_TOKEN: z.preprocess(emptyToUndef, z.string().min(10).optional()),
@@ -137,10 +156,13 @@ export function getServerEnv() {
     ENABLE_DISTRIBUTOR_SIGNUP: process.env.ENABLE_DISTRIBUTOR_SIGNUP,
     ENABLE_PAYOUTS: process.env.ENABLE_PAYOUTS,
     ENABLE_MAINTENANCE_MODE: process.env.ENABLE_MAINTENANCE_MODE,
-    PAYHERO_AUTH_TOKEN: process.env.PAYHERO_AUTH_TOKEN,
-    PAYHERO_CHANNEL_ID_STK: process.env.PAYHERO_CHANNEL_ID_STK,
-    PAYHERO_CHANNEL_ID_B2C: process.env.PAYHERO_CHANNEL_ID_B2C,
-    PAYHERO_WEBHOOK_TOKEN: process.env.PAYHERO_WEBHOOK_TOKEN,
+    INTASEND_PUBLISHABLE_KEY: process.env.INTASEND_PUBLISHABLE_KEY,
+    INTASEND_SECRET_TOKEN: process.env.INTASEND_SECRET_TOKEN,
+    INTASEND_WALLET_ID: process.env.INTASEND_WALLET_ID,
+    INTASEND_WEBHOOK_CHALLENGE: process.env.INTASEND_WEBHOOK_CHALLENGE,
+    INTASEND_TEST: process.env.INTASEND_TEST,
+    INTASEND_PAYOUT_APPROVAL_CEILING_KES:
+      process.env.INTASEND_PAYOUT_APPROVAL_CEILING_KES,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     ENFORCE_ADMIN_MFA: process.env.ENFORCE_ADMIN_MFA,

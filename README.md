@@ -4,7 +4,7 @@ Premium African fragrance commerce platform with an invite-only partner program.
 Kenya-first, mobile-first, M-Pesa-native.
 
 **Production:** https://loveli-luxury.vercel.app
-**Stack:** Next.js 14 (App Router) · TypeScript strict · Supabase (Postgres + RLS) · PayHero (M-Pesa STK + B2C) · Vercel · Sentry · Resend · Tailwind · Vitest
+**Stack:** Next.js 14 (App Router) · TypeScript strict · Supabase (Postgres + RLS) · IntaSend (M-Pesa + card + bank, inbound + B2C) · Vercel · Sentry · Resend · Tailwind · Vitest
 
 ---
 
@@ -19,7 +19,7 @@ npm install
 
 # 3. Copy env template and fill in real values
 cp .env.example .env.local
-# (Supabase + PayHero credentials live in your Vercel project)
+# (Supabase + IntaSend credentials live in your Vercel project)
 
 # 4. Run dev server
 npm run dev
@@ -44,7 +44,8 @@ deliberately minimal so the in-depth docs can stay authoritative.
   the May 2026 transformation kicked off.
 - **`docs/delivery-punchlist-2026-05.md`** — the launch checklist (P0/P1/P2/P3
   with ownership tags).
-- **`docs/go-live-mpesa.md`** — M-Pesa Daraja Go-Live runbook.
+- **`docs/intasend-migration-2026-06.md`** — PayHero → IntaSend cutover plan
+  + current phase status. The PayHero/Daraja runbooks moved to `docs/archive/`.
 - **`docs/photography-render-brief-2026-05.md`** — owner brief for regenerating
   homepage product imagery on-brand.
 

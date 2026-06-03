@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getSession, isSuperadmin } from '@/lib/auth/roles'
 import { formatKes } from '@/lib/money'
-import { transitionOrderStatus, reconcilePayheroPayment, purgeOrder } from './actions'
+import { transitionOrderStatus, reconcilePayment, purgeOrder } from './actions'
 import { ALLOWED_ACTIONS } from './transitions'
 
 export const dynamic = 'force-dynamic'
@@ -101,14 +101,17 @@ export default async function AdminOrderDetail({
   if (!order) notFound()
 
   // Superadmin gate for the purge action. Non-superadmins simply don't see
-  // the button; the server action re-checks regardless.
+  // the button; the server action re-checks regardless. paid_at === null is
+  // the canonical "this order never settled" signal (set by mark_order_paid
+  // RPC, regardless of provider); the legacy payhero_mpesa_receipt check is
+  // dropped — those rows are still on disk (nullable) but they are not the
+  // source of truth for "did money move".
   const session = await getSession()
   const canPurge =
     session !== null &&
     isSuperadmin(session) &&
     (['pending', 'cancelled', 'expired', 'failed'] as AnyStatus[]).includes(order.status) &&
-    order.paid_at === null &&
-    order.payhero_mpesa_receipt === null
+    order.paid_at === null
 
   const itemsRes = await service
     .from('order_items')
@@ -208,38 +211,28 @@ export default async function AdminOrderDetail({
         </span>
       </header>
 
-      {order.status === 'pending' && order.payment_provider === 'payhero' ? (
+      {order.status === 'pending' && order.payment_provider_ref ? (
         <section className="mb-8 rounded-lg border border-amber-300 bg-amber-50 p-4">
           <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-amber-900">
-            Stuck pending — reconcile with PayHero
+            Stuck pending — reconcile with provider
           </h2>
           <p className="mt-2 text-sm text-amber-900/80">
-            This order has a PayHero checkout reference but never flipped to
-            paid. Click to query PayHero&apos;s transaction-status endpoint and,
-            if it reports SUCCESS with matching amount, run the same
+            This order has a provider reference but never flipped to paid.
+            Click to query the active provider and, if it reports SUCCESS with
+            matching amount, run the same
             <code className="mx-1 rounded bg-amber-100 px-1 font-mono">mark_order_paid</code>
             chain the webhook would. Safe to click multiple times — idempotent.
+            (Phase 0 of the PayHero → IntaSend migration: the reconcile call
+            itself is a stub until Phase 2 lands the IntaSend status probe.)
           </p>
-          <form action={reconcilePayheroPayment} className="mt-3">
+          <form action={reconcilePayment} className="mt-3">
             <input type="hidden" name="orderId" value={order.id} />
             <button
               type="submit"
-              disabled={!order.payhero_checkout_reference}
-              className="rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
-              title={
-                order.payhero_checkout_reference
-                  ? 'Reconcile against PayHero'
-                  : 'No PayHero checkout reference on this order — cannot reconcile'
-              }
+              className="rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800"
             >
-              Reconcile PayHero payment
+              Reconcile payment
             </button>
-            {!order.payhero_checkout_reference ? (
-              <p className="mt-2 text-xs text-amber-900/70">
-                Missing <code className="font-mono">payhero_checkout_reference</code>;
-                the STK push likely never returned a reference. Cannot reconcile.
-              </p>
-            ) : null}
           </form>
         </section>
       ) : null}

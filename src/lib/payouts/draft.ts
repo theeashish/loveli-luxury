@@ -7,8 +7,8 @@
  *   - unpaid monthly_salaries (one per period)
  *   - unpaid rank_up_bonuses
  *
- * No payout-fee modelling yet: fees = 0; net = gross. PayHero B2C fees can be
- * modelled here later.
+ * No payout-fee modelling yet: fees = 0; net = gross. Provider fees
+ * (IntaSend B2C costs etc.) can be modelled here later.
  *
  * The functions here are server-only and assume the caller has already
  * verified admin role.

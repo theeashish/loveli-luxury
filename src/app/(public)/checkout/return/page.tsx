@@ -1,10 +1,10 @@
 /**
- * PayHero post-payment landing.
+ * Post-payment landing.
  *
  * Trigger: StkPushPanel detects the order has flipped to `paid` via
- *          /api/payhero/status polling, then redirects here with
+ *          /api/intasend/status polling, then redirects here with
  *          ?ref=<order_number>.
- * Role:    Read-only confirmation page. The PayHero webhook is the
+ * Role:    Read-only confirmation page. The provider webhook is the
  *          canonical source of truth — it flipped the order to paid
  *          before the polling client saw the change. This page only
  *          renders order state.

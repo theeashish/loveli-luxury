@@ -4,8 +4,9 @@
  * Server-driven checkout initiation. The cart payload from the client is
  * UNTRUSTED and is re-priced + re-validated against the database before any
  * order is written. The order is created in `pending` state with a freshly
- * generated order_number; we hand it to PayHero as the external_reference
- * so both the polling client and the webhook can resolve back to our row.
+ * generated order_number; we hand it to the provider as the external
+ * reference so both the polling client and the webhook can resolve back to
+ * our row.
  *
  * Auth:        Customer must be signed in (we need profiles.email and the
  *              addresses RLS chain).
@@ -13,10 +14,10 @@
  *              because there is no customer-INSERT policy on orders by design
  *              (clients never write the ledger or its inputs directly).
  *
- * IDEMPOTENCY (added in migration 021):
- *   PayHero charges the merchant wallet per STK push attempt. Two inits
- *   for the same user = two charges. So on every call we look for an
- *   existing pending retail order for the user:
+ * IDEMPOTENCY (added in migration 021, provider-neutral as of 2026-06-03):
+ *   The provider charges the merchant wallet per STK push attempt. Two
+ *   inits for the same user = two charges. So on every call we look for
+ *   an existing pending retail order for the user:
  *     - If one exists and is < STALE_PENDING_MS old, we REUSE it: refire
  *       STK against the same order_number, update phone if it changed,
  *       return the existing order. Cart-line / address / sponsor changes
@@ -36,11 +37,11 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
-import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import {
   decidePendingAction,
   shouldRefireStk,
-} from '@/lib/payhero/idempotency'
+} from '@/lib/payments/idempotency'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
@@ -50,11 +51,11 @@ export const dynamic = 'force-dynamic'
  *  duplicated. See file header for rationale. */
 const STALE_PENDING_MS = 15 * 60 * 1000
 
-/** Refire throttle: PayHero STK push expires at 60s on the customer's
+/** Refire throttle: the Daraja STK push expires at 60s on the customer's
  *  phone. Within that window, the previous prompt is still live —
  *  refiring would incur a second wallet fee. The init reuse branch
  *  skips refire when the prior push hasn't aged out. The explicit
- *  /api/payhero/retry-stk endpoint ignores this throttle (it only
+ *  /api/intasend/retry-stk endpoint ignores this throttle (it only
  *  fires after the panel's 75s timeout). */
 const STK_REFIRE_THROTTLE_MS = 60 * 1000
 
@@ -240,7 +241,7 @@ export async function POST(req: Request) {
         orderNumber: existingPending.order_number,
         reused: true,
         throttled: true,
-        provider: 'payhero',
+        provider: 'intasend',
         status: 'stk_pushed',
       })
     }
@@ -530,11 +531,13 @@ export async function POST(req: Request) {
   }
   const orderNumber = orderNumberRes.data as unknown as string
 
-  // 9. Compute the PayHero processing fee from the subtotal and add it
-  //    to the total. The customer sees and pays this fee on top of the
-  //    cart total; PayHero deducts it from what they remit, so the
-  //    business receives the full subtotal.
-  const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+  // 9. Compute the processing fee from the subtotal and add it to the
+  //    total. The customer sees and pays this fee on top of the cart
+  //    total; the provider deducts it from what they remit, so the
+  //    business receives the full subtotal. The fee is provider-specific
+  //    (see src/lib/payments/fees.ts) — Phase 0 stub returns 0 until
+  //    IntaSend's schedule is wired in Phase 1.
+  const processingFeeMinor = computeProcessingFeeMinor(subtotalMinor)
   const totalMinor = subtotalMinor + processingFeeMinor
 
   // 10. Insert order. TODO(types): regenerate database.ts post-migration-020
@@ -565,7 +568,7 @@ export async function POST(req: Request) {
       currency: 'KES',
       sponsor_distributor_id: sponsorDistributorId,
       shipping_address_id: resolvedAddressId,
-      payment_provider: 'payhero',
+      payment_provider: 'intasend',
     })
     .select('id, order_number, total_minor')
     .single()) as {
@@ -602,7 +605,9 @@ export async function POST(req: Request) {
     )
   }
 
-  // 12. Initiate payment via the current provider (PayHero STK push).
+  // 12. Initiate payment via the current provider (IntaSend STK push).
+  //     Phase 0 (2026-06-03): the dispatcher throws — IntaSend wires up
+  //     in Phase 1. Orders sit in 'pending' until then.
   const amountKes = Number(totalMinor / 100n)
   let result
   try {

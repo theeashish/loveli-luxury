@@ -8,7 +8,7 @@ const ContentSecurityPolicy = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: blob: https://*.supabase.co https://www.facebook.com https://www.google-analytics.com;
   font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://backend.payhero.co.ke https://www.google-analytics.com https://*.sentry.io https://analytics.tiktok.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://payment.intasend.com https://sandbox.intasend.com https://www.google-analytics.com https://*.sentry.io https://analytics.tiktok.com;
   frame-src 'self';
   object-src 'none';
   base-uri 'self';

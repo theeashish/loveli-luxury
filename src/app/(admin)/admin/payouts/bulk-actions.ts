@@ -18,7 +18,7 @@
  *   - the row must currently be status='pending' (optimistic CAS)
  *
  * It does NOT skip any of these gates, does NOT lower the bar, and does
- * NOT batch the PayHero API call (each fire is independent). Each
+ * NOT batch the provider API call (each fire is independent). Each
  * pending row is processed in sequence; a failure on one row rolls THAT
  * ROW back to 'pending' and continues with the next. The aggregate
  * result reports every outcome.
@@ -34,8 +34,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
-import { initiateB2C, buildCallbackUrl } from '@/lib/payhero/service'
-import { publicEnv, getServerEnv } from '@/lib/env'
+import { getServerEnv } from '@/lib/env'
 
 export type BulkFireOutcome =
   | { payoutId: number; status: 'fired'; reference: string | null; amountKes: number }
@@ -187,56 +186,49 @@ export async function fireAllEligiblePayouts(
       continue
     }
 
-    const amountKes = Number(BigInt(row.net_total_minor) / 100n)
+    // amountKes is computed by Phase 4's real implementation (commented
+    // below). Touch it so the variable is in scope for the commented future
+    // code without tripping noUnusedLocals.
+    void Number(BigInt(row.net_total_minor) / 100n)
 
     try {
-      const callbackUrl = buildCallbackUrl(
-        publicEnv.NEXT_PUBLIC_APP_URL,
-        '/api/payhero/payout-webhook',
+      // Phase 0 (2026-06-03): IntaSend B2C dispatch lands in Phase 4.
+      // Roll the row back to pending and surface a clear error rather
+      // than silently no-op'ing — admins will see a `failed` outcome
+      // for every row they attempted to bulk-fire, with a clear reason.
+      throw new Error(
+        'IntaSend B2C payout dispatch is not yet wired (Phase 4 of the PayHero → IntaSend migration).',
       )
-      const transfer = await initiateB2C({
-        amountKes,
-        phone: row.payout_msisdn,
-        payoutId: row.id,
-        callbackUrl,
-        customerName: `Loveli distributor ${row.id}`,
-      })
 
-      await (
-        service.from('payouts') as unknown as {
-          update: (v: Record<string, unknown>) => {
-            eq: (col: string, val: unknown) => Promise<{
-              error: { message: string } | null
-            }>
-          }
-        }
-      )
-        .update({
-          provider: 'payhero',
-          payhero_transfer_reference: transfer.reference ?? null,
-        })
-        .eq('id', row.id)
-
-      await service.from('audit_log').insert({
-        actor_id: session.userId,
-        action: 'payout.initiated.bulk',
-        resource_type: 'payouts',
-        resource_id: String(row.id),
-        after_data: {
-          provider: 'payhero',
-          payhero_reference: transfer.reference ?? null,
-          amount_kes: amountKes,
-          msisdn: row.payout_msisdn,
-          bulk_run: true,
-        },
-      })
-
-      outcomes.push({
-        payoutId: row.id,
-        status: 'fired',
-        reference: transfer.reference ?? null,
-        amountKes,
-      })
+      // Phase 4 implementation will look like:
+      //   const tracking = await initiateIntasendB2C({
+      //     amountKes, msisdn: row.payout_msisdn, payoutId: row.id,
+      //   })
+      //   await service.from('payouts').update({
+      //     provider:    'intasend',
+      //     tracking_id: tracking.id,
+      //     account:     row.payout_msisdn,
+      //     raw_payload: tracking.raw,
+      //   }).eq('id', row.id)
+      //   await service.from('audit_log').insert({
+      //     actor_id:      session.userId,
+      //     action:        'payout.initiated.bulk',
+      //     resource_type: 'payouts',
+      //     resource_id:   String(row.id),
+      //     after_data: {
+      //       provider:    'intasend',
+      //       tracking_id: tracking.id,
+      //       amount_kes:  amountKes,
+      //       msisdn:      row.payout_msisdn,
+      //       bulk_run:    true,
+      //     },
+      //   })
+      //   outcomes.push({
+      //     payoutId: row.id,
+      //     status:   'fired',
+      //     reference: tracking.id,
+      //     amountKes,
+      //   })
     } catch (err) {
       // Roll the row back to pending so the operator (or a retry) can fire it.
       await service
@@ -250,6 +242,8 @@ export async function fireAllEligiblePayouts(
       outcomes.push({ payoutId: row.id, status: 'failed', error: (err as Error).message })
     }
   }
+  // Touch session so the unused-warning is quiet until Phase 4 references it.
+  void session
 
   const fired = outcomes.filter((o) => o.status === 'fired').length
   const skipped = outcomes.filter((o) => o.status === 'skipped').length

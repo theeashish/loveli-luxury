@@ -62,7 +62,7 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
       {open && !result && (
         <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 p-4">
           <p className="text-sm text-rose-900">
-            <strong>This fires real B2C transfers</strong> from your PayHero
+            <strong>This fires real B2C transfers</strong> from the IntaSend
             wallet to every eligible pending payout. Each fire is logged.
             Failures roll back to <code className="font-mono">pending</code>{' '}
             and can be retried. Type{' '}

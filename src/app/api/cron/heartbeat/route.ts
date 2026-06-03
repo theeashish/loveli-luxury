@@ -92,9 +92,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const env = getServerEnv()
-    if (!env.PAYHERO_AUTH_TOKEN || !env.PAYHERO_WEBHOOK_TOKEN) {
+    if (
+      !env.INTASEND_SECRET_TOKEN ||
+      !env.INTASEND_WEBHOOK_CHALLENGE ||
+      !env.INTASEND_WALLET_ID
+    ) {
       ok = false
-      reason = 'PayHero env incomplete'
+      reason = 'IntaSend env incomplete'
     }
     // Quick DB ping. If the DB is gone, the heartbeat reports `error` and
     // Sentry alerts — separate signal from "the entire deployment is down."

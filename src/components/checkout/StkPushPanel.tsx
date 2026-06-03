@@ -1,22 +1,27 @@
 'use client'
 
 /**
- * StkPushPanel — UX surface for PayHero STK push.
+ * StkPushPanel — UX surface for M-Pesa STK push (provider-agnostic).
  *
  * The init route (whichever called us) has already created an order and
- * fired the STK push. The user's phone is showing the M-Pesa PIN prompt.
- * This component polls /api/payhero/status until the order flips to
- * `paid`, then redirects to /checkout/return.
+ * fired the STK push via the current provider. The user's phone is
+ * showing the M-Pesa PIN prompt. This component polls /api/intasend/status
+ * until the order flips to `paid`, then redirects to /checkout/return.
  *
  * Source of truth is the server-side webhook chain. This panel only
  * READS order state — it never tries to confirm payment from the
  * frontend.
  *
- * Retry: "Try again" calls POST /api/payhero/retry-stk against the
- * SAME order. No new order is created, the external_reference stays
- * the same, and the webhook dedup logic keeps everything coherent.
- * This is the core defense against the original "double STK push per
- * checkout intent" bug.
+ * Retry: "Try again" calls POST /api/intasend/retry-stk against the
+ * SAME order. No new order is created, the invoice id stays the same,
+ * and the webhook dedup logic keeps everything coherent. This is the
+ * core defense against the original "double STK push per checkout intent"
+ * bug (migration 021).
+ *
+ * Phase 0 of the PayHero → IntaSend migration (2026-06-03): the
+ * /api/intasend/* endpoints are scaffolded in Phase 1+; until they
+ * land, polling will simply not flip status — the panel reaches its
+ * 75 s timeout and offers the resend button.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -24,7 +29,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 type Status = 'awaiting_prompt' | 'paid' | 'failed' | 'timeout' | 'retrying'
 
 const POLL_INTERVAL_MS = 2_500
-const TIMEOUT_MS = 75_000 // 75s; PayHero STK push expires at 60s, give buffer
+const TIMEOUT_MS = 75_000 // 75s; Daraja STK push expires at 60s, give buffer
 
 interface Props {
   orderNumber: string
@@ -58,7 +63,7 @@ export function StkPushPanel({
       if (stoppedRef.current) return
       try {
         const res = await fetch(
-          `/api/payhero/status?ref=${encodeURIComponent(orderNumber)}`,
+          `/api/intasend/status?ref=${encodeURIComponent(orderNumber)}`,
           { cache: 'no-store' },
         )
         if (!res.ok) {
@@ -112,7 +117,7 @@ export function StkPushPanel({
     setStatus('retrying')
     setError(null)
     try {
-      const res = await fetch('/api/payhero/retry-stk', {
+      const res = await fetch('/api/intasend/retry-stk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderNumber }),

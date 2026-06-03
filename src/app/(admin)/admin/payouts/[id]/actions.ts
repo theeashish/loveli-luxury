@@ -4,8 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
-import { initiateB2C, buildCallbackUrl } from '@/lib/payhero/service'
-import { publicEnv } from '@/lib/env'
 import { getServerEnv } from '@/lib/env'
 
 const idSchema = z.object({
@@ -13,17 +11,21 @@ const idSchema = z.object({
 })
 
 /**
- * Initiate the M-Pesa B2C transfer for a `pending` payout.
+ * Initiate an M-Pesa B2C transfer for a `pending` payout.
  *
  * Steps:
  *   1. ENABLE_PAYOUTS feature gate.
- *   2. Optimistically lock the row by transitioning status pending → processing
- *      with `.eq('status', 'pending')`. If another caller beat us we abort.
- *   3. Call PayHero B2C /withdraw (see lib/payhero/service.ts initiateB2C).
- *   4. On API success, store the provider transfer reference in
- *      `payouts.payhero_transfer_reference` and stamp `initiated_at`. On
- *      API failure, roll status back to `pending` so the admin can retry.
- *   5. The terminal status (completed / failed) is set by the webhook.
+ *   2. Verify the distributor's MSISDN is still verified and unchanged
+ *      since the payout was drafted.
+ *   3. Optimistically lock the row by transitioning status pending →
+ *      processing with `.eq('status', 'pending')`. If another caller
+ *      beat us, abort.
+ *   4. Call the provider's B2C transfer API. Phase 0 (2026-06-03)
+ *      throws — IntaSend payouts are wired in Phase 4.
+ *   5. On API success, store the provider tracking id on the row and
+ *      stamp `initiated_at`. On API failure, roll status back to
+ *      `pending` so the admin can retry.
+ *   6. The terminal status (completed / failed) is set by the webhook.
  */
 export async function initiatePayout(formData: FormData): Promise<void> {
   const env = getServerEnv()
@@ -98,50 +100,41 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw new Error('Payout is not in pending state.')
   }
 
-  const amountKes = Number(BigInt(row.net_total_minor) / 100n)
+  // amountKes is computed by Phase 4's real implementation (commented below).
+  // Touch it here so the variable is in scope for the commented future code
+  // without tripping noUnusedLocals.
+  void Number(BigInt(row.net_total_minor) / 100n)
 
   try {
-    const callbackUrl = buildCallbackUrl(
-      publicEnv.NEXT_PUBLIC_APP_URL,
-      '/api/payhero/payout-webhook',
+    // Phase 0 (2026-06-03): IntaSend B2C payout dispatch is not yet
+    // wired (lands in Phase 4 of the migration). Roll the row back to
+    // pending and surface a clear error so admin tooling doesn't
+    // silently mark a payout "processing" that no provider will ever
+    // settle.
+    throw new Error(
+      'IntaSend B2C payout dispatch is not yet wired. Phase 4 of the PayHero → IntaSend migration adds the real implementation; until then, no payouts fire.',
     )
-    const transfer = await initiateB2C({
-      amountKes,
-      phone: row.payout_msisdn,
-      payoutId,
-      callbackUrl,
-      customerName: `Loveli distributor ${payoutId}`,
-    })
 
-    // TODO(types): regenerate database.ts post-migration-019; payouts
-    // has new payhero_transfer_reference + provider columns from 019.
-    await (
-      service.from('payouts') as unknown as {
-        update: (v: Record<string, unknown>) => {
-          eq: (col: string, val: unknown) => Promise<{
-            error: { message: string } | null
-          }>
-        }
-      }
-    )
-      .update({
-        provider: 'payhero',
-        payhero_transfer_reference: transfer.reference ?? null,
-      })
-      .eq('id', payoutId)
-
-    await service.from('audit_log').insert({
-      actor_id: session.userId,
-      action: 'payout.initiated',
-      resource_type: 'payouts',
-      resource_id: String(payoutId),
-      after_data: {
-        provider: 'payhero',
-        payhero_reference: transfer.reference ?? null,
-        amount_kes: amountKes,
-        msisdn: row.payout_msisdn,
-      },
-    })
+    // Phase 4 implementation will look like:
+    //   const tracking = await initiateIntasendB2C({
+    //     amountKes, msisdn: row.payout_msisdn, payoutId, ...
+    //   })
+    //   await service.from('payouts').update({
+    //     provider:    'intasend',
+    //     tracking_id: tracking.id,
+    //     account:     row.payout_msisdn,
+    //     raw_payload: tracking.raw,
+    //   }).eq('id', payoutId)
+    //   await service.from('audit_log').insert({
+    //     actor_id:      session.userId,
+    //     action:        'payout.initiated',
+    //     resource_type: 'payouts',
+    //     resource_id:   String(payoutId),
+    //     after_data: {
+    //       provider: 'intasend', tracking_id: tracking.id,
+    //       amount_kes: amountKes, msisdn: row.payout_msisdn,
+    //     },
+    //   })
   } catch (err) {
     // Roll back to pending so the admin can retry
     await service
@@ -155,6 +148,11 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw err
   }
 
+  // Phase 4 will unblock this revalidate (currently unreachable).
+  // eslint-disable-next-line no-unreachable
   revalidatePath('/admin/payouts')
+  // eslint-disable-next-line no-unreachable
   revalidatePath(`/admin/payouts/${payoutId}`)
+  // Touch session so the unused-warning is quiet until Phase 4 references it.
+  void session
 }

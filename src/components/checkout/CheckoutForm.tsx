@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { useCartStore } from '@/lib/cart/store'
 import { isEmpty, subtotalMinor, totalQty } from '@/lib/cart/selectors'
-import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import { StkPushPanel } from '@/components/checkout/StkPushPanel'
 
 export type CheckoutAddress = {
@@ -56,7 +56,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // When PayHero initiates an STK push, switch to polling-panel mode.
+  // When the provider initiates an STK push, switch to polling-panel mode.
   const [stkOrderNumber, setStkOrderNumber] = useState<string | null>(null)
 
   // Once hydrated, if the cart is empty there is nothing to check out for.
@@ -142,8 +142,11 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
         return
       }
 
-      // PayHero — STK push fired, switch to polling panel
-      if (json.provider === 'payhero' && json.orderNumber) {
+      // STK push fired, switch to polling panel. `provider` is whichever
+      // gateway the init route used (intasend post-2026-06-03 migration);
+      // we don't gate on the value — any provider that returns an
+      // orderNumber the polling endpoint can resolve is fine.
+      if (json.orderNumber) {
         setStkOrderNumber(json.orderNumber as string)
         return
       }
@@ -158,14 +161,14 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
 
   // STK polling — render the panel exclusively while the payment is
   // pending so the user isn't tempted to re-submit the form. The
-  // panel itself owns retry behaviour via /api/payhero/retry-stk —
+  // panel itself owns retry behaviour via /api/intasend/retry-stk —
   // no duplicate orders can be created from "Try again".
   if (stkOrderNumber) {
     return (
       <StkPushPanel
         orderNumber={stkOrderNumber}
         successRedirectUrl={`/checkout/return?ref=${encodeURIComponent(stkOrderNumber)}`}
-        amountLabel={formatKes(subtotal + computePayHeroFeeMinor(subtotal))}
+        amountLabel={formatKes(subtotal + computeProcessingFeeMinor(subtotal))}
       />
     )
   }
@@ -367,7 +370,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
           <div className="flex items-center justify-between text-[hsl(var(--muted-foreground))]">
             <dt>Processing fee</dt>
             <dd className="tabular-nums">
-              {formatKes(computePayHeroFeeMinor(subtotal))}
+              {formatKes(computeProcessingFeeMinor(subtotal))}
             </dd>
           </div>
         </dl>
@@ -375,7 +378,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Total</span>
             <span className="text-xl font-medium tabular-nums">
-              {formatKes(subtotal + computePayHeroFeeMinor(subtotal))}
+              {formatKes(subtotal + computeProcessingFeeMinor(subtotal))}
             </span>
           </div>
         </div>

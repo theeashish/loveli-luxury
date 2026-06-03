@@ -28,7 +28,7 @@ export default defineConfig({
       //  - The SQL money engine (write_commission_ledger, mark_order_paid, …) is
       //    covered by tests/integration/commission-engine.test.ts against the
       //    REAL migrations in pglite — see that suite, not line coverage here.
-      //  - Thin I/O wrappers (supabase/*, email/*, sms/*, payhero/service,
+      //  - Thin I/O wrappers (supabase/*, email/*, sms/*, intasend/client,
       //    payments/dispatcher, catalog/queries+mutations, *_store) are
       //    integration/E2E territory; unit-covering them only mocks the I/O.
       include: [
@@ -46,8 +46,8 @@ export default defineConfig({
         'src/lib/concierge/link.ts',
         'src/lib/orders/mask.ts',
         'src/lib/partners/tiers.ts',
-        'src/lib/payhero/fees.ts',
-        'src/lib/payhero/idempotency.ts',
+        'src/lib/payments/fees.ts',
+        'src/lib/payments/idempotency.ts',
         'src/lib/recently-viewed/logic.ts',
         'src/lib/wishlist/logic.ts',
         // NB: the commission/salary MONEY math lives in SQL RPCs

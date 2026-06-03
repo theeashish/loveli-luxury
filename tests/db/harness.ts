@@ -198,7 +198,7 @@ export async function seedPendingOrder(
   const orderId = await db.scalar<number>(
     `INSERT INTO orders
        (order_number, user_id, customer_email, kind, status, subtotal_minor, total_minor, currency, sponsor_distributor_id, payment_provider)
-     VALUES ($1, $2, 'cust@test.local', 'retail', 'pending', $3, $3, 'KES', $4, 'payhero')
+     VALUES ($1, $2, 'cust@test.local', 'retail', 'pending', $3, $3, 'KES', $4, 'intasend')
      RETURNING id`,
     [orderNumber, buyer, lineTotal, opts.sponsorId],
   )

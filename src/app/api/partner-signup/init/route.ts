@@ -22,9 +22,10 @@
  *              policy on orders by design).
  *
  * IDEMPOTENCY (added in migration 021):
- *   PayHero charges the merchant wallet per STK push attempt. Two inits
- *   for the same user = two charges. To prevent this, on every call we
- *   look for an existing pending distributor_signup order for the user.
+ *   The provider charges the merchant wallet per STK push attempt. Two
+ *   inits for the same user = two charges. To prevent this, on every
+ *   call we look for an existing pending distributor_signup order for
+ *   the user.
  *     - If one exists and is < STALE_PENDING_MS old, we REUSE it: refire
  *       the STK push against the same order_number, update the phone if
  *       the user typed a different one, and return the existing order.
@@ -41,27 +42,28 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
-import { computePayHeroFeeMinor } from '@/lib/payhero/fees'
+import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import {
   decidePendingAction,
   shouldRefireStk,
-} from '@/lib/payhero/idempotency'
+} from '@/lib/payments/idempotency'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /** How long a pending order is considered "still live" for reuse on a
- *  resubmission. PayHero STK push itself expires at 60s; 15 min covers
- *  realistic "I wandered off and came back" UX without indefinitely
- *  blocking the user from signing up if they abandon entirely. */
+ *  resubmission. The Daraja STK push itself expires at 60s; 15 min
+ *  covers realistic "I wandered off and came back" UX without
+ *  indefinitely blocking the user from signing up if they abandon
+ *  entirely. */
 const STALE_PENDING_MS = 15 * 60 * 1000
 
-/** PayHero STK push expires at 60s on the customer's phone. Within
+/** Daraja STK push expires at 60s on the customer's phone. Within
  *  that window, the previous prompt is still live — refiring would
- *  incur a second PayHero wallet fee for no UX gain. The init reuse
+ *  incur a second provider wallet fee for no UX gain. The init reuse
  *  branch consults this throttle to skip the refire when the prior
- *  push hasn't aged out yet. The explicit /api/payhero/retry-stk
+ *  push hasn't aged out yet. The explicit /api/intasend/retry-stk
  *  endpoint deliberately ignores this throttle — it only fires after
  *  the panel's 75s timeout, by which point the previous STK is dead. */
 const STK_REFIRE_THROTTLE_MS = 60 * 1000
@@ -222,7 +224,7 @@ export async function POST(req: Request) {
   const action = decidePendingAction(existingPending, Date.now(), STALE_PENDING_MS)
 
   if (action.type === 'reuse' && existingPending) {
-    // REUSE: same order, same external_reference → no second PayHero
+    // REUSE: same order, same external reference → no second provider
     // wallet fee, no second webhook row, no second DB order.
     if (existingPending.customer_phone !== body.customerPhone) {
       const phoneUpdate = await (service.from('orders') as unknown as {
@@ -247,7 +249,7 @@ export async function POST(req: Request) {
 
     // Refire throttle: if the previous STK push is still alive on
     // the customer's phone (< 60s old), skip the refire to avoid a
-    // duplicate PayHero wallet fee. The panel keeps polling /status
+    // duplicate provider wallet fee. The panel keeps polling /status
     // and will catch the original prompt's completion.
     const recentStkRes = await service
       .from('payment_attempts')
@@ -273,7 +275,7 @@ export async function POST(req: Request) {
         orderNumber: existingPending.order_number,
         reused: true,
         throttled: true,
-        provider: 'payhero',
+        provider: 'intasend',
         status: 'stk_pushed',
       })
     }
@@ -441,9 +443,9 @@ export async function POST(req: Request) {
 
   const bundleMinor = BigInt(bundle.retail_price_minor)
   const subtotalMinor = bundleMinor + joiningFeeMinor
-  // Add the PayHero processing fee on top — passed through to the
-  // customer, deducted by PayHero from settlement.
-  const processingFeeMinor = computePayHeroFeeMinor(subtotalMinor)
+  // Add the provider processing fee on top — passed through to the
+  // customer, deducted by the provider from settlement.
+  const processingFeeMinor = computeProcessingFeeMinor(subtotalMinor)
   const totalMinor = subtotalMinor + processingFeeMinor
 
   const signupBlob = {
@@ -487,7 +489,7 @@ export async function POST(req: Request) {
       currency: 'KES',
       sponsor_distributor_id: sponsor.id,
       shipping_address_id: resolvedAddressId,
-      payment_provider: 'payhero',
+      payment_provider: 'intasend',
       notes: JSON.stringify(signupBlob),
     })
     .select('id, order_number')
@@ -564,7 +566,9 @@ export async function POST(req: Request) {
     )
   }
 
-  // 12. Initiate payment via the current provider (PayHero STK push).
+  // 12. Initiate payment via the current provider (IntaSend STK push).
+  //     Phase 0 (2026-06-03): the dispatcher throws — IntaSend wires in
+  //     Phase 1. Signup orders sit in 'pending' until then.
   const amountKes = Number(totalMinor / 100n)
   let result
   try {

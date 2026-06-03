@@ -6,11 +6,15 @@
  * State machine:
  *   pending → cancelled
  *   paid    → fulfilled → shipped → delivered
- *   paid|fulfilled|shipped → refunded   (Phase 4: real PayHero refund call +
- *                                        inventory restore. Commission claw-
- *                                        back is implemented in migration 008
- *                                        — refunded ledger rows are voided
- *                                        unless already paid out.)
+ *   paid|fulfilled|shipped → refunded
+ *
+ * Refund money movement is initiated in the provider dashboard (IntaSend
+ * for new orders, PayHero for historical pre-2026-06-03 orders). This
+ * action handles only the DB-side bookkeeping: inventory restore +
+ * commission claw-back + status flip. Commission claw-back is implemented
+ * in migration 008 — refunded ledger rows are voided unless already paid
+ * out, in which case they surface on /admin/clawbacks for a human
+ * decision.
  *
  * Every transition writes an audit_log row with the actor, before/after
  * snapshots, and the action name.
@@ -21,11 +25,6 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin, requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
-import { getTransactionStatus } from '@/lib/payhero/service'
-import { applyPaymentSuccess } from '@/lib/payments/apply-payment-success'
-// Refunds: PayHero does not yet expose a public refund API in our integration.
-// Admins issue refunds from the PayHero dashboard, then click "Mark refunded"
-// here to update inventory + clawback. See refund() below.
 
 const ACTIONS = ['cancel', 'fulfill', 'ship', 'deliver', 'refund'] as const
 type Action = (typeof ACTIONS)[number]
@@ -84,9 +83,10 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
 
   const service = createServiceClient()
 
-  // Refund takes a different path: FW API call → inventory restore via RPC
+  // Refund takes a different path: provider-side refund (admin issues in
+  // provider dashboard) → inventory restore via RPC → commission clawback
   // → status flip. We branch early because the bare status flip is wrong
-  // for refunds (no FW money movement, no inventory return).
+  // for refunds (no money movement triggered here; inventory must come back).
   if (action === 'refund') {
     const orderRes = await service
       .from('orders')
@@ -109,16 +109,12 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       throw new Error('Order has no payment reference to refund.')
     }
 
-    // Refunds: the actual money-movement is initiated in the PayHero
-    // dashboard (no documented refund API at the time of this
-    // integration). This action handles only the DB-side bookkeeping:
-    //   1. Restore inventory
-    //   2. Void unpaid commission ledger rows
-    //   3. Surface paid commissions on /admin/clawbacks for resolution
-    //   4. Flip status to refunded
-    // Admin is responsible for confirming the refund was issued in
-    // PayHero BEFORE clicking refund here. After confirming, the audit
-    // log captures the operator's intent.
+    // The actual money-movement is initiated in the provider dashboard
+    // (IntaSend for new orders, PayHero for historical pre-2026-06-03
+    // orders — neither exposes a documented refund API in our integration
+    // at this time). This action handles only the DB-side bookkeeping.
+    // Admin is responsible for confirming the refund was issued in the
+    // provider BEFORE clicking refund here.
 
     // 1. Restore inventory.
     const restoreRes = await service.rpc('restore_order_inventory', {
@@ -131,7 +127,7 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       )
     }
 
-    // 3. Commission claw-back. Voids unpaid commission_ledger rows for
+    // 2. Commission claw-back. Voids unpaid commission_ledger rows for
     //    this order; surfaces a count of already-paid rows so the admin
     //    can resolve manually if needed (Phase 5 does not auto-reverse
     //    disbursed commissions — see migration 008 header).
@@ -152,7 +148,7 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       paid_amount_minor: number
     } | null
 
-    // 3a. If commissions on this order were already paid out, queue a
+    // 2a. If commissions on this order were already paid out, queue a
     //     clawback_resolutions row so it surfaces on /admin/clawbacks for
     //     a human decision (write-off or deduct-from-future-payout).
     //     UNIQUE(order_id) makes the insert idempotent across retries.
@@ -168,7 +164,7 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
         .maybeSingle() // tolerate UNIQUE conflict from a webhook race
     }
 
-    // 4. Status flip with optimistic lock.
+    // 3. Status flip with optimistic lock.
     const update = await service
       .from('orders')
       .update({ status: 'refunded' })
@@ -192,7 +188,7 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
         provider_ref: current.payment_provider_ref,
         clawback,
         note:
-          'Refund must be issued in PayHero dashboard before this status flip.',
+          'Refund must be issued in the provider dashboard before this status flip.',
       },
     })
 
@@ -247,29 +243,27 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
 // exports only async functions (Next.js constraint).
 
 /**
- * Admin reconcile action for stuck PayHero orders.
+ * Admin reconcile action for stuck orders.
  *
- * Calls PayHero's transaction-status endpoint for an order that's still
- * `pending` despite the customer having paid (typical cause: webhook
- * delivery failure, dropped callback, or — as observed 2026-05-18 —
- * a schema-drift bug in webhook_deliveries that made the dedup RPC
- * throw). If PayHero confirms SUCCESS and amount matches, runs the
- * same RPC chain the webhook would: mark_order_paid →
- * provision_distributor (for distributor_signup orders) →
- * write_commission_ledger → audit_log.
+ * Phase 0 (2026-06-03): PayHero has been removed. The IntaSend status
+ * probe lands in Phase 2 of the migration; until then this action throws
+ * a clear "not implemented" error so the admin sees the truthful state
+ * rather than a silent no-op.
  *
- * Same wire-level logic as POST /api/payhero/reconcile, but invoked
- * as a server action so the admin can trigger it with a form button
- * instead of having to drop into browser DevTools or curl.
- *
- * Idempotent on order state — mark_order_paid short-circuits when the
- * order is already paid.
+ * When Phase 2 lands, the flow will be:
+ *   1. Load the order's payments row (status='pending').
+ *   2. Call IntaSend's status endpoint with payments.invoice_id.
+ *   3. If SUCCESS + amount matches, call applyPaymentSuccess() with
+ *      source='reconcile_admin' to run the same RPC chain the webhook
+ *      would. mark_order_paid is idempotent so concurrent reconciles
+ *      are safe.
+ *   4. If FAILED or amount mismatches, error and leave the order pending.
  */
 const reconcileInputSchema = z.object({
   orderId: z.coerce.number().int().positive(),
 })
 
-export async function reconcilePayheroPayment(formData: FormData): Promise<void> {
+export async function reconcilePayment(formData: FormData): Promise<void> {
   let session
   try {
     session = await requireAdmin()
@@ -282,105 +276,16 @@ export async function reconcilePayheroPayment(formData: FormData): Promise<void>
     orderId: formData.get('orderId'),
   })
   if (!parsed.success) throw new Error('Invalid request')
-  const { orderId } = parsed.data
 
-  const service = createServiceClient()
+  // Touch parsed/session so the unused-warning is quiet until Phase 2
+  // wires the real implementation.
+  void parsed
+  void session
 
-  // 1. Load the order. TODO(types): regenerate database.ts post-019.
-  const orderRes = (await service
-    .from('orders')
-    .select(
-      'id, order_number, status, total_minor, kind, payment_provider, payhero_checkout_reference',
-    )
-    .eq('id', orderId)
-    .maybeSingle()) as unknown as {
-    data: {
-      id: number
-      order_number: string
-      status: AnyStatus
-      total_minor: string | number
-      kind: string
-      payment_provider: string | null
-      payhero_checkout_reference: string | null
-    } | null
-    error: { message: string } | null
-  }
-  if (orderRes.error || !orderRes.data) throw new Error('Order not found')
-  const order = orderRes.data
-
-  if (order.status !== 'pending') {
-    // Idempotent UX: don't blow up if a concurrent webhook just settled it.
-    revalidatePath(`/admin/orders/${orderId}`)
-    return
-  }
-  if (order.payment_provider !== 'payhero') {
-    throw new Error(
-      `Order provider is '${order.payment_provider}', not payhero — nothing to reconcile.`,
-    )
-  }
-  if (!order.payhero_checkout_reference) {
-    throw new Error(
-      'Order has no PayHero checkout reference. Likely the STK push never returned a reference; cannot reconcile.',
-    )
-  }
-
-  // 2. Ask PayHero for the canonical transaction state.
-  let status
-  try {
-    status = await getTransactionStatus(order.payhero_checkout_reference)
-  } catch (e) {
-    throw new Error(`PayHero status lookup failed: ${(e as Error).message}`)
-  }
-
-  if (status.status !== 'SUCCESS' || !status.success) {
-    throw new Error(
-      `PayHero reports status '${status.status}' for this order — not SUCCESS. ` +
-        `Message: ${status.message ?? '(none)'}. Order left pending.`,
-    )
-  }
-
-  // 3. Amount sanity check.
-  const expectedMajor = Math.round(Number(order.total_minor) / 100)
-  if (typeof status.amount === 'number' && status.amount !== expectedMajor) {
-    throw new Error(
-      `Amount mismatch — expected Kes ${expectedMajor}, PayHero says Kes ${status.amount}. ` +
-        `Refusing to mark paid.`,
-    )
-  }
-
-  // Stamp refs → mark paid → provision (signup) → ledger → v2 preview →
-  // receipt → audit, all in the shared helper. The helper tags the audit
-  // row with the admin actor_id passed in.
-  const applied = await applyPaymentSuccess(service, {
-    orderId: order.id,
-    orderKind: order.kind,
-    payheroCheckoutReference: order.payhero_checkout_reference ?? '',
-    mpesaReceipt:
-      status.provider_reference ?? status.third_party_reference ?? null,
-    externalReference: status.external_reference ?? null,
-    source: 'reconcile_admin',
-    actorId: session.userId,
-  })
-  if (!applied.paid) {
-    throw new Error(applied.error ?? 'apply failed')
-  }
-  if (applied.warnings.length > 0) {
-    // Non-fatal warnings — surface in a per-warning audit row so the admin
-    // page can show them. The order is paid; we don't block on these.
-    for (const warning of applied.warnings) {
-      await service.from('audit_log').insert({
-        actor_id: session.userId,
-        action: 'order.reconcile.warning',
-        resource_type: 'orders',
-        resource_id: String(orderId),
-        after_data: { provider: 'payhero', warning },
-      })
-    }
-  }
-
-  revalidatePath('/admin/orders')
-  revalidatePath(`/admin/orders/${orderId}`)
-  revalidatePath('/shop')
+  throw new Error(
+    'Admin reconcile is not wired in Phase 0 of the PayHero → IntaSend migration. ' +
+      'Phase 2 introduces the IntaSend status probe and the matching applyPaymentSuccess chain.',
+  )
 }
 
 /**
@@ -391,12 +296,15 @@ export async function reconcilePayheroPayment(formData: FormData): Promise<void>
  *
  *   1. Status must be `pending`, `cancelled`, `expired`, or `failed`.
  *   2. paid_at must be NULL.
- *   3. payhero_mpesa_receipt must be NULL (no real M-Pesa traffic).
+ *   3. No `payments` row in status='complete' for the order. (Replaces
+ *      the legacy "payhero_mpesa_receipt IS NULL" check — the payments
+ *      table is the new source of truth for "did money move".)
  *   4. Zero rows in commission_ledger reference this order.
  *
- * Order_items + payment_attempts cascade-delete via FK. The audit_log row
- * we write here is preserved (audit is append-only — by design we keep a
- * record of what the order *was*).
+ * Order_items + payment_attempts cascade-delete via FK. The new `payments`
+ * rows are cascade-deleted by `ON DELETE CASCADE` on `payments.order_id`
+ * (migration 047). The audit_log row we write here is preserved (audit is
+ * append-only — by design we keep a record of what the order *was*).
  */
 const purgeInputSchema = z.object({
   orderId: z.coerce.number().int().positive(),
@@ -435,23 +343,6 @@ export async function purgeOrder(formData: FormData): Promise<void> {
   if (orderRes.error || !orderRes.data) throw new Error('Order not found')
   const order = orderRes.data
 
-  // Pull the PayHero refs separately via a service-cast read (types are stale
-  // for the payhero_* cols on the orders Row type without a fresh regen).
-  const refsRes = (await (service.from('orders') as unknown as {
-    select: (cols: string) => {
-      eq: (col: string, val: unknown) => {
-        maybeSingle: () => Promise<{
-          data: { payhero_mpesa_receipt: string | null } | null
-          error: { message: string } | null
-        }>
-      }
-    }
-  })
-    .select('payhero_mpesa_receipt')
-    .eq('id', orderId)
-    .maybeSingle())
-  const mpesaReceipt = refsRes.data?.payhero_mpesa_receipt ?? null
-
   const PURGEABLE_STATUSES: AnyStatus[] = ['pending', 'cancelled', 'failed']
   // 'expired' is a custom status on the orders.status enum in some envs —
   // include defensively if it's typed in.
@@ -468,9 +359,35 @@ export async function purgeOrder(formData: FormData): Promise<void> {
   if (order.paid_at) {
     throw new Error('Cannot purge an order that has a paid_at timestamp.')
   }
-  if (mpesaReceipt) {
+
+  // New source of truth for "did money move": a payments row with
+  // status='complete'. The legacy payhero_mpesa_receipt column is no
+  // longer consulted (it stays nullable on disk for historical records).
+  const completePaymentsRes = (await (service
+    .from('payments' as never) as unknown as {
+    select: (cols: string, opts?: { count?: 'exact'; head?: boolean }) => {
+      eq: (col: string, val: unknown) => {
+        eq: (col: string, val: unknown) => Promise<{
+          count: number | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
+    .select('id', { count: 'exact', head: true })
+    .eq('order_id', orderId)
+    .eq('status', 'complete')) as {
+    count: number | null
+    error: { message: string } | null
+  }
+  if (completePaymentsRes.error) {
     throw new Error(
-      `Cannot purge an order with an M-Pesa receipt (${mpesaReceipt}). Real money moved — refund instead.`,
+      `payments check failed: ${completePaymentsRes.error.message}`,
+    )
+  }
+  if ((completePaymentsRes.count ?? 0) > 0) {
+    throw new Error(
+      'Cannot purge — at least one payments row is status=complete for this order. Real money moved; refund instead.',
     )
   }
 
@@ -499,6 +416,7 @@ export async function purgeOrder(formData: FormData): Promise<void> {
 
   // payment_attempts is FK-cascaded from orders, so it deletes with the row.
   // order_items has ON DELETE CASCADE too (per the original schema).
+  // payments.order_id has ON DELETE CASCADE (migration 047).
   const delRes = await service.from('orders').delete().eq('id', orderId)
   if (delRes.error) {
     throw new Error(`Delete failed: ${delRes.error.message}`)

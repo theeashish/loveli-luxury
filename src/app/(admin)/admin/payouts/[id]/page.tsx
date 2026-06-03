@@ -23,6 +23,9 @@ type PayoutRow = {
   currency: string
   payout_method: string
   payout_msisdn: string | null
+  /** IntaSend batch tracking id (set on dispatch). Replaces payhero_transfer_reference. */
+  tracking_id: string | null
+  /** Legacy: pre-2026-06-03 PayHero transfer reference. Nullable, read-only here. */
   payhero_transfer_reference: string | null
   initiated_at: string | null
   completed_at: string | null
@@ -42,7 +45,7 @@ export default async function AdminPayoutDetail({
   const r = await service
     .from('payouts')
     .select(
-      'id, distributor_id, period_year, period_month, status, commissions_total_minor, salary_total_minor, rank_bonus_total_minor, retail_profit_minor, gross_total_minor, fees_minor, net_total_minor, currency, payout_method, payout_msisdn, payhero_transfer_reference, initiated_at, completed_at, failure_reason, created_at',
+      'id, distributor_id, period_year, period_month, status, commissions_total_minor, salary_total_minor, rank_bonus_total_minor, retail_profit_minor, gross_total_minor, fees_minor, net_total_minor, currency, payout_method, payout_msisdn, tracking_id, payhero_transfer_reference, initiated_at, completed_at, failure_reason, created_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -186,8 +189,14 @@ export default async function AdminPayoutDetail({
           {payout.payout_msisdn ? (
             <Row label="MSISDN" value={payout.payout_msisdn} />
           ) : null}
+          {payout.tracking_id ? (
+            <Row label="IntaSend tracking id" value={payout.tracking_id} />
+          ) : null}
           {payout.payhero_transfer_reference ? (
-            <Row label="Transfer reference" value={payout.payhero_transfer_reference} />
+            <Row
+              label="Legacy PayHero reference"
+              value={payout.payhero_transfer_reference}
+            />
           ) : null}
           {payout.initiated_at ? (
             <Row

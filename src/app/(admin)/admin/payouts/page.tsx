@@ -13,7 +13,12 @@ type PayoutRow = {
   status: string
   gross_total_minor: string | number
   net_total_minor: string | number
-  payhero_transfer_reference: string | null
+  /**
+   * IntaSend batch tracking id (from migration 047). Historical PayHero
+   * payouts still carry the value in `payhero_transfer_reference` —
+   * both columns are surfaced on the detail page.
+   */
+  tracking_id: string | null
   created_at: string
   initiated_at: string | null
   completed_at: string | null
@@ -21,13 +26,26 @@ type PayoutRow = {
 
 export default async function AdminPayoutsListPage() {
   const service = createServiceClient()
-  const r = await service
-    .from('payouts')
+  // `tracking_id` is added by migration 047 (Phase 0 of the PayHero →
+  // IntaSend cutover). The generated `database.ts` types are stale until
+  // someone runs `npm run supabase:types` against the migrated project,
+  // so we cast through `unknown` here. Remove the cast once the types
+  // are regenerated.
+  const r = (await (service.from('payouts') as unknown as {
+    select: (cols: string) => {
+      order: (col: string, opts: { ascending: boolean }) => {
+        limit: (n: number) => Promise<{
+          data: PayoutRow[] | null
+          error: { message: string } | null
+        }>
+      }
+    }
+  })
     .select(
-      'id, distributor_id, period_year, period_month, status, gross_total_minor, net_total_minor, payhero_transfer_reference, created_at, initiated_at, completed_at',
+      'id, distributor_id, period_year, period_month, status, gross_total_minor, net_total_minor, tracking_id, created_at, initiated_at, completed_at',
     )
     .order('created_at', { ascending: false })
-    .limit(200)
+    .limit(200))
   const rows = (r.data ?? []) as PayoutRow[]
   const pendingCount = rows.filter((p) => p.status === 'pending').length
 

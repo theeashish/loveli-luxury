@@ -81,7 +81,7 @@ export default async function CheckoutPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Secure</p>
         <h1 className="mt-2 text-4xl font-light tracking-tight">Checkout</h1>
         <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-          Confirm your shipping details. Payment is handled via M-Pesa (PayHero).
+          Confirm your shipping details. Payment is handled via M-Pesa.
         </p>
       </header>
 
