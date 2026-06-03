@@ -1,19 +1,19 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { Toaster } from 'sonner'
 import { CartIndicator } from '@/components/cart/CartIndicator'
+import { CartDrawer } from '@/components/cart/CartDrawer'
 import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
 import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
 import { getSection } from '@/lib/content/site'
 
-// All four of these are below-the-fold, client-only widgets — defer them
-// out of the LCP critical path so initial JS ships only what the hero/grid
+// Both of these are below-the-fold, client-only widgets — defer them out
+// of the LCP critical path so initial JS ships only what the hero/grid
 // need. Each renders nothing during SSR (loading: () => null), keeping
-// the server payload smaller too. CartDrawer + Toaster are loaded only
-// after hydration; on mobile 4G this trims ~25 KiB of compressed JS from
-// the LCP path.
+// the server payload smaller too.
 const WhatsAppConcierge = dynamic(
   () => import('@/components/concierge/WhatsAppConcierge').then((m) => m.WhatsAppConcierge),
   { ssr: false, loading: () => null },
@@ -22,14 +22,6 @@ const WishlistHydrator = dynamic(
   () => import('@/components/wishlist/WishlistHydrator').then((m) => m.WishlistHydrator),
   { ssr: false, loading: () => null },
 )
-const CartDrawer = dynamic(
-  () => import('@/components/cart/CartDrawer').then((m) => m.CartDrawer),
-  { ssr: false, loading: () => null },
-)
-const Toaster = dynamic(() => import('sonner').then((m) => m.Toaster), {
-  ssr: false,
-  loading: () => null,
-})
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
