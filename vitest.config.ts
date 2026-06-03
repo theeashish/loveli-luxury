@@ -48,6 +48,8 @@ export default defineConfig({
         'src/lib/partners/tiers.ts',
         'src/lib/payments/fees.ts',
         'src/lib/payments/idempotency.ts',
+        'src/lib/intasend/signature.ts',
+        'src/lib/intasend/types.ts',
         'src/lib/recently-viewed/logic.ts',
         'src/lib/wishlist/logic.ts',
         // NB: the commission/salary MONEY math lives in SQL RPCs
