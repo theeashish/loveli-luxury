@@ -25,11 +25,12 @@
  * Auth: bearer CRON_SECRET, identical pattern to the other cron routes.
  * Vercel cron sends `Authorization: Bearer <CRON_SECRET>` automatically.
  *
- * Cadence: every 15 minutes (schedule: "{slash}15 * * * *" in vercel.json,
- * where {slash}15 is the literal "/15" — written here without the slash so
- * the asterisk-slash sequence doesn't terminate this comment). If you change
- * the cadence here, update vercel.json AND `SCHEDULE_CRON` below so Sentry's
- * missed-check-in detector knows the expected interval.
+ * Cadence (current): "0 9 * * *" — once daily at 09:00 UTC. This is the
+ * tightest cadence Vercel's Hobby plan allows. When the project moves to
+ * Vercel Pro, swap to a tighter cadence (e.g. every 15 minutes) — update
+ * BOTH `vercel.json` AND the `SCHEDULE_CRON` constant below in lockstep so
+ * Sentry's missed-check-in detector knows the expected interval. The route
+ * code is plan-agnostic; only the cron schedule changes.
  */
 
 import { NextResponse, type NextRequest } from 'next/server'
@@ -41,7 +42,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const MONITOR_SLUG = 'site-liveness'
-const SCHEDULE_CRON = '*/15 * * * *'
+const SCHEDULE_CRON = '0 9 * * *'
 
 function authBearer(request: NextRequest):
   | { ok: true }
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
     { monitorSlug: MONITOR_SLUG, status: 'in_progress' },
     {
       schedule: { type: 'crontab', value: SCHEDULE_CRON },
-      checkinMargin: 5, // alert if the heartbeat is >5 min late
+      checkinMargin: 30, // alert if the daily heartbeat is >30 min late
       maxRuntime: 2, // alert if the heartbeat hasn't finished in 2 min
       timezone: 'UTC',
     },
