@@ -345,7 +345,7 @@ export type Database = {
         Row: {
           amount_minor: string | number
           basis_pv: number
-          commission_basis_minor: string | number
+          commission_basis_minor: number
           config_commission_rate_id: number
           currency: string
           distributor_id: number
@@ -360,7 +360,7 @@ export type Database = {
         Insert: {
           amount_minor: string | number
           basis_pv?: number
-          commission_basis_minor: string | number
+          commission_basis_minor: number
           config_commission_rate_id: number
           currency?: string
           distributor_id: number
@@ -375,7 +375,7 @@ export type Database = {
         Update: {
           amount_minor?: string | number
           basis_pv?: number
-          commission_basis_minor?: string | number
+          commission_basis_minor?: number
           config_commission_rate_id?: number
           currency?: string
           distributor_id?: number
@@ -477,14 +477,14 @@ export type Database = {
           maintenance_grace_months: number | null
           min_active_customers: number | null
           min_active_recruits: number
-          min_group_sales_minor: string | number
+          min_group_sales_minor: number
           min_personal_pv: number | null
-          min_personal_sales_minor: string | number | null
+          min_personal_sales_minor: number | null
           notes: string | null
           qualifying_months: number | null
           rank_name: string
           rank_position: number
-          rank_up_bonus_minor: string | number
+          rank_up_bonus_minor: number
         }
         Insert: {
           created_at?: string
@@ -496,14 +496,14 @@ export type Database = {
           maintenance_grace_months?: number | null
           min_active_customers?: number | null
           min_active_recruits?: number
-          min_group_sales_minor?: string | number
+          min_group_sales_minor?: number
           min_personal_pv?: number | null
-          min_personal_sales_minor?: string | number | null
+          min_personal_sales_minor?: number | null
           notes?: string | null
           qualifying_months?: number | null
           rank_name: string
           rank_position: number
-          rank_up_bonus_minor?: string | number
+          rank_up_bonus_minor?: number
         }
         Update: {
           created_at?: string
@@ -515,14 +515,14 @@ export type Database = {
           maintenance_grace_months?: number | null
           min_active_customers?: number | null
           min_active_recruits?: number
-          min_group_sales_minor?: string | number
+          min_group_sales_minor?: number
           min_personal_pv?: number | null
-          min_personal_sales_minor?: string | number | null
+          min_personal_sales_minor?: number | null
           notes?: string | null
           qualifying_months?: number | null
           rank_name?: string
           rank_position?: number
-          rank_up_bonus_minor?: string | number
+          rank_up_bonus_minor?: number
         }
         Relationships: [
           {
@@ -540,10 +540,10 @@ export type Database = {
           created_by: string | null
           effective_from: string
           effective_until: string | null
-          fixed_salary_minor: string | number
+          fixed_salary_minor: number
           id: number
           min_personal_bottles: number
-          min_team_gsv_minor: string | number
+          min_team_gsv_minor: number
           performance_bonus_basis_points: number
           rank_position: number
         }
@@ -552,10 +552,10 @@ export type Database = {
           created_by?: string | null
           effective_from?: string
           effective_until?: string | null
-          fixed_salary_minor?: string | number
+          fixed_salary_minor?: number
           id?: number
           min_personal_bottles?: number
-          min_team_gsv_minor?: string | number
+          min_team_gsv_minor?: number
           performance_bonus_basis_points?: number
           rank_position: number
         }
@@ -564,10 +564,10 @@ export type Database = {
           created_by?: string | null
           effective_from?: string
           effective_until?: string | null
-          fixed_salary_minor?: string | number
+          fixed_salary_minor?: number
           id?: number
           min_personal_bottles?: number
-          min_team_gsv_minor?: string | number
+          min_team_gsv_minor?: number
           performance_bonus_basis_points?: number
           rank_position?: number
         }
@@ -796,8 +796,8 @@ export type Database = {
           period_month: number
           period_year: number
           personal_bottles_sold: number
-          personal_sales_minor: string | number
-          team_gsv_minor: string | number
+          personal_sales_minor: number
+          team_gsv_minor: number
         }
         Insert: {
           active_customers_count?: number
@@ -808,8 +808,8 @@ export type Database = {
           period_month: number
           period_year: number
           personal_bottles_sold?: number
-          personal_sales_minor?: string | number
-          team_gsv_minor?: string | number
+          personal_sales_minor?: number
+          team_gsv_minor?: number
         }
         Update: {
           active_customers_count?: number
@@ -820,8 +820,8 @@ export type Database = {
           period_month?: number
           period_year?: number
           personal_bottles_sold?: number
-          personal_sales_minor?: string | number
-          team_gsv_minor?: string | number
+          personal_sales_minor?: number
+          team_gsv_minor?: number
         }
         Relationships: [
           {
@@ -949,46 +949,46 @@ export type Database = {
         Row: {
           computed_at: string
           distributor_id: number
-          fixed_salary_minor: string | number
+          fixed_salary_minor: number
           id: number
           payout_id: number | null
-          performance_bonus_minor: string | number
+          performance_bonus_minor: number
           period_month: number
           period_year: number
           personal_bottles_sold: number
           qualified: boolean
           rank_at_period_id: number
-          team_gsv_minor: string | number
+          team_gsv_minor: number
           total_minor: string | number
         }
         Insert: {
           computed_at?: string
           distributor_id: number
-          fixed_salary_minor?: string | number
+          fixed_salary_minor?: number
           id?: number
           payout_id?: number | null
-          performance_bonus_minor?: string | number
+          performance_bonus_minor?: number
           period_month: number
           period_year: number
           personal_bottles_sold?: number
           qualified: boolean
           rank_at_period_id: number
-          team_gsv_minor?: string | number
+          team_gsv_minor?: number
           total_minor?: string | number
         }
         Update: {
           computed_at?: string
           distributor_id?: number
-          fixed_salary_minor?: string | number
+          fixed_salary_minor?: number
           id?: number
           payout_id?: number | null
-          performance_bonus_minor?: string | number
+          performance_bonus_minor?: number
           period_month?: number
           period_year?: number
           personal_bottles_sold?: number
           qualified?: boolean
           rank_at_period_id?: number
-          team_gsv_minor?: string | number
+          team_gsv_minor?: number
           total_minor?: string | number
         }
         Relationships: [
@@ -1309,8 +1309,68 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_cents: string | number
+          channel: string
+          created_at: string
+          currency: string
+          id: number
+          invoice_id: string
+          order_id: number | null
+          raw_payload: Json
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: string | number
+          channel: string
+          created_at?: string
+          currency?: string
+          id?: number
+          invoice_id: string
+          order_id?: number | null
+          raw_payload?: Json
+          status: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: string | number
+          channel?: string
+          created_at?: string
+          currency?: string
+          id?: number
+          invoice_id?: string
+          order_id?: number | null
+          raw_payload?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payouts: {
         Row: {
+          account: string | null
+          approved_by: string | null
+          bank_code: string | null
           commissions_total_minor: string | number
           completed_at: string | null
           created_at: string
@@ -1326,15 +1386,23 @@ export type Database = {
           payhero_transfer_reference: string | null
           payout_method: string
           payout_msisdn: string | null
+          payout_type: string
           period_month: number
           period_year: number
           provider: string
           rank_bonus_total_minor: string | number
+          raw_payload: Json
+          recipient_type: string
+          requires_approval: boolean
           retail_profit_minor: string | number
           salary_total_minor: string | number
           status: Database["public"]["Enums"]["payout_status"]
+          tracking_id: string | null
         }
         Insert: {
+          account?: string | null
+          approved_by?: string | null
+          bank_code?: string | null
           commissions_total_minor?: string | number
           completed_at?: string | null
           created_at?: string
@@ -1350,15 +1418,23 @@ export type Database = {
           payhero_transfer_reference?: string | null
           payout_method?: string
           payout_msisdn?: string | null
+          payout_type?: string
           period_month: number
           period_year: number
-          provider?: string
+          provider: string
           rank_bonus_total_minor?: string | number
+          raw_payload?: Json
+          recipient_type?: string
+          requires_approval?: boolean
           retail_profit_minor?: string | number
           salary_total_minor?: string | number
           status?: Database["public"]["Enums"]["payout_status"]
+          tracking_id?: string | null
         }
         Update: {
+          account?: string | null
+          approved_by?: string | null
+          bank_code?: string | null
           commissions_total_minor?: string | number
           completed_at?: string | null
           created_at?: string
@@ -1374,15 +1450,27 @@ export type Database = {
           payhero_transfer_reference?: string | null
           payout_method?: string
           payout_msisdn?: string | null
+          payout_type?: string
           period_month?: number
           period_year?: number
           provider?: string
           rank_bonus_total_minor?: string | number
+          raw_payload?: Json
+          recipient_type?: string
+          requires_approval?: boolean
           retail_profit_minor?: string | number
           salary_total_minor?: string | number
           status?: Database["public"]["Enums"]["payout_status"]
+          tracking_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payouts_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payouts_distributor_id_fkey"
             columns: ["distributor_id"]
@@ -1560,7 +1648,7 @@ export type Database = {
           product_id: number
           pv_per_bottle: number
           retail_price_minor: string | number
-          selling_price_minor: string | number | null
+          selling_price_minor: number | null
           size_ml: number
           sku: string
           weight_g: number | null
@@ -1574,7 +1662,7 @@ export type Database = {
           product_id: number
           pv_per_bottle?: number
           retail_price_minor: string | number
-          selling_price_minor?: string | number | null
+          selling_price_minor?: number | null
           size_ml: number
           sku: string
           weight_g?: number | null
@@ -1588,7 +1676,7 @@ export type Database = {
           product_id?: number
           pv_per_bottle?: number
           retail_price_minor?: string | number
-          selling_price_minor?: string | number | null
+          selling_price_minor?: number | null
           size_ml?: number
           sku?: string
           weight_g?: number | null
@@ -1814,6 +1902,7 @@ export type Database = {
           event_id: string
           event_type: string | null
           id: number
+          invoice_or_tracking_id: string | null
           processed_at: string | null
           provider: string
           received_at: string
@@ -1825,6 +1914,7 @@ export type Database = {
           event_id: string
           event_type?: string | null
           id?: number
+          invoice_or_tracking_id?: string | null
           processed_at?: string | null
           provider: string
           received_at?: string
@@ -1836,6 +1926,7 @@ export type Database = {
           event_id?: string
           event_type?: string | null
           id?: number
+          invoice_or_tracking_id?: string | null
           processed_at?: string | null
           provider?: string
           received_at?: string
@@ -1953,6 +2044,8 @@ export type Database = {
         | "refunded"
         | "expired"
       payout_status:
+        | "queued"
+        | "pending_approval"
         | "pending"
         | "processing"
         | "completed"
@@ -2099,6 +2192,8 @@ export const Constants = {
         "expired",
       ],
       payout_status: [
+        "queued",
+        "pending_approval",
         "pending",
         "processing",
         "completed",

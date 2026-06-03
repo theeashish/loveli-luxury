@@ -83,6 +83,8 @@ export async function createPayoutDraft(formData: FormData): Promise<void> {
       currency: 'KES',
       payout_method: 'mpesa',
       payout_msisdn: dist.payout_msisdn,
+      // provider is NOT NULL (migration 019) and has no default after 047.
+      provider: 'intasend',
       status: 'pending',
     })
     .select('id')

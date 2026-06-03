@@ -178,6 +178,10 @@ export async function draftPayoutsForPeriod(
           currency: 'KES',
           payout_method: 'mpesa',
           payout_msisdn: d.payout_msisdn,
+          // provider is NOT NULL in the schema since migration 019 and has
+          // no default after 047. Draft payouts target the active provider;
+          // the dispatch endpoint stamps tracking_id when it fires.
+          provider: 'intasend',
           status: 'pending',
         })
         .select('id')
