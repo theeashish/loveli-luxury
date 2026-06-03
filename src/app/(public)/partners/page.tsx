@@ -20,6 +20,7 @@ export const metadata = {
   title: 'Partner Program — Loveli Luxury',
   description:
     'An invite-only partner program for creators, resellers, and regional curators of modern African luxury fragrance. Five ranks. Earnings tied to verified retail performance.',
+  alternates: { canonical: '/partners' },
 }
 
 // Rate-free, aspirational descriptions for the public tier ladder. The actual

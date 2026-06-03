@@ -11,6 +11,7 @@ export const metadata = {
   title: 'Refunds: Loveli Luxury',
   description:
     'How refunds work at Loveli Luxury. 7-day window from delivery. Sealed bottles only. M-Pesa reversal within 5 business days.',
+  alternates: { canonical: '/policies/refund' },
 }
 
 export default async function RefundPolicy() {

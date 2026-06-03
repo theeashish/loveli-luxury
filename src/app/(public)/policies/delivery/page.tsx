@@ -11,6 +11,7 @@ export const metadata = {
   title: 'Delivery: Loveli Luxury',
   description:
     'How long fragrances take to reach you in Kenya, by region. Tracking and rider details.',
+  alternates: { canonical: '/policies/delivery' },
 }
 
 export default async function DeliveryPolicy() {

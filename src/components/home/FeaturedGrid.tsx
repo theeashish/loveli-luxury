@@ -13,8 +13,8 @@ function Card({ f }: { f: FragranceMeta }) {
           src={f.image}
           alt={f.name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          quality={65}
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 47vw, (max-width: 1536px) 31vw, 420px"
+          quality={60}
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-90" />

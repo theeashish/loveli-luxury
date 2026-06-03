@@ -38,6 +38,7 @@ export async function generateMetadata({
   return {
     title: bundle.name,
     description: bundle.description ?? undefined,
+    alternates: { canonical: `/bundles/${bundle.slug}` },
     openGraph: { title: bundle.name, description: bundle.description ?? undefined, type: 'website' },
   }
 }

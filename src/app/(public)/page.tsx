@@ -15,6 +15,10 @@ import { publicEnv } from '@/lib/env'
 // Cached forever; admin save actions call revalidatePath('/') to refresh.
 export const revalidate = false
 
+export const metadata = {
+  alternates: { canonical: '/' },
+}
+
 /**
  * Homepage structured data. Organization + WebSite let Google render brand-name
  * search results with the proper sitelink box and a search action. Mirrors

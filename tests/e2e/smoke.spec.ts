@@ -63,6 +63,15 @@ test.describe('public surfaces render', () => {
     expect(body.mode).toBe('liveness')
   })
 
+  test('/api/cron/heartbeat refuses anonymous requests with 401', async ({ request }) => {
+    // The internal Sentry heartbeat cron is bearer-gated. Anonymous access
+    // must NOT trigger a Sentry check-in (that would silence the missed-
+    // check-in alert by spamming "ok" on every drive-by request). Regression
+    // here = compromised liveness alerting.
+    const res = await request.get('/api/cron/heartbeat')
+    expect([401, 500]).toContain(res.status()) // 500 only if CRON_SECRET unset in test env
+  })
+
   test('robots.txt allows / and disallows private routes', async ({ request }) => {
     const res = await request.get('/robots.txt')
     expect(res.status()).toBe(200)
@@ -81,6 +90,32 @@ test.describe('public surfaces render', () => {
     // Static routes from sitemap.ts STATIC_PATHS.
     for (const route of ['/shop', '/bundles', '/partners', '/story', '/policies']) {
       expect(body).toContain(route)
+    }
+  })
+
+  test('indexable marketing routes emit a self-referential canonical', async ({ page }) => {
+    // SEO regression guard. The 2026-06-03 pass added explicit canonicals to
+    // every indexable route (previously only PDP + /ids set them). If a future
+    // metadata edit silently drops `alternates.canonical`, Google sees the
+    // route as duplicate-content-risk.
+    const expected: Record<string, string> = {
+      '/': '/',
+      '/shop': '/shop',
+      '/bundles': '/bundles',
+      '/partners': '/partners',
+      '/story': '/story',
+      '/policies/authenticity': '/policies/authenticity',
+      '/policies/delivery': '/policies/delivery',
+      '/policies/refund': '/policies/refund',
+      '/ids': '/ids',
+    }
+    for (const [route, expectedPath] of Object.entries(expected)) {
+      await page.goto(route)
+      const href = await page.locator('link[rel="canonical"]').first().getAttribute('href')
+      expect(href, `canonical on ${route}`).toBeTruthy()
+      expect(href, `canonical on ${route} should end in ${expectedPath}`).toMatch(
+        new RegExp(`${expectedPath.replace(/\//g, '\\/')}\\/?$`),
+      )
     }
   })
 })

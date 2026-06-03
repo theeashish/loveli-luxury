@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Shop',
   description: 'The full Loveli Luxury Eau de Parfum collection.',
+  alternates: { canonical: '/shop' },
 }
 
 export default async function ShopPage() {

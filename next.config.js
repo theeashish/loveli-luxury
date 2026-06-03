@@ -117,6 +117,10 @@ const nextConfig = {
       // Keep this in sync if that limit moves.
       bodySizeLimit: '10mb',
     },
+    // Tree-shake icon barrels — `lucide-react` exports ~1500 icons; without
+    // this every icon ships in the shared bundle. `sonner` and `zod` also
+    // benefit from per-export imports.
+    optimizePackageImports: ['lucide-react', 'sonner', 'zod', '@supabase/ssr'],
   },
 }
 
@@ -126,4 +130,16 @@ module.exports = withSentryConfig(nextConfig, {
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   disableLogger: true,
+  // Tree-shake the heavy client-side Sentry features at build time. Tracing
+  // (~120 KiB) and Replay (~60 KiB) aren't used on the browser — error
+  // reporting only — so dropping the dead code is a flat perf win for the
+  // 4G mobile audience. Server-side tracing is unaffected.
+  bundleSizeOptimizations: {
+    excludeTracing: true,
+    excludeReplayCanvas: true,
+    excludeReplayShadowDom: true,
+    excludeReplayIframe: true,
+    excludeReplayWorker: true,
+    excludeDebugStatements: true,
+  },
 })

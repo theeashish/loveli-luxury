@@ -1,6 +1,12 @@
 # MIGRATION_NOTES — Loveli Luxury transformation, Phase 2 schema work
 
-**Status:** Proposal only. **No destructive migrations ship in Phase 1.** This document is the spec Phase 2 (Compensation Plan Restructure) will execute.
+> ⚠️ **SUPERSEDED in part — read this before §1.** The 8 → 4 tier collapse described in §1 was **not adopted**. After owner review the team kept the **5-rank v1 model** (`ambassador → executive → gold_director → platinum_director → diamond_director` per `src/lib/partners/tiers.ts`) and the matching v1 SQL config tables (`config_ranks`, `config_commission_rates`, `config_salary_tiers`). The v2 scaffolding referenced below was removed; live commission math is the **5-rank L1–L5 PV plan** in production (migrations 029 / 036 / 040). The terminology renames in **§2–§4** (`monthly_salaries → retention_bonus_grants`, `gsv_snapshots → revenue_snapshots`, `is_starter_package → is_onboarding_kit`, `distributors → partners`) remain valid Phase-2 work if/when the owner approves.
+>
+> Last superseded check: 2026-06-03.
+
+---
+
+**Status:** Proposal only. **No destructive migrations ship in Phase 1.** This document is the spec Phase 2 (Compensation Plan Restructure) will execute — **subject to the supersession note above.**
 
 **Sign-off scope:** This document was produced as part of Phase 1 (Terminology & Positioning Refactor) per §5 of the transformation prompt: "Where database columns use MLM language, produce a migration plan but do not run destructive migrations yet — propose, wait for approval." The owner reviews and approves; Phase 2 then runs.
 

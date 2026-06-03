@@ -16,6 +16,7 @@ export const metadata = {
   title: 'Story: Loveli Luxury',
   description:
     'Modern African luxury, told in scent. The story behind Loveli Luxury.',
+  alternates: { canonical: '/story' },
 }
 
 // Flip to true once the owner has finalised the copy below. While

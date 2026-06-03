@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Bundles',
   description: 'Curated combos and starter packages from Loveli Luxury.',
+  alternates: { canonical: '/bundles' },
 }
 
 export default async function BundlesIndexPage() {

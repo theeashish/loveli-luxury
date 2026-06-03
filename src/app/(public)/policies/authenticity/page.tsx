@@ -11,6 +11,7 @@ export const metadata = {
   title: 'Authenticity: Loveli Luxury',
   description:
     'Every fragrance is authenticity verified before dispatch. How we source, store, and seal each bottle.',
+  alternates: { canonical: '/policies/authenticity' },
 }
 
 export default async function AuthenticityPolicy() {

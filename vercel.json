@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/commission-reconcile",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/heartbeat",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
