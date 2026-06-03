@@ -120,7 +120,7 @@ const nextConfig = {
     // Tree-shake icon barrels — `lucide-react` exports ~1500 icons; without
     // this every icon ships in the shared bundle. `sonner` and `zod` also
     // benefit from per-export imports.
-    optimizePackageImports: ['lucide-react', 'sonner', 'zod', '@supabase/ssr'],
+    optimizePackageImports: ['lucide-react', 'zod', '@supabase/ssr'],
   },
 }
 

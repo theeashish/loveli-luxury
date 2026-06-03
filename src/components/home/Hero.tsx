@@ -1,55 +1,32 @@
-'use client'
-
 /**
  * Hero — the headline section above the fold.
  *
- * Copy comes from the server-side `getSection('home_hero')` call in
+ * Server Component. Copy comes from `getSection('home_hero')` in
  * `src/app/(public)/page.tsx`, which falls back to in-code defaults if the
  * DB row is missing or malformed. Admin-editable via
  * `/admin/content/site/home_hero`.
  *
- * The component itself stays client-side because of the bottle rotation
- * logic — it crossfades through 5 fragrances on a 6.5s interval, respecting
- * `prefers-reduced-motion`. The non-LCP images are deferred until after
- * hydration so the initial paint ships only the priority bottle.
+ * Design (2026-06-03): single bottle showcase, no rotation. The earlier
+ * 5-image client crossfade shipped Hero as `'use client'` plus an
+ * interval-driven `useState`, and eagerly mounted all five fragrance
+ * images after hydration (~330 KiB of image weight on the LCP route).
+ * The owner authorised the perf trade-off on 2026-06-03; the brand brief
+ * principle "UI restraint" favours one well-photographed signature anyway.
+ * If the owner ever wants a hero rotation back, push it down into a
+ * deferred client island so the LCP path stays static.
  */
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
 import { FRAGRANCES } from '@/lib/catalog/fragrance-meta'
 import { type HeroContent } from '@/lib/content/site'
 import { HighlightText } from '@/components/content/HighlightText'
 
-const ROTATION_MS = 6500
-const HERO_PICKS = [
-  'ocean-desire',
-  'crimson-noir',
-  'sunset-bliss',
-  'afar',
-  'vanilla-smoke',
-] as const
+const HERO_SLUG = 'ocean-desire'
 
 export function Hero({ copy }: { copy: HeroContent }) {
-  const picks = HERO_PICKS.map((slug) => FRAGRANCES.find((f) => f.slug === slug)!).filter(Boolean)
-  const [index, setIndex] = useState(0)
-  const [mounted, setMounted] = useState(false)
-  const current = picks[index] ?? picks[0]
-
-  // Defer the non-LCP hero images until after hydration so the initial paint
-  // ships ONE bottle image, not five — cuts LCP + Speed Index on mobile / 4G.
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const id = setInterval(() => setIndex((i) => (i + 1) % picks.length), ROTATION_MS)
-    return () => clearInterval(id)
-  }, [picks.length])
-
-  if (!current) return null
+  const bottle = FRAGRANCES.find((f) => f.slug === HERO_SLUG) ?? FRAGRANCES[0]
+  if (!bottle) return null
 
   return (
     <section className="relative isolate overflow-hidden">
@@ -72,29 +49,16 @@ export function Hero({ copy }: { copy: HeroContent }) {
             {copy.subhead}
           </p>
 
-          {/* Rotating fragrance card — stacked, crossfade by opacity */}
           <div className="mt-10 flex items-center gap-5">
             <div className="h-px flex-1 bg-gradient-to-r from-[hsl(var(--primary))]/60 to-transparent" />
-            <div className="relative h-[5.5rem] w-56 text-right">
-              {picks.map((p, i) => (
-                <div
-                  key={p.slug}
-                  aria-hidden={i !== index}
-                  className={`absolute inset-0 transition-opacity duration-[900ms] ease-out ${
-                    i === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
-                    {copy.rotatingLabel}
-                  </p>
-                  <p className="mt-1 font-serif text-xl text-[hsl(var(--foreground))]">
-                    {p.name}
-                  </p>
-                  <p className="mt-1 text-xs italic text-[hsl(var(--primary))]">
-                    {p.tagline}
-                  </p>
-                </div>
-              ))}
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
+                {copy.rotatingLabel}
+              </p>
+              <p className="mt-1 font-serif text-xl text-[hsl(var(--foreground))]">
+                {bottle.name}
+              </p>
+              <p className="mt-1 text-xs italic text-[hsl(var(--primary))]">{bottle.tagline}</p>
             </div>
           </div>
 
@@ -107,43 +71,19 @@ export function Hero({ copy }: { copy: HeroContent }) {
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
             </Link>
           </div>
-
-          <div className="mt-10 flex items-center gap-2">
-            {picks.map((p, i) => (
-              <button
-                key={p.slug}
-                onClick={() => setIndex(i)}
-                aria-label={`Show ${p.name}`}
-                className={`h-1 rounded-full transition-all ${
-                  i === index ? 'w-10 bg-[hsl(var(--primary))]' : 'w-4 bg-[hsl(var(--border))]'
-                }`}
-              />
-            ))}
-          </div>
         </div>
 
-        {/* Bottle — all picks stacked, crossfade by opacity */}
+        {/* Bottle — single signature, server-rendered */}
         <div className="relative lg:col-span-6">
           <div className="relative mx-auto aspect-[3/4] w-full max-w-[580px]">
-            {picks.map((p, i) => {
-              // Only the LCP image (first) is in the initial paint; the rest
-              // mount after hydration.
-              if (!mounted && i !== 0) return null
-              return (
-                <Image
-                  key={p.slug}
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  priority={i === 0}
-                  loading={i === 0 ? undefined : 'lazy'}
-                  sizes="(max-width: 1024px) 90vw, 520px"
-                  className={`absolute inset-0 object-contain drop-shadow-[0_24px_50px_rgba(60,42,28,0.22)] transition-opacity duration-[900ms] ease-out ${
-                    i === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                />
-              )
-            })}
+            <Image
+              src={bottle.image}
+              alt={bottle.name}
+              fill
+              priority
+              sizes="(max-width: 1024px) 90vw, 520px"
+              className="absolute inset-0 object-contain drop-shadow-[0_24px_50px_rgba(60,42,28,0.22)]"
+            />
             <div
               aria-hidden
               className="absolute inset-x-10 -bottom-2 h-10 rounded-[50%] bg-[hsl(22_14%_13%/0.15)] blur-2xl"

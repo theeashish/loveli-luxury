@@ -9,7 +9,7 @@
  */
 
 import { redirect } from 'next/navigation'
-import { Toaster } from 'sonner'
+import { Toaster } from '@/lib/toast'
 import { getSession, isAdmin, adminMfaRedirect } from '@/lib/auth/roles'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
@@ -41,7 +41,7 @@ export default async function AdminLayout({
         isSuperadmin={isSuperadmin}
       />
       <main className="overflow-y-auto p-8 text-neutral-900">{children}</main>
-      <Toaster richColors position="top-right" />
+      <Toaster />
     </div>
   )
 }

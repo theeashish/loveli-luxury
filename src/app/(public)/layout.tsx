@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { Toaster } from 'sonner'
+import { Toaster } from '@/lib/toast'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
 import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
@@ -89,7 +89,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <PublicFooter copy={footerCopy} />
 
       <CartDrawer />
-      <Toaster richColors position="top-right" theme="dark" />
+      <Toaster />
       <WhatsAppConcierge />
       <WishlistHydrator />
     </div>

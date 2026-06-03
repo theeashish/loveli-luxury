@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { publicEnv } from '@/lib/env'
 import './globals.css'
 
@@ -57,6 +58,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
+        {/* Field Real-User Monitoring. Beacon-only — ~2 kB compressed, sent
+            after the page is idle so it has no impact on Core Web Vitals.
+            Replaces lab Lighthouse as the canonical perf source. */}
+        <SpeedInsights />
       </body>
     </html>
   )

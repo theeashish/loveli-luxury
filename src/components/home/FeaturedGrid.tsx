@@ -3,28 +3,35 @@ import Link from 'next/link'
 import { FRAGRANCES, type FragranceMeta } from '@/lib/catalog/fragrance-meta'
 
 function Card({ f }: { f: FragranceMeta }) {
+  // Editorial layout: image on top, caption below — the "mondedesparfum.com"
+  // look the brand brief references. No dark gradient overlay, no white text
+  // on photograph. Lets future clean-render imagery breathe; lets current
+  // images degrade gracefully without the overlay-over-baked-text problem.
   return (
     <Link
       href={`/p/${f.slug}`}
-      className="group relative block overflow-hidden rounded-md border border-[hsl(var(--border))]/60 bg-[hsl(var(--muted))]/40 transition hover:border-[hsl(var(--primary))]/50"
+      className="group block transition"
     >
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[hsl(var(--muted))]/40">
         <Image
           src={f.image}
           alt={f.name}
           fill
           sizes="(max-width: 640px) 92vw, (max-width: 1024px) 47vw, (max-width: 1536px) 31vw, 420px"
           quality={60}
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-90" />
       </div>
-      <div className="absolute inset-x-0 bottom-0 p-6">
+      <div className="mt-5">
         <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
           {f.family}
         </p>
-        <h3 className="mt-1 font-serif text-2xl text-white">{f.name}</h3>
-        <p className="mt-1 text-sm italic text-white/70">{f.tagline}</p>
+        <h3 className="mt-2 font-serif text-2xl tracking-tight text-[hsl(var(--foreground))] transition group-hover:text-[hsl(var(--primary))]">
+          {f.name}
+        </h3>
+        <p className="mt-1 text-sm italic text-[hsl(var(--muted-foreground))]">
+          {f.tagline}
+        </p>
       </div>
     </Link>
   )

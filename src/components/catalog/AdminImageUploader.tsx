@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import {
   deleteBundleImage,
