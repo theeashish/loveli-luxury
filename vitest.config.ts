@@ -46,6 +46,7 @@ export default defineConfig({
         'src/lib/concierge/link.ts',
         'src/lib/orders/mask.ts',
         'src/lib/partners/tiers.ts',
+        'src/lib/payments/availability.ts',
         'src/lib/payments/fees.ts',
         'src/lib/payments/idempotency.ts',
         'src/lib/intasend/signature.ts',

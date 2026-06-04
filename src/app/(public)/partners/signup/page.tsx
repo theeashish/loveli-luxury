@@ -20,6 +20,7 @@ import {
   type StarterBundleOption,
   type SignupAddress,
 } from '@/components/distributors/SignupForm'
+import { paymentProviderAvailability } from '@/lib/payments/availability'
 
 export const metadata = {
   title: 'Join the partner program',
@@ -264,14 +265,34 @@ export default async function DistributorSignupPage() {
     <Shell>
       <BrandHeading subtitle="Pick your onboarding kit, complete KYC, pay via M-Pesa. Your partner account activates the moment payment confirms." />
       <div className="mt-10">
-        <DistributorSignupForm
-          defaultPhone={profile.phone ?? ''}
-          defaultNationalId={profile.national_id ?? ''}
-          defaultDateOfBirth={profile.date_of_birth ?? ''}
-          addresses={addresses}
-          bundles={bundles}
-          sponsorCookie={sponsorCookie}
-        />
+        {(() => {
+          const availability = paymentProviderAvailability()
+          if (!availability.ok) {
+            return (
+              <div className="rounded-lg border border-[hsl(var(--primary))]/30 bg-[hsl(var(--muted))]/50 p-8 text-center">
+                <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+                  Just a moment
+                </p>
+                <h2 className="mt-3 font-serif text-2xl tracking-tight">
+                  Payments are briefly being upgraded
+                </h2>
+                <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
+                  {availability.customerMessage}
+                </p>
+              </div>
+            )
+          }
+          return (
+            <DistributorSignupForm
+              defaultPhone={profile.phone ?? ''}
+              defaultNationalId={profile.national_id ?? ''}
+              defaultDateOfBirth={profile.date_of_birth ?? ''}
+              addresses={addresses}
+              bundles={bundles}
+              sponsorCookie={sponsorCookie}
+            />
+          )
+        })()}
       </div>
       <p className="mt-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
         Just want to shop?{' '}

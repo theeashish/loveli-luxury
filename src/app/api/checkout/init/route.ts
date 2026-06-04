@@ -37,6 +37,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
+import { paymentProviderAvailability } from '@/lib/payments/availability'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import {
   decidePendingAction,
@@ -114,6 +115,24 @@ const requestSchema = z
 // -----------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  // Deploy-safety guard. If the IntaSend env is not wired we return a
+  // 503 with a customer-safe message rather than letting the dispatcher
+  // throw bubble up as an opaque 502. The /checkout page already shows
+  // the banner upstream; this is belt-and-braces for direct API callers
+  // and for the brief window between a deploy landing and the env vars
+  // being set in Vercel.
+  const availability = paymentProviderAvailability()
+  if (!availability.ok) {
+    return NextResponse.json(
+      {
+        error: availability.customerMessage,
+        provider: availability.provider,
+        missing: availability.missing,
+      },
+      { status: 503 },
+    )
+  }
+
   // Rate limit (fail-open; no-op until UPSTASH_* is configured).
   const rl = await checkRateLimit('checkout-init', clientIp(req), { limit: 5, windowSeconds: 60 })
   if (!rl.ok) {

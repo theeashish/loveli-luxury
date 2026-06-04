@@ -42,6 +42,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
+import { paymentProviderAvailability } from '@/lib/payments/availability'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import {
   decidePendingAction,
@@ -117,6 +118,21 @@ const requestSchema = z
 // -----------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  // Deploy-safety guard. Mirrors /api/checkout/init — returns 503 with a
+  // customer-safe message when the IntaSend env is not wired, so the
+  // signup form sees a clean error instead of an opaque 502.
+  const availability = paymentProviderAvailability()
+  if (!availability.ok) {
+    return NextResponse.json(
+      {
+        error: availability.customerMessage,
+        provider: availability.provider,
+        missing: availability.missing,
+      },
+      { status: 503 },
+    )
+  }
+
   // Rate limit (fail-open; no-op until UPSTASH_* is configured).
   const rl = await checkRateLimit('partner-signup-init', clientIp(req), { limit: 3, windowSeconds: 60 })
   if (!rl.ok) {

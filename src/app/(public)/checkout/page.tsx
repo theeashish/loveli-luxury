@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { CheckoutForm, type CheckoutAddress } from '@/components/checkout/CheckoutForm'
 import { SponsorStrip } from '@/components/sponsor/SponsorStrip'
+import { paymentProviderAvailability } from '@/lib/payments/availability'
 
 export const metadata = {
   title: 'Checkout',
@@ -85,7 +86,30 @@ export default async function CheckoutPage() {
         </p>
       </header>
 
-      <CheckoutForm defaultPhone={profile.phone ?? ''} addresses={addresses} />
+      {(() => {
+        const availability = paymentProviderAvailability()
+        if (!availability.ok) {
+          // Payment provider env not yet wired — render the customer-safe
+          // banner instead of letting CheckoutForm fire /api/checkout/init
+          // and 502. This is the deploy-safety guard for the IntaSend
+          // cutover window: ops set INTASEND_* in Vercel, redeploy, and
+          // checkout becomes usable.
+          return (
+            <div className="rounded-lg border border-[hsl(var(--primary))]/30 bg-[hsl(var(--muted))]/50 p-8 text-center">
+              <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+                Just a moment
+              </p>
+              <h2 className="mt-3 font-serif text-2xl tracking-tight">
+                Payments are briefly being upgraded
+              </h2>
+              <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
+                {availability.customerMessage}
+              </p>
+            </div>
+          )
+        }
+        return <CheckoutForm defaultPhone={profile.phone ?? ''} addresses={addresses} />
+      })()}
       </div>
     </>
   )
