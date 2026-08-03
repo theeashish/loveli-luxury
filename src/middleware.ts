@@ -69,7 +69,21 @@ export async function middleware(request: NextRequest) {
   // IMPORTANT: refreshes auth session, do not remove
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await (async () => {
+    try {
+      return await supabase.auth.getUser()
+    } catch (e) {
+      // auth-js re-throws any error it doesn't recognise as an AuthError —
+      // including a raw network failure (DNS down, Supabase outage, CI's
+      // placeholder URL). This ran on EVERY request before any routing
+      // decision, uncaught, so a transient Supabase network problem would
+      // 500 the entire storefront, not just personalization. Fail closed
+      // to "no user" — safe for the /admin gate below (still denies) and
+      // safe for public pages (they just render without personalization).
+      console.error('[middleware] auth.getUser() failed, treating as signed-out:', (e as Error).message)
+      return { data: { user: null } }
+    }
+  })()
 
   const path = request.nextUrl.pathname
 

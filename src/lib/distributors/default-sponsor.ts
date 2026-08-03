@@ -41,7 +41,21 @@ export async function getDefaultSponsorCode(
     }>
   }
 
-  const { data, error } = await typed.rpc('default_sponsor_code')
+  const { data, error } = await (async () => {
+    try {
+      return await typed.rpc('default_sponsor_code')
+    } catch (e) {
+      // supabase-js only returns { data, error } for HTTP-level failures
+      // (4xx/5xx). A network-level failure (DNS down, connection refused,
+      // Supabase outage, or CI's placeholder URL) throws instead — this
+      // was previously uncaught here, propagating out of middleware.ts
+      // and 500-ing every public page on any Supabase network hiccup, not
+      // just the sponsor-attribution feature. Fail closed to null, per
+      // this function's own documented contract ("or the RPC is
+      // unavailable"), instead of taking the whole storefront down.
+      return { data: null, error: { message: (e as Error).message } }
+    }
+  })()
   if (error) {
     // Don't cache the failure — a freshly-applied migration or
     // freshly-bootstrapped founder should be picked up on the next request.
