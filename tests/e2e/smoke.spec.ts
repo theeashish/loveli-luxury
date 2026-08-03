@@ -113,8 +113,17 @@ test.describe('public surfaces render', () => {
       await page.goto(route)
       const href = await page.locator('link[rel="canonical"]').first().getAttribute('href')
       expect(href, `canonical on ${route}`).toBeTruthy()
+      // Next.js's own URL resolver (resolveAbsoluteUrlWithPathname in
+      // next/dist/lib/metadata/resolvers/resolve-url.js) deliberately
+      // returns the bare origin with NO trailing slash for the root path
+      // specifically, unless `trailingSlash: true` is set in
+      // next.config.js (it isn't, here). Stripping a trailing '/' from
+      // expectedPath before building the regex makes the trailing slash
+      // truly optional for every route, root included, instead of
+      // accidentally requiring one only for '/'.
+      const trimmedPath = expectedPath.replace(/\/$/, '')
       expect(href, `canonical on ${route} should end in ${expectedPath}`).toMatch(
-        new RegExp(`${expectedPath.replace(/\//g, '\\/')}\\/?$`),
+        new RegExp(`${trimmedPath.replace(/\//g, '\\/')}\\/?$`),
       )
     }
   })
