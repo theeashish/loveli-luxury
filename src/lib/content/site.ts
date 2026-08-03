@@ -603,19 +603,37 @@ export async function getSection<K extends SectionKey>(
   const service = createServiceClient()
 
   // TODO(types): regenerate database.ts post-035 to drop this cast.
-  const res = (await (service.from('site_content' as never) as unknown as {
-    select: (cols: string) => {
-      eq: (col: string, val: unknown) => {
-        maybeSingle: () => Promise<{
-          data: { body: unknown } | null
-          error: { message: string } | null
-        }>
+  let res: { data: { body: unknown } | null; error: { message: string } | null }
+  try {
+    res = await (service.from('site_content' as never) as unknown as {
+      select: (cols: string) => {
+        eq: (col: string, val: unknown) => {
+          maybeSingle: () => Promise<{
+            data: { body: unknown } | null
+            error: { message: string } | null
+          }>
+        }
       }
-    }
-  })
-    .select('body')
-    .eq('section_key', key)
-    .maybeSingle())
+    })
+      .select('body')
+      .eq('section_key', key)
+      .maybeSingle()
+  } catch (e) {
+    // postgrest-js re-throws on a network-level failure (DNS down,
+    // Supabase outage, CI's placeholder URL) instead of returning it as
+    // `{ error }` — it only normalises HTTP-level failures that way. This
+    // was previously uncaught here, which directly contradicted this
+    // function's own contract above ("a network blip can never break the
+    // site") and, because this is awaited directly in the public route
+    // group layout for EVERY page, took down the entire storefront on any
+    // Supabase network hiccup. Fail closed to the in-code default, same
+    // as the DB-error and validation-failure paths below.
+    console.warn(
+      `[site-content] '${key}' fetch failed, falling back to defaults:`,
+      (e as Error).message,
+    )
+    return SECTIONS[key].defaults as SectionContent<K>
+  }
 
   if (res.error || !res.data) {
     return SECTIONS[key].defaults as SectionContent<K>
