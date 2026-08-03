@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/roles'
+import { authorize, PERMISSIONS } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const inputSchema = z
@@ -34,7 +34,7 @@ const inputSchema = z
  *                            the payout). Phase 7+ may automate.
  */
 export async function resolveClawback(formData: FormData): Promise<void> {
-  const session = await requireAdmin()
+  const session = await authorize(PERMISSIONS.PAYMENTS_VERIFY)
 
   const parsed = inputSchema.safeParse({
     resolutionId: formData.get('resolutionId'),

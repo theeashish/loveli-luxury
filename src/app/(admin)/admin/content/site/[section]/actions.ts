@@ -12,7 +12,7 @@
  */
 
 import { revalidatePath } from 'next/cache'
-import { requireAdmin, AuthError } from '@/lib/auth/roles'
+import { authorize, PERMISSIONS, AuthError } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { SECTIONS, type SectionKey } from '@/lib/content/site'
 
@@ -26,7 +26,7 @@ export async function saveSectionContent(
 ): Promise<SaveResult> {
   let session
   try {
-    session = await requireAdmin()
+    session = await authorize(PERMISSIONS.CONTENT_UPDATE)
   } catch (err) {
     if (err instanceof AuthError) return { ok: false, error: 'Forbidden' }
     throw err
@@ -94,7 +94,7 @@ export async function resetSectionToDefaults(
   sectionKey: string,
 ): Promise<SaveResult> {
   try {
-    await requireAdmin()
+    await authorize(PERMISSIONS.CONTENT_DELETE)
   } catch (err) {
     if (err instanceof AuthError) return { ok: false, error: 'Forbidden' }
     throw err

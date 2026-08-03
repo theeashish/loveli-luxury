@@ -35,6 +35,8 @@ import { z } from 'zod'
 import { requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getServerEnv } from '@/lib/env'
+import { getPaymentProvider } from '@/lib/payments/payment-service'
+import type { Json } from '@/types/database'
 
 export type BulkFireOutcome =
   | { payoutId: number; status: 'fired'; reference: string | null; amountKes: number }
@@ -142,15 +144,35 @@ export async function fireAllEligiblePayouts(
   const distributorIds = Array.from(new Set(candidates.map((p) => p.distributor_id)))
   const distRes = await service
     .from('distributors')
-    .select('id, payout_msisdn, payout_msisdn_verified_at')
+    .select('id, user_id, payout_msisdn, payout_msisdn_verified_at')
     .in('id', distributorIds)
   if (distRes.error) {
     return { ok: false, error: `Could not load distributor verification: ${distRes.error.message}` }
   }
-  const distById = new Map<number, DistVerifyRow>(
-    ((distRes.data ?? []) as Array<{ id: number } & DistVerifyRow>).map((d) => [
+  const distById = new Map<number, DistVerifyRow & { user_id: string }>(
+    ((distRes.data ?? []) as Array<{ id: number; user_id: string } & DistVerifyRow>).map((d) => [
       d.id,
-      { payout_msisdn: d.payout_msisdn, payout_msisdn_verified_at: d.payout_msisdn_verified_at },
+      {
+        user_id: d.user_id,
+        payout_msisdn: d.payout_msisdn,
+        payout_msisdn_verified_at: d.payout_msisdn_verified_at,
+      },
+    ]),
+  )
+
+  // Batch-resolve beneficiary names (IntaSend `transactions[].name`) —
+  // one round-trip for every distributor's profile rather than N.
+  const userIds = Array.from(new Set(Array.from(distById.values()).map((d) => d.user_id))).filter(
+    Boolean,
+  )
+  const profilesRes =
+    userIds.length > 0
+      ? await service.from('profiles').select('id, full_name').in('id', userIds)
+      : { data: [] as Array<{ id: string; full_name: string }>, error: null }
+  const nameByUserId = new Map<string, string>(
+    ((profilesRes.data ?? []) as Array<{ id: string; full_name: string }>).map((p) => [
+      p.id,
+      p.full_name,
     ]),
   )
 
@@ -186,49 +208,52 @@ export async function fireAllEligiblePayouts(
       continue
     }
 
-    // amountKes is computed by Phase 4's real implementation (commented
-    // below). Touch it so the variable is in scope for the commented future
-    // code without tripping noUnusedLocals.
-    void Number(BigInt(row.net_total_minor) / 100n)
+    const amountKes = Number(BigInt(row.net_total_minor) / 100n)
+    const beneficiaryName = nameByUserId.get(dv.user_id) ?? 'Loveli Distributor'
 
     try {
-      // Phase 0 (2026-06-03): IntaSend B2C dispatch lands in Phase 4.
-      // Roll the row back to pending and surface a clear error rather
-      // than silently no-op'ing — admins will see a `failed` outcome
-      // for every row they attempted to bulk-fire, with a clear reason.
-      throw new Error(
-        'IntaSend B2C payout dispatch is not yet wired (Phase 4 of the PayHero → IntaSend migration).',
-      )
+      const provider = getPaymentProvider()
+      const dispatch = await provider.initiatePayout({
+        payoutId: row.id,
+        amountKes,
+        msisdn: row.payout_msisdn,
+        beneficiaryName,
+        narrative: `Loveli Luxury payout (bulk run)`,
+      })
 
-      // Phase 4 implementation will look like:
-      //   const tracking = await initiateIntasendB2C({
-      //     amountKes, msisdn: row.payout_msisdn, payoutId: row.id,
-      //   })
-      //   await service.from('payouts').update({
-      //     provider:    'intasend',
-      //     tracking_id: tracking.id,
-      //     account:     row.payout_msisdn,
-      //     raw_payload: tracking.raw,
-      //   }).eq('id', row.id)
-      //   await service.from('audit_log').insert({
-      //     actor_id:      session.userId,
-      //     action:        'payout.initiated.bulk',
-      //     resource_type: 'payouts',
-      //     resource_id:   String(row.id),
-      //     after_data: {
-      //       provider:    'intasend',
-      //       tracking_id: tracking.id,
-      //       amount_kes:  amountKes,
-      //       msisdn:      row.payout_msisdn,
-      //       bulk_run:    true,
-      //     },
-      //   })
-      //   outcomes.push({
-      //     payoutId: row.id,
-      //     status:   'fired',
-      //     reference: tracking.id,
-      //     amountKes,
-      //   })
+      await service
+        .from('payouts')
+        .update({
+          provider: 'intasend',
+          status: dispatch.status,
+          tracking_id: dispatch.trackingId,
+          account: row.payout_msisdn,
+          requires_approval: dispatch.status === 'pending_approval',
+          raw_payload: dispatch.raw as unknown as Json,
+        })
+        .eq('id', row.id)
+
+      await service.from('audit_log').insert({
+        actor_id: session.userId,
+        action: 'payout.initiated.bulk',
+        resource_type: 'payouts',
+        resource_id: String(row.id),
+        after_data: {
+          provider: 'intasend',
+          tracking_id: dispatch.trackingId,
+          amount_kes: amountKes,
+          msisdn: row.payout_msisdn,
+          status: dispatch.status,
+          bulk_run: true,
+        },
+      })
+
+      outcomes.push({
+        payoutId: row.id,
+        status: 'fired',
+        reference: dispatch.trackingId,
+        amountKes,
+      })
     } catch (err) {
       // Roll the row back to pending so the operator (or a retry) can fire it.
       await service
@@ -242,8 +267,6 @@ export async function fireAllEligiblePayouts(
       outcomes.push({ payoutId: row.id, status: 'failed', error: (err as Error).message })
     }
   }
-  // Touch session so the unused-warning is quiet until Phase 4 references it.
-  void session
 
   const fired = outcomes.filter((o) => o.status === 'fired').length
   const skipped = outcomes.filter((o) => o.status === 'skipped').length

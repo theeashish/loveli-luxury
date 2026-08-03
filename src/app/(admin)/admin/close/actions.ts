@@ -5,14 +5,14 @@
  *
  * Both actions delegate to src/lib/close/orchestrate.ts so the cron
  * endpoint shares one source of truth for the iteration logic. These
- * action wrappers add the admin gate, parse FormData, and redirect with
+ * action wrappers add the permission check, parse FormData, and redirect with
  * summary query params after the work completes.
  */
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/roles'
+import { authorize, PERMISSIONS } from '@/lib/auth'
 import {
   runCloseForPeriod,
   draftPayoutsForPeriod,
@@ -24,7 +24,8 @@ const periodSchema = z.object({
 })
 
 export async function runMonthlyClose(formData: FormData): Promise<void> {
-  const session = await requireAdmin()
+  const session = await authorize(PERMISSIONS.PAYMENTS_VERIFY)
+
   const parsed = periodSchema.safeParse({
     year: formData.get('year'),
     month: formData.get('month'),
@@ -45,7 +46,8 @@ export async function runMonthlyClose(formData: FormData): Promise<void> {
 }
 
 export async function draftPayoutsForPeriodAction(formData: FormData): Promise<void> {
-  const session = await requireAdmin()
+  const session = await authorize(PERMISSIONS.PAYMENTS_VERIFY)
+
   const parsed = periodSchema.safeParse({
     year: formData.get('year'),
     month: formData.get('month'),

@@ -8,13 +8,21 @@
  *   paid    → fulfilled → shipped → delivered
  *   paid|fulfilled|shipped → refunded
  *
- * Refund money movement is initiated in the provider dashboard (IntaSend
- * for new orders, PayHero for historical pre-2026-06-03 orders). This
- * action handles only the DB-side bookkeeping: inventory restore +
- * commission claw-back + status flip. Commission claw-back is implemented
- * in migration 008 — refunded ledger rows are voided unless already paid
- * out, in which case they surface on /admin/clawbacks for a human
- * decision.
+ * Refund money movement: for IntaSend-provider orders (2026-06-03
+ * onward) this action now calls IntaSend's documented Chargebacks API
+ * directly (`getPaymentProvider().refundPayment`) — see
+ * `src/lib/intasend/refunds.ts`. This corrects the previous assumption
+ * that "neither [PayHero nor IntaSend] exposes a documented refund API
+ * in our integration" — that was true for PayHero, but IntaSend
+ * documents this endpoint (developers.intasend.com/docs/creating-refunds).
+ * Historical PayHero-provider orders still fall back to the manual
+ * provider-dashboard flow, since PayHero access is retired.
+ *
+ * This action handles: (for intasend orders) the refund API call, then
+ * for all orders: inventory restore + commission claw-back + status
+ * flip. Commission claw-back is implemented in migration 008 —
+ * refunded ledger rows are voided unless already paid out, in which
+ * case they surface on /admin/clawbacks for a human decision.
  *
  * Every transition writes an audit_log row with the actor, before/after
  * snapshots, and the action name.
@@ -25,6 +33,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { requireAdmin, requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getPaymentProvider } from '@/lib/payments/payment-service'
+import { RefundError } from '@/lib/payments/errors'
 
 const ACTIONS = ['cancel', 'fulfill', 'ship', 'deliver', 'refund'] as const
 type Action = (typeof ACTIONS)[number]
@@ -109,12 +119,52 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
       throw new Error('Order has no payment reference to refund.')
     }
 
-    // The actual money-movement is initiated in the provider dashboard
-    // (IntaSend for new orders, PayHero for historical pre-2026-06-03
-    // orders — neither exposes a documented refund API in our integration
-    // at this time). This action handles only the DB-side bookkeeping.
-    // Admin is responsible for confirming the refund was issued in the
-    // provider BEFORE clicking refund here.
+    // The actual money-movement: for IntaSend-provider orders, call the
+    // documented Chargebacks/Refunds API directly. Historical PayHero
+    // orders (provider retired) still require the admin to have issued
+    // the refund manually in the provider dashboard before clicking
+    // this action — we cannot call an API for a provider we no longer
+    // have credentials for.
+    if (current.payment_provider === 'intasend') {
+      const paymentRow = await service
+        .from('payments')
+        .select('invoice_id')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const invoiceId = (paymentRow.data as { invoice_id: string } | null)?.invoice_id
+
+      if (!invoiceId) {
+        throw new Error(
+          'No payments row (invoice_id) found for this order — cannot call the IntaSend refund API. ' +
+            'If the refund was already issued manually in the IntaSend dashboard, contact an engineer to force the status flip.',
+        )
+      }
+
+      try {
+        const provider = getPaymentProvider()
+        const refund = await provider.refundPayment({
+          orderId,
+          invoiceId,
+          amountKes: Number(BigInt(current.total_minor) / 100n),
+          reason: 'Customer refund',
+          reasonDetails: `Admin-initiated refund for order ${orderId} via /admin/orders.`,
+        })
+        await service.from('audit_log').insert({
+          actor_id: session.userId,
+          action: 'order.refund.api_call',
+          resource_type: 'orders',
+          resource_id: String(orderId),
+          after_data: { chargeback_id: refund.chargebackId, invoice_id: invoiceId },
+        })
+      } catch (err) {
+        if (err instanceof RefundError) {
+          throw new Error(`IntaSend refund API call failed: ${err.message}`)
+        }
+        throw err
+      }
+    }
 
     // 1. Restore inventory.
     const restoreRes = await service.rpc('restore_order_inventory', {
@@ -188,7 +238,9 @@ export async function transitionOrderStatus(formData: FormData): Promise<void> {
         provider_ref: current.payment_provider_ref,
         clawback,
         note:
-          'Refund must be issued in the provider dashboard before this status flip.',
+          current.payment_provider === 'intasend'
+            ? 'Refund issued via the IntaSend Chargebacks API (see order.refund.api_call for the chargeback_id).'
+            : 'Historical PayHero order — refund must have been issued manually in the provider dashboard before this status flip.',
       },
     })
 

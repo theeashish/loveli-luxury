@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/roles'
+import { authorize, PERMISSIONS } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const updateSchema = z.object({
@@ -24,7 +24,8 @@ export async function updateStarterJoiningFee(input: {
   packageCode: string
   joiningFeeKes: number
 }): Promise<{ ok: true } | { error: string }> {
-  const session = await requireAdmin()
+  const session = await authorize(PERMISSIONS.SETTINGS_UPDATE)
+
   const parsed = updateSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues.map((i) => i.message).join('; ') }
@@ -112,5 +113,6 @@ export async function updateStarterJoiningFee(input: {
 
   revalidatePath('/admin/comp/starter-packages')
   revalidatePath('/partners/signup')
+
   return { ok: true }
 }

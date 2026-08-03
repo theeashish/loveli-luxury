@@ -13,25 +13,41 @@
  *      polling window while they wait on the success page.
  *   3. This cron (sweep) — for orders that miss both above.
  *
- * Phase 0 status (2026-06-03):
- *   PayHero has been removed. The IntaSend status probe lands in Phase 2
- *   of the migration. Until then this endpoint short-circuits — it
- *   verifies the bearer secret, reports the deferred state, and exits
- *   without scanning. Vercel cron / ops will see a successful 200 with
- *   `paid: 0, scanned: 0, note: 'sweeper deferred until Phase 2'`.
+ * Phase 2 (2026-07-26): the IntaSend status probe is wired via
+ * `reconcileByInvoiceId` (shared with `/api/intasend/status`). Scans
+ * `orders` with status='pending', kind IN ('retail','distributor_signup'),
+ * a `payments` row with a non-null invoice_id, older than
+ * MIN_AGE_BEFORE_SWEEP_MS (so we don't race the customer's own poll or
+ * the webhook that's very likely already in flight for a brand-new
+ * order), and younger than MAX_AGE_MS (a pending order past that point
+ * is almost certainly abandoned — the STALE_PENDING_MS window in
+ * /api/checkout/init already expires it going forward; sweeping is a
+ * bounded catch-up, not an unbounded historical scan).
  *
  * Auth: Bearer `CRON_SECRET` — matches /api/cron/monthly-close.
  *
- * Idempotent — `mark_order_paid` will short-circuit on already-paid
- * orders when Phase 2 lands; if two workers race (webhook + status +
- * sweeper), the losers no-op.
+ * Idempotent — `mark_order_paid` short-circuits on already-paid orders;
+ * if two workers race (webhook + status + sweeper), the losers no-op.
  */
 
 import { NextResponse, type NextRequest } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
+import { createServiceClient } from '@/lib/supabase/service'
+import { reconcileByInvoiceId } from '@/lib/payments/payment-service'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+
+/** Don't sweep an order younger than this — give the webhook and the
+ *  customer's own /api/intasend/status poll first crack at it. */
+const MIN_AGE_BEFORE_SWEEP_MS = 3 * 60 * 1000
+/** Don't bother sweeping an order this old — it's either already
+ *  expired by /api/checkout/init's STALE_PENDING_MS or is a stuck
+ *  historical record an admin should look at manually. */
+const MAX_AGE_MS = 24 * 60 * 60 * 1000
+/** Cap per run so a large backlog can't turn one cron invocation into a
+ *  Vercel function timeout. */
+const MAX_ORDERS_PER_RUN = 50
 
 function authBearer(req: NextRequest):
   | { ok: true }
@@ -65,18 +81,75 @@ export async function GET(req: NextRequest) {
   const auth = authBearer(req)
   if (!auth.ok) return auth.res
 
-  // Phase 0 stub. When Phase 2 lands, replace this body with the IntaSend
-  // status-probe loop: scan recent `orders` with status='pending' +
-  // provider='intasend' + a payments.invoice_id, call the IntaSend
-  // status endpoint per order, and on SUCCESS feed the result into
-  // applyPaymentSuccess() with source='cron_sweep'.
+  const service = createServiceClient()
+
+  const cutoffNew = new Date(Date.now() - MIN_AGE_BEFORE_SWEEP_MS).toISOString()
+  const cutoffOld = new Date(Date.now() - MAX_AGE_MS).toISOString()
+
+  // Orders old enough that the webhook/status-poll have had their shot,
+  // not so old they're a stale historical record. Retail + signup only
+  // — restock orders follow the same STK flow and are covered too since
+  // `kind` isn't filtered further; every order kind uses `payments`.
+  const pendingRes = await service
+    .from('orders')
+    .select('id, order_number, kind, created_at')
+    .eq('status', 'pending')
+    .lte('created_at', cutoffNew)
+    .gte('created_at', cutoffOld)
+    .order('created_at', { ascending: true })
+    .limit(MAX_ORDERS_PER_RUN)
+
+  if (pendingRes.error) {
+    return NextResponse.json(
+      { ok: false, error: `orders scan failed: ${pendingRes.error.message}` },
+      { status: 500 },
+    )
+  }
+
+  const candidates = (pendingRes.data ?? []) as Array<{
+    id: number
+    order_number: string
+    kind: string
+    created_at: string
+  }>
+
+  let paid = 0
+  let unchanged = 0
+  let failed = 0
+  const errors: string[] = []
+
+  for (const order of candidates) {
+    const paymentRes = await service
+      .from('payments')
+      .select('invoice_id')
+      .eq('order_id', order.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const invoiceId = (paymentRes.data as { invoice_id: string } | null)?.invoice_id
+    if (!invoiceId) {
+      unchanged++
+      continue
+    }
+
+    try {
+      const outcome = await reconcileByInvoiceId(invoiceId, order.id, order.kind, 'cron_sweep')
+      if (outcome.state === 'complete') paid++
+      else if (outcome.state === 'failed') failed++
+      else unchanged++
+    } catch (e) {
+      errors.push(`order ${order.order_number}: ${(e as Error).message}`)
+      unchanged++
+    }
+  }
+
   return NextResponse.json({
     ok: true,
-    scanned: 0,
-    paid: 0,
-    unchanged: 0,
-    failed: 0,
-    note: 'Provider status probe deferred until Phase 2 of the PayHero → IntaSend migration. Bearer auth is live; the loop body is intentionally empty.',
+    scanned: candidates.length,
+    paid,
+    failed,
+    unchanged,
+    errors: errors.length > 0 ? errors : undefined,
   })
 }
 

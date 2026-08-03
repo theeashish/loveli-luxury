@@ -1,13 +1,15 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAdmin } from '@/lib/auth/roles'
+import { authorize, PERMISSIONS } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { reconcileMissingCommissions } from '@/lib/mlm/commission-reconcile'
 
 export async function runReconcileNow(): Promise<void> {
-  await requireAdmin()
+  await authorize(PERMISSIONS.PAYMENTS_VERIFY)
+
   const service = createServiceClient()
   await reconcileMissingCommissions(service)
+
   revalidatePath('/admin/comp/commission-health')
 }

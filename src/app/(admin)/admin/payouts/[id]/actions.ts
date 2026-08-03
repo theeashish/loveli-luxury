@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/roles'
+import { requireAdmin, requireSuperadmin, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getServerEnv } from '@/lib/env'
+import { getPaymentProvider } from '@/lib/payments/payment-service'
+import type { Json } from '@/types/database'
 
 const idSchema = z.object({
   payoutId: z.coerce.number().int().positive(),
@@ -20,12 +22,14 @@ const idSchema = z.object({
  *   3. Optimistically lock the row by transitioning status pending →
  *      processing with `.eq('status', 'pending')`. If another caller
  *      beat us, abort.
- *   4. Call the provider's B2C transfer API. Phase 0 (2026-06-03)
- *      throws — IntaSend payouts are wired in Phase 4.
- *   5. On API success, store the provider tracking id on the row and
- *      stamp `initiated_at`. On API failure, roll status back to
- *      `pending` so the admin can retry.
- *   6. The terminal status (completed / failed) is set by the webhook.
+ *   4. Call the provider's B2C transfer API (`getPaymentProvider().initiatePayout`).
+ *   5. On API success, store the provider tracking id + raw response on
+ *      the row and stamp `initiated_at`. If the amount is over
+ *      `INTASEND_PAYOUT_APPROVAL_CEILING_KES`, the row lands in
+ *      `pending_approval` instead of `processing` — see `approvePendingPayout`.
+ *      On API failure, roll status back to `pending` so the admin can retry.
+ *   6. The terminal status (completed / failed) is set by the webhook
+ *      (`/api/intasend/webhook`) or the cron sweep, not here.
  */
 export async function initiatePayout(formData: FormData): Promise<void> {
   const env = getServerEnv()
@@ -33,7 +37,13 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw new Error('Payouts are disabled. Set ENABLE_PAYOUTS=true to proceed.')
   }
 
-  const session = await requireAdmin()
+  let session
+  try {
+    session = await requireAdmin()
+  } catch (err) {
+    if (err instanceof AuthError) throw new Error('Forbidden')
+    throw err
+  }
   const parsed = idSchema.safeParse({ payoutId: formData.get('payoutId') })
   if (!parsed.success) throw new Error('Invalid payout id')
   const { payoutId } = parsed.data
@@ -100,41 +110,57 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw new Error('Payout is not in pending state.')
   }
 
-  // amountKes is computed by Phase 4's real implementation (commented below).
-  // Touch it here so the variable is in scope for the commented future code
-  // without tripping noUnusedLocals.
-  void Number(BigInt(row.net_total_minor) / 100n)
+  const amountKes = Number(BigInt(row.net_total_minor) / 100n)
+
+  // Beneficiary name for the IntaSend `transactions[].name` field lives
+  // on profiles, not distributors — join through user_id.
+  const distRow = await service
+    .from('distributors')
+    .select('user_id')
+    .eq('id', row.distributor_id)
+    .maybeSingle()
+  const distUserId = (distRow.data as { user_id: string } | null)?.user_id
+  const beneficiaryProfile = distUserId
+    ? await service.from('profiles').select('full_name').eq('id', distUserId).maybeSingle()
+    : null
+  const beneficiaryName =
+    (beneficiaryProfile?.data as { full_name: string } | null)?.full_name ?? 'Loveli Distributor'
 
   try {
-    // Phase 0 (2026-06-03): IntaSend B2C payout dispatch is not yet
-    // wired (lands in Phase 4 of the migration). Roll the row back to
-    // pending and surface a clear error so admin tooling doesn't
-    // silently mark a payout "processing" that no provider will ever
-    // settle.
-    throw new Error(
-      'IntaSend B2C payout dispatch is not yet wired. Phase 4 of the PayHero → IntaSend migration adds the real implementation; until then, no payouts fire.',
-    )
+    const provider = getPaymentProvider()
+    const dispatch = await provider.initiatePayout({
+      payoutId,
+      amountKes,
+      msisdn: row.payout_msisdn,
+      beneficiaryName,
+      narrative: `Loveli Luxury payout ${row.period_year}-${String(row.period_month).padStart(2, '0')}`,
+    })
 
-    // Phase 4 implementation will look like:
-    //   const tracking = await initiateIntasendB2C({
-    //     amountKes, msisdn: row.payout_msisdn, payoutId, ...
-    //   })
-    //   await service.from('payouts').update({
-    //     provider:    'intasend',
-    //     tracking_id: tracking.id,
-    //     account:     row.payout_msisdn,
-    //     raw_payload: tracking.raw,
-    //   }).eq('id', payoutId)
-    //   await service.from('audit_log').insert({
-    //     actor_id:      session.userId,
-    //     action:        'payout.initiated',
-    //     resource_type: 'payouts',
-    //     resource_id:   String(payoutId),
-    //     after_data: {
-    //       provider: 'intasend', tracking_id: tracking.id,
-    //       amount_kes: amountKes, msisdn: row.payout_msisdn,
-    //     },
-    //   })
+    await service
+      .from('payouts')
+      .update({
+        provider: 'intasend',
+        status: dispatch.status, // 'processing' | 'pending_approval'
+        tracking_id: dispatch.trackingId,
+        account: row.payout_msisdn,
+        requires_approval: dispatch.status === 'pending_approval',
+        raw_payload: dispatch.raw as unknown as Json,
+      })
+      .eq('id', payoutId)
+
+    await service.from('audit_log').insert({
+      actor_id: session.userId,
+      action: 'payout.initiated',
+      resource_type: 'payouts',
+      resource_id: String(payoutId),
+      after_data: {
+        provider: 'intasend',
+        tracking_id: dispatch.trackingId,
+        amount_kes: amountKes,
+        msisdn: row.payout_msisdn,
+        status: dispatch.status,
+      },
+    })
   } catch (err) {
     // Roll back to pending so the admin can retry
     await service
@@ -148,11 +174,75 @@ export async function initiatePayout(formData: FormData): Promise<void> {
     throw err
   }
 
-  // Phase 4 will unblock this revalidate (currently unreachable).
-  // eslint-disable-next-line no-unreachable
   revalidatePath('/admin/payouts')
-  // eslint-disable-next-line no-unreachable
   revalidatePath(`/admin/payouts/${payoutId}`)
-  // Touch session so the unused-warning is quiet until Phase 4 references it.
-  void session
+}
+
+/**
+ * Approve a payout that IntaSend parked in `pending_approval` because its
+ * amount exceeded `INTASEND_PAYOUT_APPROVAL_CEILING_KES`. Superadmin only
+ * — a regular admin can fire payouts under the ceiling but cannot clear
+ * the higher-value gate alone (see migration 046's `pending_approval`
+ * state and the ceiling env var in env.ts).
+ *
+ * Replays the exact `raw_payload` captured at initiate time — the
+ * IntaSend `approve()` call takes the full initiate response object, not
+ * just the tracking id (see developers.intasend.com/docs/m-pesa-b2c).
+ */
+export async function approvePendingPayout(formData: FormData): Promise<void> {
+  let session
+  try {
+    session = await requireSuperadmin()
+  } catch (err) {
+    if (err instanceof AuthError) throw new Error('Forbidden — superadmin required')
+    throw err
+  }
+  const parsed = idSchema.safeParse({ payoutId: formData.get('payoutId') })
+  if (!parsed.success) throw new Error('Invalid payout id')
+  const { payoutId } = parsed.data
+
+  const service = createServiceClient()
+
+  const r = await service
+    .from('payouts')
+    .select('id, status, tracking_id, raw_payload')
+    .eq('id', payoutId)
+    .maybeSingle()
+  if (r.error || !r.data) throw new Error('Payout not found')
+  const row = r.data as {
+    id: number
+    status: string
+    tracking_id: string | null
+    raw_payload: Record<string, unknown> | null
+  }
+
+  if (row.status !== 'pending_approval') {
+    throw new Error(`Payout is not awaiting approval (status: ${row.status}).`)
+  }
+  if (!row.raw_payload || !row.tracking_id) {
+    throw new Error('Payout is missing its initiate response — cannot approve. Re-initiate instead.')
+  }
+
+  const provider = getPaymentProvider()
+  const approved = await provider.approvePayout({ payoutId, raw: row.raw_payload })
+
+  await service
+    .from('payouts')
+    .update({
+      status: 'processing',
+      approved_by: session.userId,
+      raw_payload: approved.raw as unknown as Json,
+    })
+    .eq('id', payoutId)
+
+  await service.from('audit_log').insert({
+    actor_id: session.userId,
+    action: 'payout.approved',
+    resource_type: 'payouts',
+    resource_id: String(payoutId),
+    after_data: { tracking_id: approved.trackingId },
+  })
+
+  revalidatePath('/admin/payouts')
+  revalidatePath(`/admin/payouts/${payoutId}`)
 }

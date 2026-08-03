@@ -129,27 +129,85 @@ export const webhookCollectionSchema = z.object({
 export type WebhookCollection = z.infer<typeof webhookCollectionSchema>
 
 /**
- * IntaSend webhook payload — payout events. Similar shape; the dedup key
- * is `tracking_id` instead of `invoice_id`.
+ * IntaSend webhook payload — send-money (payout) events.
+ *
+ * CORRECTED against the official docs (developers.intasend.com/docs/
+ * send-money-events, verified 2026-07-26): the batch-level field is
+ * named `status` (e.g. "Completed"), NOT `state` — the original
+ * speculative schema here used `state`, which would have silently
+ * failed to match every real webhook (Zod would still parse it via
+ * `.passthrough()`, but `status` would land in the untyped catch-all
+ * and any dedup/apply logic reading `.state` would see `undefined`).
+ * The dedup key is `tracking_id` (batch-level), and per-beneficiary
+ * outcomes live in `transactions[]` keyed by `status` (e.g.
+ * "Successful" / "Failed"), NOT the batch's own status.
+ *
+ * The docs' example payload does not show a `challenge` field (unlike
+ * the collection and chargeback examples, which do). The webhook setup
+ * page states the challenge applies to webhooks generally with no
+ * per-event-type carve-out, so `challenge` is modelled as optional here
+ * and the handler logs (rather than silently accepts) a send-money
+ * event that arrives without one — see `webhook-handler.ts`.
  */
-export const webhookPayoutSchema = z.object({
-  challenge: z.string(),
+export const webhookSendMoneySchema = z.object({
+  challenge: z.string().optional(),
+  file_id: z.string().optional(),
   tracking_id: z.string(),
-  state: z.string(),
-  provider: z.string().optional(),
+  batch_reference: z.string().optional().nullable(),
+  status: z.string(),
+  status_code: z.string().optional(),
   transactions: z
     .array(
       z.object({
-        tracking_id: z.string().optional(),
-        state: z.string().optional(),
-        amount: z.union([z.string(), z.number()]).optional(),
+        transaction_id: z.string().optional(),
+        status: z.string().optional(),
+        status_code: z.string().optional(),
+        status_description: z.string().optional().nullable(),
+        request_reference_id: z.string().optional(),
+        provider: z.string().optional(),
         account: z.string().optional(),
-        name: z.string().optional(),
+        provider_reference: z.string().optional().nullable(),
+        amount: z.union([z.string(), z.number()]).optional(),
+        charge: z.union([z.string(), z.number()]).optional(),
         narrative: z.string().optional().nullable(),
-        failed_reason: z.string().optional().nullable(),
       }).passthrough(),
     )
     .optional(),
+  actual_charges: z.union([z.string(), z.number()]).optional(),
+  paid_amount: z.union([z.string(), z.number()]).optional(),
+  failed_amount: z.union([z.string(), z.number()]).optional(),
+  total_amount: z.union([z.string(), z.number()]).optional(),
+  transactions_count: z.number().optional(),
 }).passthrough()
 
-export type WebhookPayout = z.infer<typeof webhookPayoutSchema>
+export type WebhookSendMoney = z.infer<typeof webhookSendMoneySchema>
+
+/** @deprecated Renamed to `webhookSendMoneySchema` to match the corrected field names. Kept as an alias so any external import doesn't hard-break. */
+export const webhookPayoutSchema = webhookSendMoneySchema
+/** @deprecated see `webhookSendMoneySchema` */
+export type WebhookPayout = WebhookSendMoney
+
+/**
+ * IntaSend webhook payload — chargeback (refund) events. Verified
+ * against developers.intasend.com/docs/chargeback-events. Dedup key is
+ * `chargeback_id`; the nested `invoice` carries the original
+ * transaction's `invoice_id` for correlation back to `payments`.
+ */
+export const webhookChargebackSchema = z.object({
+  challenge: z.string(),
+  chargeback_id: z.string(),
+  status: z.string(),
+  amount: z.union([z.string(), z.number()]).optional(),
+  reason: z.string().optional().nullable(),
+  resolution: z.string().optional().nullable(),
+  invoice: z
+    .object({
+      invoice_id: z.string(),
+      state: z.string().optional(),
+      api_ref: z.string().optional().nullable(),
+    })
+    .passthrough()
+    .optional(),
+}).passthrough()
+
+export type WebhookChargeback = z.infer<typeof webhookChargebackSchema>

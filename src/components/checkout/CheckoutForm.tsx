@@ -7,6 +7,7 @@ import { useCartStore } from '@/lib/cart/store'
 import { isEmpty, subtotalMinor, totalQty } from '@/lib/cart/selectors'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import { StkPushPanel } from '@/components/checkout/StkPushPanel'
+import IntaSendBadge from '@/components/payment/IntaSendBadge'
 
 export type CheckoutAddress = {
   id: number
@@ -100,13 +101,19 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
           ? {
               kind: 'variant' as const,
               variantId: l.variantId,
-              unitPriceMinor: l.unitPriceMinor,
+              // unitPriceMinor is `string | number` on the cart line (older
+              // persisted carts, or lines added before the VariantPicker
+              // fix, may carry a raw number). The API requires a decimal
+              // string, so normalise here as a defensive last line —
+              // without this, any pre-existing cart in localStorage keeps
+              // failing checkout with "Invalid request" until it's cleared.
+              unitPriceMinor: String(l.unitPriceMinor),
               qty: l.qty,
             }
           : {
               kind: 'bundle' as const,
               bundleId: l.bundleId,
-              unitPriceMinor: l.unitPriceMinor,
+              unitPriceMinor: String(l.unitPriceMinor),
               qty: l.qty,
             },
       ),
@@ -136,7 +143,25 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
       const json = await res.json()
       if (!res.ok) {
         const base = json?.error ?? 'Checkout failed.'
-        const detail = typeof json?.detail === 'string' ? ` (${json.detail})` : ''
+        // Server sends validation failures as `details` (Zod's
+        // `.flatten()` shape — an object), not `detail` (a string). The
+        // previous check here looked for the wrong key/type and always
+        // fell through, so 400 responses only ever showed "Invalid
+        // request" with no way to see what actually failed.
+        let detail = ''
+        if (typeof json?.detail === 'string') {
+          detail = ` (${json.detail})`
+        } else if (json?.details && typeof json.details === 'object') {
+          const flat = json.details as {
+            formErrors?: string[]
+            fieldErrors?: Record<string, string[] | undefined>
+          }
+          const messages = [
+            ...(flat.formErrors ?? []),
+            ...Object.values(flat.fieldErrors ?? {}).flatMap((v) => v ?? []),
+          ]
+          if (messages.length > 0) detail = ` (${messages.join('; ')})`
+        }
         setError(`${base}${detail}`)
         setSubmitting(false)
         return
@@ -397,6 +422,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
         <p className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
           Card · M-Pesa · Mobile money
         </p>
+        <IntaSendBadge />
       </aside>
     </form>
   )

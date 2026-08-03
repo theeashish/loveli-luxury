@@ -31,6 +31,41 @@ import { stkPushResponseSchema } from '../intasend/types'
 export type PaymentProvider = 'intasend'
 
 /**
+ * The intasend-node SDK rejects with inconsistent shapes depending on the
+ * failure mode:
+ *   - Non-200/201 HTTP response  -> rejects with the raw response body
+ *     (a Buffer, and IntaSend's error responses are JSON, e.g.
+ *     `{"detail": "..."}` or `{"errors": [...]}`).
+ *   - Underlying `https` request error (DNS, TLS, connection refused)
+ *     -> rejects with `err.message` (a plain string).
+ * Never a proper `Error`. This normalises every shape into one readable
+ * string so the real cause reaches logs and the customer-facing banner
+ * instead of silently becoming `undefined`.
+ */
+function normalizeIntasendError(e: unknown): string {
+  if (Buffer.isBuffer(e)) {
+    const text = e.toString('utf8')
+    try {
+      const parsed = JSON.parse(text) as Record<string, unknown>
+      if (typeof parsed.detail === 'string') return parsed.detail
+      if (typeof parsed.error === 'string') return parsed.error
+      if (typeof parsed.message === 'string') return parsed.message
+      if (Array.isArray(parsed.errors)) return JSON.stringify(parsed.errors)
+      return text
+    } catch {
+      return text || 'IntaSend returned an error with no readable body.'
+    }
+  }
+  if (e instanceof Error) return e.message
+  if (typeof e === 'string') return e
+  try {
+    return JSON.stringify(e)
+  } catch {
+    return 'Unknown IntaSend error (unserializable).'
+  }
+}
+
+/**
  * The single source of truth for which provider is active. Future-proofed
  * for a multi-provider config (e.g. an `active_provider` setting in
  * `config_settings`); today there is exactly one option.
@@ -139,7 +174,13 @@ export async function initiatePayment(
   let raw: unknown
   try {
     raw = await collection.mpesaStkPush({
-      phone_number: args.customer.phone,
+      // IntaSend's mpesa-stk-push endpoint rejects the leading `+` from
+      // our E.164 phone format ("Invalid phone number: must contain only
+      // digits"). Every other layer of this app (phoneSchema, DB, the
+      // webhook's inbound match) expects/stores E.164 WITH the `+`, so we
+      // strip it only at this one boundary rather than changing the
+      // format everywhere.
+      phone_number: args.customer.phone.replace(/^\+/, ''),
       name: args.customer.name,
       email: args.customer.email,
       amount: args.amountKes,
@@ -147,12 +188,21 @@ export async function initiatePayment(
       wallet_id: walletId,
     })
   } catch (e) {
+    // The intasend-node SDK does NOT reject with an Error on a non-200/201
+    // HTTP response — it rejects with the raw response body chunk (a
+    // Buffer, or occasionally a string), while a genuine network failure
+    // rejects with err.message (a string) from the underlying `https`
+    // request. `(e as Error).message` on a Buffer is `undefined`, which
+    // JSON.stringify then drops entirely — the caller (and the customer-
+    // facing error banner) never sees why the push failed. Normalise every
+    // shape into a readable string here so nothing gets silently lost.
+    const message = normalizeIntasendError(e)
     await logAttempt(service, {
       order_id: args.orderId,
       provider: 'intasend',
       attempt_type: 'stk_push',
       status: 'error',
-      error_message: (e as Error).message,
+      error_message: message,
       request_payload: {
         amount: args.amountKes,
         phone: args.customer.phone,
@@ -160,7 +210,7 @@ export async function initiatePayment(
         wallet_id: walletId,
       },
     })
-    throw e
+    throw new Error(message)
   }
 
   const parsed = stkPushResponseSchema.safeParse(raw)

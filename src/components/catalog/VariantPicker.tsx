@@ -32,7 +32,7 @@ export function VariantPicker({ product }: { product: ProductDto }) {
     productSlug: product.slug,
     name: `${product.name} — ${selected.sizeMl}ml`,
     sizeMl: selected.sizeMl,
-    unitPriceMinor: selected.retailPriceMinor,
+    unitPriceMinor: String(selected.retailPriceMinor),
     image: productImage ? imageUrl(productImage.storagePrefix, 'thumb') : null,
     inventoryAtAdd: selected.inventoryQty,
   }
