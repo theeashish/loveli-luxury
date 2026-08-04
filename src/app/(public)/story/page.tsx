@@ -10,7 +10,6 @@
  */
 
 import Link from 'next/link'
-import Image from 'next/image'
 
 export const metadata = {
   title: 'Story: Loveli Luxury',
@@ -43,17 +42,18 @@ export default function StoryPage() {
       <div className="grid grid-cols-1 gap-16 md:grid-cols-[20rem_1fr] md:gap-20">
         <aside className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-[hsl(var(--primary))]/15 bg-[hsl(var(--muted))]/40">
-            {/* Founder portrait placeholder. Owner replaces with a real
-                portrait (4:5 ratio recommended) under public/images/
-                and updates the src here. */}
-            <Image
-              src="/placeholder-founder.jpg"
-              alt="Founder of Loveli Luxury"
-              fill
-              sizes="(min-width: 768px) 320px, 100vw"
-              className="object-cover"
-              priority={false}
-            />
+            {/* Founder portrait placeholder. There is no real photo file yet
+                — a previous version of this page pointed <Image> at
+                /placeholder-founder.jpg, which doesn't exist in public/ and
+                404s on every request. Rendering a CSS monogram here instead
+                means this page never depends on a missing file. Owner
+                replaces this block with a real <Image> (4:5 ratio
+                recommended) once a portrait exists under public/images/. */}
+            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))]">
+              <span className="font-serif text-6xl font-light tracking-tight text-[hsl(var(--primary))]/40">
+                AI
+              </span>
+            </div>
             {!COPY_IS_FINAL ? (
               <span className="absolute right-3 top-3 rounded-sm border border-[hsl(var(--primary))]/40 bg-[hsl(var(--background))]/90 px-2 py-1 text-[9px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
                 Draft: owner review pending
