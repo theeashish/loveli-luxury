@@ -110,7 +110,19 @@ test.describe('public surfaces render', () => {
       '/ids': '/ids',
     }
     for (const [route, expectedPath] of Object.entries(expected)) {
-      await page.goto(route)
+      // waitUntil: 'domcontentloaded' instead of the default 'load'. This
+      // test only needs the server-rendered <link rel="canonical"> tag,
+      // present well before the 'load' event — which additionally blocks
+      // on every sub-resource (fonts, analytics scripts, images) that
+      // have nothing to do with what's being asserted here. On CI this
+      // loop has been intermittently failing navigation into '/story'
+      // with `net::ERR_ABORTED` for reasons not yet isolated (ruled out:
+      // worker concurrency — reproduces identically at workers: 1; Sentry
+      // — its client SDK is inert in CI, NEXT_PUBLIC_SENTRY_DSN is unset).
+      // Narrowing the wait condition to only what this test actually
+      // needs removes a whole class of exposure to slow, irrelevant
+      // resource loads regardless of the underlying cause.
+      await page.goto(route, { waitUntil: 'domcontentloaded' })
       const href = await page.locator('link[rel="canonical"]').first().getAttribute('href')
       expect(href, `canonical on ${route}`).toBeTruthy()
       // Next.js's own URL resolver (resolveAbsoluteUrlWithPathname in
