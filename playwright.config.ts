@@ -22,7 +22,14 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // Serialised in CI (1 worker), not for speed but for stability: several
+  // routes make Supabase calls that all fail against CI's placeholder DB
+  // URL. With 2 workers, up to 18 tests can hit that failing DNS lookup
+  // concurrently, and under CI's more constrained resources that burst
+  // has been observed to destabilise the dev server mid-run (net::
+  // ERR_ABORTED on an unrelated, fully-static route). Serial execution
+  // removes that concurrency window entirely.
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,
   expect: { timeout: 5_000 },
