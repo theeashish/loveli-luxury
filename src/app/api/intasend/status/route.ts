@@ -2,27 +2,21 @@
  * GET /api/intasend/status?ref=<order_number>
  *
  * Phase 2 self-heal endpoint. The contract here is dictated by the
- * ALREADY-WRITTEN frontend (`src/components/checkout/StkPushPanel.tsx`),
- * not invented for this pass: `{ status: string }` where `status` is the
- * order's own status column, and the panel treats `paid | fulfilled |
- * shipped | delivered` as success, `cancelled | refunded | failed |
- * expired` as failure, and anything else (`pending`) as "keep polling".
+ * ALREADY-WRITTEN frontend (`src/components/checkout/StkPushPanel.tsx`):
+ * `{ status: string }`, where terminal states are displayed as success or
+ * failure and `pending` keeps the panel polling.
  *
- * No auth check — `order_number` is an unguessable reference (matches
- * the same posture `/checkout/return` already uses for guest checkout),
- * and this endpoint only ever reads/reconciles state, never mutates
- * anything the caller didn't already have a legitimate reference to.
+ * Security boundary:
+ *   - The customer must be signed in.
+ *   - The queried order must belong to that authenticated customer.
  *
- * Behaviour:
- *   - If the order is already in a terminal status, return it immediately
- *     — no provider call needed.
- *   - Otherwise, look up the most recent `payments` row for this order
- *     and ask IntaSend for its current state via `verifyPayment`. If
- *     COMPLETE, run the same `applyPaymentSuccess` chain the webhook
- *     uses (source='status_poll') — idempotent either way.
+ * Order numbers are sequential operational references, not bearer secrets.
+ * Keeping both checks here prevents status enumeration and prevents arbitrary
+ * callers from causing provider-status reconciliation for another order.
  */
 
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { reconcileByInvoiceId } from '@/lib/payments/payment-service'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
@@ -48,18 +42,28 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'rate limited' }, { status: 429 })
   }
 
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'sign in required' }, { status: 401 })
+  }
+
   const url = new URL(req.url)
   const ref = url.searchParams.get('ref')
   if (!ref) {
     return NextResponse.json({ error: 'missing ref' }, { status: 400 })
   }
 
-  const service = createServiceClient()
-
-  const orderRes = await service
+  // Read ownership through the session-bound client before using the service
+  // client for reconciliation. A non-owner deliberately receives the same 404
+  // as an unknown order so sequential references cannot be enumerated.
+  const orderRes = await supabase
     .from('orders')
     .select('id, status, kind, order_number')
     .eq('order_number', ref)
+    .eq('user_id', user.id)
     .maybeSingle()
   if (orderRes.error || !orderRes.data) {
     return NextResponse.json({ error: 'order not found' }, { status: 404 })
@@ -70,7 +74,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ status: order.status })
   }
 
-  // Not yet terminal — find the invoice this order's STK push produced.
+  // The service client is used only after the purchaser and order ownership
+  // have been proven. It handles the internal payment lookup/reconciliation
+  // workflow, which is not exposed to arbitrary callers.
+  const service = createServiceClient()
   const paymentRes = await service
     .from('payments')
     .select('invoice_id')
@@ -81,7 +88,7 @@ export async function GET(req: Request) {
 
   const invoiceId = (paymentRes.data as { invoice_id: string } | null)?.invoice_id
   if (!invoiceId) {
-    // STK push hasn't landed a payments row yet (race with /api/checkout/init).
+    // STK push has not landed a payments row yet (race with checkout init).
     return NextResponse.json({ status: order.status })
   }
 
@@ -105,8 +112,8 @@ export async function GET(req: Request) {
       status: (refreshed.data as { status: string } | null)?.status ?? order.status,
     })
   } catch {
-    // Provider call failed (network/timeout) — don't fail the poll; the
-    // panel will just try again on its next tick.
+    // Provider call failed (network/timeout) — do not fail the poll; the
+    // authenticated panel will try again on its next interval.
     return NextResponse.json({ status: order.status })
   }
 }

@@ -93,7 +93,7 @@ test.describe('public surfaces render', () => {
     }
   })
 
-  test('indexable marketing routes emit a self-referential canonical', async ({ page }) => {
+  test('indexable marketing routes emit a self-referential canonical', async ({ request }) => {
     // SEO regression guard. The 2026-06-03 pass added explicit canonicals to
     // every indexable route (previously only PDP + /ids set them). If a future
     // metadata edit silently drops `alternates.canonical`, Google sees the
@@ -110,20 +110,18 @@ test.describe('public surfaces render', () => {
       '/ids': '/ids',
     }
     for (const [route, expectedPath] of Object.entries(expected)) {
-      // waitUntil: 'domcontentloaded' instead of the default 'load'. This
-      // test only needs the server-rendered <link rel="canonical"> tag,
-      // present well before the 'load' event — which additionally blocks
-      // on every sub-resource (fonts, analytics scripts, images) that
-      // have nothing to do with what's being asserted here. On CI this
-      // loop has been intermittently failing navigation into '/story'
-      // with `net::ERR_ABORTED` for reasons not yet isolated (ruled out:
-      // worker concurrency — reproduces identically at workers: 1; Sentry
-      // — its client SDK is inert in CI, NEXT_PUBLIC_SENTRY_DSN is unset).
-      // Narrowing the wait condition to only what this test actually
-      // needs removes a whole class of exposure to slow, irrelevant
-      // resource loads regardless of the underlying cause.
-      await page.goto(route, { waitUntil: 'domcontentloaded' })
-      const href = await page.locator('link[rel="canonical"]').first().getAttribute('href')
+      // A canonical tag is server-rendered metadata. Assert it from the raw
+      // HTML response instead of driving Chromium through every page's client
+      // resource lifecycle. This removes the intermittent frame-detach failure
+      // seen when navigating to /story in CI, while still testing the exact
+      // canonical tag search engines receive.
+      const response = await request.get(route)
+      expect(response.status(), `${route} status`).toBe(200)
+      const html = await response.text()
+      const canonicalTag = html.match(
+        /<link\b[^>]*\brel=["']canonical["'][^>]*>/i,
+      )?.[0]
+      const href = canonicalTag?.match(/\bhref=["']([^"']+)["']/i)?.[1]
       expect(href, `canonical on ${route}`).toBeTruthy()
       // Next.js's own URL resolver (resolveAbsoluteUrlWithPathname in
       // next/dist/lib/metadata/resolvers/resolve-url.js) deliberately
