@@ -1,37 +1,47 @@
 import { listProductSummaries } from '@/lib/catalog/queries'
 import { ProductCard } from '@/components/catalog/ProductCard'
+import { EditorialPageHeader } from '@/components/editorial/EditorialPageHeader'
+import { getSection } from '@/lib/content/site'
 
-// Catalog reads use the auth-bound Supabase client (cookies()), which
-// is incompatible with static generation. Render fresh per request.
 export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: 'Shop',
-  description: 'The full Loveli Luxury Eau de Parfum collection.',
+  title: 'The Collection | Loveli Luxury Scents',
+  description: 'Discover the Loveli Luxury Eau de Parfum collection.',
   alternates: { canonical: '/shop' },
 }
 
 export default async function ShopPage() {
-  const products = await listProductSummaries()
+  const [products, content] = await Promise.all([
+    listProductSummaries(),
+    getSection('shop_landing'),
+  ])
+  const countLine =
+    products.length === 0
+      ? content.emptyMessage
+      : `${products.length} ${products.length === 1 ? content.countSingular : content.countPlural}`
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16">
-      <header className="mb-12">
-        <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Shop</p>
-        <h1 className="mt-2 text-4xl font-light tracking-tight">The collection</h1>
-        <p className="mt-4 max-w-xl text-sm text-[hsl(var(--muted-foreground))]">
-          {products.length === 0
-            ? 'New arrivals soon. Check back shortly.'
-            : `${products.length} fragrance${products.length === 1 ? '' : 's'} available.`}
-        </p>
-      </header>
+    <div>
+      <EditorialPageHeader
+        eyebrow={content.eyebrow}
+        title={content.headline}
+        description={content.subhead}
+        detail={countLine}
+      />
 
-      {products.length === 0 ? null : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      )}
+      <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="border-y border-[hsl(var(--border))] py-16 text-center">
+            <p className="font-serif text-3xl italic text-[hsl(var(--foreground))]">{content.emptyMessage}</p>
+          </div>
+        )}
+      </section>
     </div>
   )
 }

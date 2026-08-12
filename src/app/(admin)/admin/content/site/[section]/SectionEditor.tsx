@@ -40,7 +40,7 @@ export function SectionEditor({
     startTransition(async () => {
       const res = await saveSectionContent(sectionKey, text)
       if (res.ok) {
-        setMessage({ kind: 'success', text: 'Saved. Homepage refreshed.' })
+        setMessage({ kind: 'success', text: 'Saved. Public content refreshed.' })
       } else {
         setMessage({ kind: 'error', text: res.error })
       }

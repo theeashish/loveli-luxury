@@ -486,6 +486,73 @@ export const MARQUEE_DEFAULTS: MarqueeContent = {
   ],
 }
 
+
+/** policies_shell — shared hero and navigation copy for all policy pages. */
+export const policiesShellSchema = z.object({
+  eyebrow: z.string(),
+  headline: z.string(),
+  subhead: z.string(),
+  sectionsLabel: z.string(),
+  authenticityLabel: z.string(),
+  deliveryLabel: z.string(),
+  refundLabel: z.string(),
+  lastUpdatedLabel: z.string(),
+  lastUpdated: z.string(),
+})
+export type PoliciesShellContent = z.infer<typeof policiesShellSchema>
+export const POLICIES_SHELL_DEFAULTS: PoliciesShellContent = {
+  eyebrow: 'The Loveli promise',
+  headline: 'Care, stated clearly.',
+  subhead:
+    'The details behind every order: how we verify it, how it travels, and how we make things right when they do not arrive as they should.',
+  sectionsLabel: 'Our promises',
+  authenticityLabel: 'Authenticity',
+  deliveryLabel: 'Delivery',
+  refundLabel: 'Returns & refunds',
+  lastUpdatedLabel: 'Last updated',
+  lastUpdated: '18 May 2026',
+}
+
+/** shop_landing — editorial heading on the public collection page. */
+export const shopLandingSchema = z.object({
+  eyebrow: z.string(),
+  headline: z.string(),
+  subhead: z.string(),
+  countSingular: z.string(),
+  countPlural: z.string(),
+  emptyMessage: z.string(),
+})
+export type ShopLandingContent = z.infer<typeof shopLandingSchema>
+export const SHOP_LANDING_DEFAULTS: ShopLandingContent = {
+  eyebrow: 'The collection',
+  headline: 'Scent, selected with intention.',
+  subhead:
+    'A considered wardrobe of fragrance for the way you want to arrive, linger, and be remembered.',
+  countSingular: 'fragrance, chosen for presence.',
+  countPlural: 'fragrances, chosen for presence.',
+  emptyMessage: 'A new collection is being prepared. Please return shortly.',
+}
+
+/** bundles_landing — editorial heading on the public bundles page. */
+export const bundlesLandingSchema = z.object({
+  eyebrow: z.string(),
+  headline: z.string(),
+  subhead: z.string(),
+  countSingular: z.string(),
+  countPlural: z.string(),
+  emptyMessage: z.string(),
+})
+export type BundlesLandingContent = z.infer<typeof bundlesLandingSchema>
+export const BUNDLES_LANDING_DEFAULTS: BundlesLandingContent = {
+  eyebrow: 'Curated sets',
+  headline: 'More to remember, together.',
+  subhead:
+    'Thoughtfully paired fragrances and packages, assembled to make choosing feel more considered.',
+  countSingular: 'set, composed with intention.',
+  countPlural: 'sets, composed with intention.',
+  emptyMessage: 'A new set is being composed. Please return shortly.',
+}
+
 // ---------------------------------------------------------------------
 // Registry — single source of truth that ties each key to its schema,
 // defaults, and editor metadata.
@@ -542,6 +609,24 @@ export const SECTIONS = {
     defaults: PARTNER_LANDING_DEFAULTS,
     label: 'Partner landing — hero',
     description: 'The hero block at the top of /partners. Eyebrow, headline, sub-text, microtag, primary and secondary CTAs, and the invite-only note. The rest of the page stays in code.',
+  },
+  policies_shell: {
+    schema: policiesShellSchema,
+    defaults: POLICIES_SHELL_DEFAULTS,
+    label: 'Policies — page shell',
+    description: 'The shared editorial hero, navigation labels, and update stamp used across the authenticity, delivery, and refund pages. Policy routes remain fixed in code.',
+  },
+  shop_landing: {
+    schema: shopLandingSchema,
+    defaults: SHOP_LANDING_DEFAULTS,
+    label: 'Collection — page heading',
+    description: 'The eyebrow, headline, introduction, availability line, and empty-state message at the top of /shop. Product names, images, and prices remain catalog-controlled.',
+  },
+  bundles_landing: {
+    schema: bundlesLandingSchema,
+    defaults: BUNDLES_LANDING_DEFAULTS,
+    label: 'Bundles — page heading',
+    description: 'The eyebrow, headline, introduction, availability line, and empty-state message at the top of /bundles. Bundle items and prices remain catalog-controlled.',
   },
   policies_authenticity: {
     schema: policiesAuthenticitySchema,

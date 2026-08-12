@@ -85,6 +85,36 @@ const SCHEMA_HELP: Record<SectionKey, string> = {
   inviteNote      — small uppercase line under the buttons
                     (e.g. "Invite-only · Sponsor code required")`,
 
+  policies_shell: `Fields:
+  eyebrow           — small uppercase line above the headline
+  headline          — shared display heading across policy pages
+  subhead           — intro paragraph under the heading
+  sectionsLabel     — label above the policy navigation links
+  authenticityLabel — visible label for /policies/authenticity
+  deliveryLabel     — visible label for /policies/delivery
+  refundLabel       — visible label for /policies/refund
+  lastUpdatedLabel  — label above the date stamp
+  lastUpdated       — reader-facing review date (e.g. "18 May 2026")
+  Note: the policy routes themselves are fixed to protect navigation.`,
+
+  shop_landing: `Fields:
+  eyebrow        — small uppercase line above the collection headline
+  headline       — large page heading on /shop
+  subhead        — introductory paragraph under the heading
+  countSingular  — phrase after a one-item count (e.g. "fragrance, chosen for presence.")
+  countPlural    — phrase after a multiple-item count (e.g. "fragrances, chosen for presence.")
+  emptyMessage   — message shown when no products are available
+  Note: products, images, variants, stock, and prices stay catalog-controlled.`,
+
+  bundles_landing: `Fields:
+  eyebrow        — small uppercase line above the bundles headline
+  headline       — large page heading on /bundles
+  subhead        — introductory paragraph under the heading
+  countSingular  — phrase after a one-item count (e.g. "set, composed with intention.")
+  countPlural    — phrase after a multiple-item count (e.g. "sets, composed with intention.")
+  emptyMessage   — message shown when no bundles are available
+  Note: bundle items, images, stock, and prices stay catalog-controlled.`,
+
   policies_authenticity: `Fields:
   lead            — large display heading at the top of the page
   intro           — opening paragraph under the heading

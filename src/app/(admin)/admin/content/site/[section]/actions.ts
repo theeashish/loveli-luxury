@@ -21,6 +21,20 @@ export type SaveResult =
   | { ok: true }
   | { ok: false; error: string }
 
+const PUBLIC_PATHS: Partial<Record<SectionKey, readonly string[]>> = {
+  policies_shell: ['/policies/authenticity', '/policies/delivery', '/policies/refund'],
+  policies_authenticity: ['/policies/authenticity'],
+  policies_delivery: ['/policies/delivery'],
+  policies_refund: ['/policies/refund'],
+  shop_landing: ['/shop'],
+  bundles_landing: ['/bundles'],
+}
+
+function revalidateSectionPaths(key: SectionKey) {
+  revalidatePath('/')
+  for (const path of PUBLIC_PATHS[key] ?? []) revalidatePath(path)
+}
+
 export async function saveSectionContent(
   sectionKey: string,
   rawJson: string,
@@ -85,7 +99,7 @@ export async function saveSectionContent(
 
   // The homepage is statically cached (revalidate=false). Bust it so the
   // change is visible immediately.
-  revalidatePath('/')
+  revalidateSectionPaths(key)
   revalidatePath(`/admin/content/site/${key}`)
   revalidatePath('/admin/content/site')
 
@@ -123,7 +137,7 @@ export async function resetSectionToDefaults(
     return { ok: false, error: `Reset failed: ${delRes.error.message}` }
   }
 
-  revalidatePath('/')
+  revalidateSectionPaths(key)
   revalidatePath(`/admin/content/site/${key}`)
   revalidatePath('/admin/content/site')
 
