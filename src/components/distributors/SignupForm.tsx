@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
@@ -457,7 +458,10 @@ export function DistributorSignupForm({
             className="mt-1"
           />
           <span>
-            I have read and accept the Loveli Luxury Partner Agreement,
+            I have read and accept the{' '}
+            <Link href="/partners/agreement" target="_blank" className="font-medium text-[hsl(var(--foreground))] underline underline-offset-4">
+              Loveli Luxury Partner Agreement - Draft for Legal Review
+            </Link>{' '}
             including the compensation plan and code of conduct.
           </span>
         </label>
@@ -532,9 +536,6 @@ export function DistributorSignupForm({
         >
           {submitting ? 'Redirecting…' : 'Create my account'}
         </button>
-        <p className="mt-3 text-center text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
-          M-Pesa STK push
-        </p>
       </aside>
     </form>
   )

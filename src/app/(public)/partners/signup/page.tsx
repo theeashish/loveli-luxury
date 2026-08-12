@@ -218,7 +218,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
   const bundles: StarterBundleOption[] = bundleRows.map((b) => ({
     id: b.id,
     slug: b.slug,
-    name: 'Welcome Package',
+    name: 'Starter package',
     description: b.description,
     retailPriceMinor: b.retail_price_minor,
     joiningFeeMinor: joiningFeeByBundle.get(b.id) ?? '0',
