@@ -1,152 +1,161 @@
-/**
- * /story — founder + brand narrative.
- *
- * Editorial layout. Single column on mobile, two-column on desktop
- * (image left, copy right). Conservative draft copy marked as a
- * placeholder ribbon until the owner edits this file and replaces it.
- *
- * Restraint: no testimonials, no logo wall, no busy "as seen in"
- * strip. One quote pull, one closing CTA.
- */
-
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Story: Loveli Luxury',
+  title: 'Our Story | Loveli Luxury Scents',
   description:
-    'Modern African luxury, told in scent. The story behind Loveli Luxury.',
+    'A contemporary African fragrance house shaped by considered rituals, authentic scent, and the art of presence.',
   alternates: { canonical: '/story' },
 }
 
-// Flip to true once the owner has finalised the copy below. While
-// false, a small "[draft]" ribbon shows in the top-right of the
-// founder portrait so customers know the founder content is provisional.
-const COPY_IS_FINAL = false
+const principles = [
+  {
+    index: '01',
+    label: 'Origin',
+    title: 'A house built close to home.',
+    body: 'Loveli Luxury began with a simple belief: fragrance should recognise the life already around us. The warmth after rain, the stillness before an occasion, the familiar turn of a shoulder in a crowded room. Our point of view is contemporary African luxury: expressive, composed, and never borrowed from somebody else’s winter.',
+  },
+  {
+    index: '02',
+    label: 'Standard',
+    title: 'The ritual starts with trust.',
+    body: 'A beautiful bottle means very little if it cannot be trusted. We choose authorised supply channels, handle every order with care, and keep authenticity at the centre of the experience. It is a quiet discipline, but it is the one that lets every other detail matter.',
+  },
+  {
+    index: '03',
+    label: 'Intention',
+    title: 'A scent should stay with you.',
+    body: 'We curate fragrance for the moments that ask for a little more intention: a first introduction, an evening out, a gift chosen slowly, or the ordinary day you decide to make memorable. The collection is designed to be lived with, not simply displayed.',
+  },
+]
 
 export default function StoryPage() {
   return (
-    <article className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-      <header className="mb-16">
-        <p className="text-[10px] uppercase tracking-[0.4em] text-[hsl(var(--primary))]">
-          About Loveli Luxury
-        </p>
-        <h1 className="mt-3 max-w-2xl font-serif text-5xl tracking-tight md:text-6xl">
-          Modern African luxury, told in scent.
-        </h1>
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
-          The home of modern African luxury fragrance culture, built for the
-          customer who notices the smaller things, and remembers them.
-        </p>
-      </header>
+    <article className="overflow-hidden">
+      <section className="relative border-b border-[hsl(var(--border))]/70">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute -left-24 top-20 h-80 w-80 rounded-full bg-[hsl(var(--primary))]/[0.07] blur-3xl" />
+          <div className="absolute right-[-7rem] top-[-8rem] h-[30rem] w-[30rem] rounded-full border border-[hsl(var(--primary))]/15" />
+          <div className="absolute right-[8%] top-[16%] h-24 w-24 rounded-full border border-[hsl(var(--primary))]/20" />
+        </div>
 
-      <div className="grid grid-cols-1 gap-16 md:grid-cols-[20rem_1fr] md:gap-20">
-        <aside className="relative">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-[hsl(var(--primary))]/15 bg-[hsl(var(--muted))]/40">
-            {/* Founder portrait placeholder. There is no real photo file yet
-                — a previous version of this page pointed <Image> at
-                /placeholder-founder.jpg, which doesn't exist in public/ and
-                404s on every request. Rendering a CSS monogram here instead
-                means this page never depends on a missing file. Owner
-                replaces this block with a real <Image> (4:5 ratio
-                recommended) once a portrait exists under public/images/. */}
-            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))]">
-              <span className="font-serif text-6xl font-light tracking-tight text-[hsl(var(--primary))]/40">
-                AI
-              </span>
+        <div className="relative mx-auto grid min-h-[34rem] max-w-7xl items-end gap-12 px-6 py-20 md:grid-cols-[minmax(0,1fr)_22rem] md:py-28 lg:grid-cols-[minmax(0,1fr)_27rem]">
+          <div className="max-w-3xl">
+            <p className="text-eyebrow">The Loveli point of view</p>
+            <h1 className="mt-6 font-serif text-5xl leading-[0.98] tracking-tight text-[hsl(var(--foreground))] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
+              Made for the way a room remembers you.
+            </h1>
+            <p className="mt-8 max-w-2xl text-base leading-8 text-[hsl(var(--muted-foreground))] md:text-lg">
+              Loveli Luxury is a contemporary fragrance house shaped by the
+              cities, rituals, and small gestures that make presence personal.
+              We curate scent with an editorial eye and a deep respect for the
+              person who wears it.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[10px] font-medium uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]">
+              <span>Nairobi, Kenya</span>
+              <span className="h-1 w-1 rounded-full bg-[hsl(var(--primary))]" />
+              <span>Fragrance, considered</span>
             </div>
-            {!COPY_IS_FINAL ? (
-              <span className="absolute right-3 top-3 rounded-sm border border-[hsl(var(--primary))]/40 bg-[hsl(var(--background))]/90 px-2 py-1 text-[9px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
-                Draft: owner review pending
-              </span>
-            ) : null}
           </div>
-          <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
-            Founder
-          </p>
-          <p className="mt-1 text-base text-[hsl(var(--foreground))]">
-            Ashish Iruma Abala
-          </p>
-          <p className="mt-0.5 text-xs text-[hsl(var(--muted-foreground))]">
-            Founder + Curator
-          </p>
-        </aside>
 
-        <div className="space-y-12">
-          <section>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-              Origin
+          <div className="relative mx-auto w-full max-w-sm self-center md:self-end">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-[hsl(var(--primary))]/25 bg-[linear-gradient(145deg,hsl(var(--muted))_0%,hsl(var(--background))_48%,hsl(var(--primary))_180%)] p-5 shadow-[0_24px_60px_-34px_hsl(var(--foreground)/0.45)]">
+              <div className="absolute inset-5 border border-[hsl(var(--primary))]/20" />
+              <div className="absolute inset-x-0 top-[18%] h-px bg-[hsl(var(--primary))]/30" />
+              <div className="absolute inset-x-0 bottom-[18%] h-px bg-[hsl(var(--primary))]/30" />
+              <div className="relative flex h-full flex-col items-center justify-center text-center">
+                <span className="font-serif text-7xl font-light italic tracking-tight text-[hsl(var(--primary))]/75 sm:text-8xl">
+                  L
+                </span>
+                <span className="mt-4 text-[10px] font-medium uppercase tracking-[0.42em] text-[hsl(var(--foreground))]">
+                  Loveli Luxury
+                </span>
+                <span className="mt-2 text-[9px] uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]">
+                  Scent as presence
+                </span>
+              </div>
+            </div>
+            <p className="mt-4 text-right text-[9px] uppercase tracking-[0.26em] text-[hsl(var(--muted-foreground))]">
+              A study in memory
             </p>
-            <h2 className="mt-2 font-serif text-2xl italic md:text-3xl">
-              We started because nobody was telling our story in scent.
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-24">
+          <div className="lg:sticky lg:top-32 lg:self-start">
+            <p className="text-eyebrow">Our story</p>
+            <h2 className="mt-5 max-w-sm font-serif text-4xl leading-tight tracking-tight md:text-5xl">
+              Luxury, in a voice that feels like ours.
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
-              Loveli Luxury was founded out of a simple frustration: the global
-              luxury fragrance houses do not speak to who we are or where we
-              live. They sell ideas of glamour borrowed from someone else's
-              winter. We wanted something that recognised our cities, our
-              ceremonies, our shoulders, our nights. Fragrance built for
-              presence here, in Nairobi, in Mombasa, in Kakamega, not exported
-              and softened along the way.
+            <p className="mt-6 max-w-md text-base leading-8 text-[hsl(var(--muted-foreground))]">
+              We are interested in the details that create a lasting impression:
+              the ceremony of choosing, the confidence of knowing, and the
+              restraint to let a scent speak for itself.
             </p>
-          </section>
+          </div>
 
-          <section>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-              Standards
-            </p>
-            <h2 className="mt-2 font-serif text-2xl italic md:text-3xl">
-              Authenticity comes before everything.
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
-              Counterfeit perfume is a real problem in our region, and any
-              brand pretending otherwise is selling a fantasy. Every bottle on
-              our shelves comes from authorised channels, arrives with house
-              documentation, is stored under controlled conditions, and ships
-              tamper-banded. We over-engineer this part of the operation
-              because the alternative, selling a bottle whose chemistry has
-              been altered or fabricated, destroys the trust this whole
-              category depends on.
-            </p>
-          </section>
+          <div className="divide-y divide-[hsl(var(--border))] border-y border-[hsl(var(--border))]">
+            {principles.map((principle) => (
+              <section key={principle.index} className="grid gap-5 py-10 md:grid-cols-[4.5rem_1fr] md:gap-8 md:py-12">
+                <p className="pt-1 text-[11px] font-medium tracking-[0.2em] text-[hsl(var(--primary))]">
+                  {principle.index}
+                </p>
+                <div>
+                  <p className="text-eyebrow">{principle.label}</p>
+                  <h3 className="mt-3 font-serif text-3xl leading-tight italic tracking-tight md:text-4xl">
+                    {principle.title}
+                  </h3>
+                  <p className="mt-5 max-w-2xl text-base leading-8 text-[hsl(var(--muted-foreground))]">
+                    {principle.body}
+                  </p>
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <section>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
-              Where we're going
-            </p>
-            <h2 className="mt-2 font-serif text-2xl italic md:text-3xl">
-              A fragrance ecosystem, not a perfume shop.
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
-              The catalogue is the first surface. Behind it: a partner program
-              for the people who already live this culture (creators,
-              stylists, regional curators, hosts) and an education layer that
-              treats fragrance with the seriousness it deserves. We're building Loveli Luxury
-              to outlast the trend cycle. Slow growth, real relationships,
-              fragrance that finishes the way it begins.
-            </p>
-          </section>
-
-          <blockquote className="border-l-2 border-[hsl(var(--primary))]/50 pl-6 font-serif text-2xl italic leading-relaxed text-[hsl(var(--foreground))] md:text-3xl">
-            "We are not selling perfume. We are selling presence, and the
-            confidence to leave it behind in a room."
+      <section className="border-y border-[hsl(var(--border))]/70 bg-[hsl(var(--muted))]/45">
+        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:py-20">
+          <blockquote className="max-w-4xl font-serif text-3xl leading-tight italic tracking-tight text-[hsl(var(--foreground))] sm:text-4xl md:text-5xl">
+            “A fragrance does not need to announce itself. It only needs to be
+            remembered.”
           </blockquote>
+          <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+            The Loveli standard
+          </p>
+        </div>
+      </section>
 
-          <div className="flex flex-wrap gap-4 pt-4">
+      <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+        <div className="grid gap-10 border border-[hsl(var(--primary))]/25 bg-[hsl(var(--background))]/70 p-8 shadow-[0_20px_48px_-38px_hsl(var(--foreground)/0.6)] md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-12">
+          <div className="max-w-2xl">
+            <p className="text-eyebrow">Find your signature</p>
+            <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight md:text-5xl">
+              Begin with a scent that feels like you.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-[hsl(var(--muted-foreground))]">
+              Explore the collection at your own pace, or speak with our
+              concierge when you would like a more considered introduction.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3 md:justify-end">
             <Link
               href="/shop"
-              className="rounded-md bg-[hsl(var(--foreground))] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
+              className="rounded-sm bg-[hsl(var(--foreground))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
             >
               Explore the collection
             </Link>
             <Link
-              href="/partners"
-              className="rounded-md border border-[hsl(var(--primary))]/40 px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
+              href="/policies/authenticity"
+              className="rounded-sm border border-[hsl(var(--primary))]/45 px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--primary))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--primary))]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
             >
-              The partner program
+              Our authenticity promise
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </article>
   )
 }
