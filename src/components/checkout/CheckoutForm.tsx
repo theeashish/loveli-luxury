@@ -288,7 +288,7 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
                 <input
                   type="tel"
                   required={usingNew}
-                  pattern="^\+\d{8,15}$"
+                  pattern="^\+254[17]\d{8}$"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   className={inputCls}
@@ -361,13 +361,13 @@ export function CheckoutForm({ defaultPhone, addresses }: Props) {
         <section>
           <h2 className="text-base font-medium">Contact phone</h2>
           <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
-            Used for delivery updates. Override if different from your account.
+            Used for delivery updates. Override if different from your account. Format: +254712345678 (12 digits).
           </p>
           <div className="mt-4 max-w-sm">
             <input
               type="tel"
               required
-              pattern="^\+\d{8,15}$"
+              pattern="^\+254[17]\d{8}$"
               placeholder="+254712345678"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

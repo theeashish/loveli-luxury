@@ -15,7 +15,7 @@ import { revalidatePath } from 'next/cache'
 import { getSession, AuthError } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 
-type ManageableRole = 'admin' | 'superadmin'
+type ManageableRole = 'admin' | 'superadmin' | 'wholesale'
 
 async function requireSuperadmin() {
   const session = await getSession()
@@ -28,8 +28,8 @@ export async function grantRoleAction(
   targetUserId: string,
   role: ManageableRole,
 ): Promise<{ ok: boolean; error?: string }> {
-  if (role !== 'admin' && role !== 'superadmin') {
-    return { ok: false, error: 'Only admin and superadmin are manageable here.' }
+  if (role !== 'admin' && role !== 'superadmin' && role !== 'wholesale') {
+    return { ok: false, error: 'Only admin, superadmin, and wholesale are manageable here.' }
   }
 
   let actor
@@ -66,7 +66,7 @@ export async function grantRoleAction(
   const existingRes = await rolesTable
     .select('id, revoked_at')
     .eq('user_id', targetUserId)
-    .eq('role', role)
+    .eq('role', role as never)
     .maybeSingle()
   const existing = existingRes.data
 
@@ -107,8 +107,8 @@ export async function revokeRoleAction(
   targetUserId: string,
   role: ManageableRole,
 ): Promise<{ ok: boolean; error?: string }> {
-  if (role !== 'admin' && role !== 'superadmin') {
-    return { ok: false, error: 'Only admin and superadmin are manageable here.' }
+  if (role !== 'admin' && role !== 'superadmin' && role !== 'wholesale') {
+    return { ok: false, error: 'Only admin, superadmin, and wholesale are manageable here.' }
   }
 
   let actor
@@ -133,7 +133,7 @@ export async function revokeRoleAction(
     .from('user_roles')
     .update({ revoked_at: new Date().toISOString() })
     .eq('user_id', targetUserId)
-    .eq('role', role)
+    .eq('role', role as never)
     .is('revoked_at', null)
   if (upd.error) return { ok: false, error: upd.error.message }
 

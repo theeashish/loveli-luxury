@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignupForm } from '@/components/auth/SignupForm'
+import { AccountProtectionNotice } from '@/components/auth/AccountProtectionNotice'
 import { safeNext } from '@/lib/auth/safe-next'
 
 export const metadata = { title: 'Create account', robots: { index: false } }
@@ -49,6 +50,7 @@ export default async function SignupPage({
           </p>
           <div className="mt-10">
             <SignupForm next={next} />
+          <AccountProtectionNotice />
           </div>
           <div className="mt-8 space-y-2 text-center text-sm text-[hsl(var(--muted-foreground))]">
             <p>

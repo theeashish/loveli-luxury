@@ -158,7 +158,7 @@ export function StkPushPanel({
           <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
             We sent an M-Pesa prompt to your phone{amountLabel ? ` for ${amountLabel}` : ''}.
             Enter your PIN to complete payment. This page will refresh
-            automatically once we confirm.
+            automatically once we confirm. Keep this page open; M-Pesa may take up to 60 seconds to deliver the prompt during network delays.
           </p>
           <p className="mt-6 font-mono text-xs text-[hsl(var(--muted-foreground))]">
             Order {orderNumber}

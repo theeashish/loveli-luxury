@@ -21,6 +21,7 @@ import {
   type SignupAddress,
 } from '@/components/distributors/SignupForm'
 import { paymentProviderAvailability } from '@/lib/payments/availability'
+import { AccountProtectionNotice } from '@/components/auth/AccountProtectionNotice'
 
 export const metadata = {
   title: 'Join the partner program',
@@ -102,7 +103,7 @@ function BrandHeading({ subtitle }: { subtitle: string }) {
   )
 }
 
-export default async function DistributorSignupPage() {
+export default async function DistributorSignupPage({ searchParams }: { searchParams?: { activation?: string } }) {
   // Middleware guarantees user is signed in and not already a distributor.
   // We still need their id for the DB reads.
   const supabase = createClient()
@@ -244,6 +245,7 @@ export default async function DistributorSignupPage() {
   }
 
   const sponsorCookie = cookies().get('ll_sponsor')?.value ?? ''
+  const activationMode = searchParams?.activation === '1'
 
   const addresses: SignupAddress[] = ((addressesRes.data ?? []) as AddressRow[]).map(
     (a) => ({
@@ -265,6 +267,7 @@ export default async function DistributorSignupPage() {
     <Shell>
       <BrandHeading subtitle="Pick your onboarding kit, complete KYC, pay via M-Pesa. Your partner account activates the moment payment confirms." />
       <div className="mt-10">
+        <AccountProtectionNotice />
         {(() => {
           const availability = paymentProviderAvailability()
           if (!availability.ok) {
@@ -290,6 +293,7 @@ export default async function DistributorSignupPage() {
               addresses={addresses}
               bundles={bundles}
               sponsorCookie={sponsorCookie}
+              activationMode={activationMode}
             />
           )
         })()}

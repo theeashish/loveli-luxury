@@ -97,7 +97,8 @@ const newAddressSchema = z.object({
 const requestSchema = z
   .object({
     starterBundleId: z.number().int().positive(),
-    sponsorCode: sponsorCodeSchema,
+    sponsorCode: sponsorCodeSchema.optional(),
+    activationMode: z.boolean().optional().default(false),
     nationalId: z.string().min(4).max(40),
     dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     payoutMsisdn: phoneSchema,
@@ -173,10 +174,10 @@ export async function POST(req: Request) {
   //    the client to redirect cleanly.
   const existing = await service
     .from('distributors')
-    .select('id')
+    .select('id, sponsor_id, is_active, starter_paid_at')
     .eq('user_id', user.id)
     .maybeSingle()
-  if (existing.data) {
+  if (existing.data && !body.activationMode) {
     return NextResponse.json(
       {
         error: 'You are already a distributor.',
@@ -347,27 +348,30 @@ export async function POST(req: Request) {
   }
 
   // 6. Sponsor — REQUIRED. Resolve and verify active.
-  const sponsorRes = await service
-    .from('distributors')
-    .select('id, user_id, is_active')
-    .eq('sponsor_code', body.sponsorCode)
-    .maybeSingle()
+  const sponsorRes = body.activationMode
+    ? { data: null }
+    : await service
+        .from('distributors')
+        .select('id, user_id, is_active')
+        .eq('sponsor_code', body.sponsorCode ?? '')
+        .maybeSingle()
   const sponsor = sponsorRes.data as
     | { id: number; user_id: string; is_active: boolean }
     | null
-  if (!sponsor || !sponsor.is_active) {
+  if (!body.activationMode && (!sponsor || !sponsor.is_active)) {
     return NextResponse.json(
       { error: 'Sponsor code not recognised or inactive.' },
       { status: 400 },
     )
   }
-  if (sponsor.user_id === user.id) {
+  if (!body.activationMode && sponsor?.user_id === user.id) {
     return NextResponse.json(
       { error: 'You cannot sponsor yourself.' },
       { status: 400 },
     )
   }
 
+  const sponsorId = body.activationMode ? existing.data?.sponsor_id ?? null : sponsor?.id ?? null
   // 7. Starter bundle lookup (server-derived; client just sends id)
   const bundleRes = await service
     .from('bundles')
@@ -466,11 +470,12 @@ export async function POST(req: Request) {
 
   const signupBlob = {
     signup: {
+      activation_mode: body.activationMode ?? false,
       national_id: body.nationalId,
       date_of_birth: body.dateOfBirth,
       payout_msisdn: body.payoutMsisdn,
       starter_bundle_id: bundle.id,
-      sponsor_distributor_id: sponsor.id,
+      sponsor_distributor_id: sponsorId,
       sponsor_code: body.sponsorCode,
       agreed_to_terms_at: new Date().toISOString(),
       joining_fee_minor: String(joiningFeeMinor),
@@ -503,7 +508,7 @@ export async function POST(req: Request) {
       processing_fee_minor: String(processingFeeMinor),
       total_minor: String(totalMinor),
       currency: 'KES',
-      sponsor_distributor_id: sponsor.id,
+      sponsor_distributor_id: sponsorId,
       shipping_address_id: resolvedAddressId,
       payment_provider: 'intasend',
       notes: JSON.stringify(signupBlob),

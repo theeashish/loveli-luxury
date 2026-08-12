@@ -6,6 +6,7 @@ import { publicEnv } from '@/lib/env'
 import type { ImageDto } from '@/lib/catalog/types'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { VariantPicker } from '@/components/catalog/VariantPicker'
+import { getPricingContext } from '@/lib/catalog/pricing-context'
 import { WishlistButton } from '@/components/wishlist/WishlistButton'
 import { RecordRecentView } from '@/components/catalog/RecordRecentView'
 import { RecentlyViewedStrip } from '@/components/catalog/RecentlyViewedStrip'
@@ -69,6 +70,7 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getProductBySlug(params.slug)
   if (!product) notFound()
+  const pricingContext = await getPricingContext()
 
   // Order via WhatsApp: deep link to the concierge with product context.
   const waLink = buildConciergeLink(
@@ -148,7 +150,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             ) : null}
           </div>
 
-          <VariantPicker product={product} />
+          <VariantPicker product={product} pricingTier={pricingContext.tier} />
 
           {waLink ? (
             <a

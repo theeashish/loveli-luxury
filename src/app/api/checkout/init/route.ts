@@ -66,7 +66,7 @@ const STK_REFIRE_THROTTLE_MS = 60 * 1000
 
 const phoneSchema = z
   .string()
-  .regex(/^\+\d{8,15}$/, 'Phone must be E.164 format e.g. +254712345678')
+  .regex(/^\+254[17]\d{8}$/, 'Phone must be a Kenyan number like +254712345678 (12 digits)')
 
 const variantLineSchema = z.object({
   kind: z.literal('variant'),
@@ -168,6 +168,11 @@ export async function POST(req: Request) {
   const { lines, shippingAddressId, newAddress, customerPhone } = parsed.data
 
   const service = createServiceClient()
+  const roleRes = await service.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'distributor').is('revoked_at', null).maybeSingle()
+  const wholesaleRoleRes = await service.from('user_roles').select('role').eq('user_id', user.id).eq('role' as never, 'wholesale' as never).is('revoked_at', null).maybeSingle()
+  const isApprovedWholesaler = Boolean((wholesaleRoleRes.data?.role as string) === 'wholesale')
+  const distributorRes = await service.from('distributors').select('is_active, starter_paid_at').eq('user_id', user.id).maybeSingle()
+  const isActiveDistributor = Boolean(roleRes.data?.role === 'distributor' && distributorRes.data?.is_active && distributorRes.data?.starter_paid_at)
 
   // 3. Profile lookup — hoisted from later so the idempotency reuse
   //    branch can call initiatePayment without re-fetching.
@@ -439,7 +444,7 @@ export async function POST(req: Request) {
           { status: 409 },
         )
       }
-      const expected = BigInt(v.retail_price_minor)
+      const expected = isApprovedWholesaler ? (BigInt(v.retail_price_minor) * 75n) / 100n : isActiveDistributor ? BigInt(v.distributor_price_minor) : BigInt(v.retail_price_minor)
       const claimed = BigInt(line.unitPriceMinor)
       if (expected !== claimed) {
         return NextResponse.json(
@@ -469,7 +474,7 @@ export async function POST(req: Request) {
           { status: 409 },
         )
       }
-      const expected = BigInt(b.retail_price_minor)
+      const expected = isApprovedWholesaler ? (BigInt(b.retail_price_minor) * 75n) / 100n : isActiveDistributor ? BigInt(b.distributor_price_minor) : BigInt(b.retail_price_minor)
       const claimed = BigInt(line.unitPriceMinor)
       if (expected !== claimed) {
         return NextResponse.json(
@@ -503,6 +508,12 @@ export async function POST(req: Request) {
     }
   }
 
+  if (isApprovedWholesaler) {
+    const bottleCount = Array.from(requiredVariantQty.values()).reduce((sum, qty) => sum + qty, 0)
+    if (bottleCount < 12) {
+      return NextResponse.json({ error: 'Wholesale orders require a minimum of 12 bottles.' }, { status: 400 })
+    }
+  }
   // Pre-flight inventory check (final guard is the CHECK constraint inside
   // mark_order_paid; this surfaces a nicer error before a payment is started)
   const allReqIds = Array.from(requiredVariantQty.keys())

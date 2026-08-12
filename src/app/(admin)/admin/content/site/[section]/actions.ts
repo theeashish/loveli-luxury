@@ -13,6 +13,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { authorize, PERMISSIONS, AuthError } from '@/lib/auth'
+import { requireSuperadmin } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 import { SECTIONS, type SectionKey } from '@/lib/content/site'
 
@@ -24,6 +25,7 @@ export async function saveSectionContent(
   sectionKey: string,
   rawJson: string,
 ): Promise<SaveResult> {
+  await requireSuperadmin()
   let session
   try {
     session = await authorize(PERMISSIONS.CONTENT_UPDATE)
@@ -93,6 +95,7 @@ export async function saveSectionContent(
 export async function resetSectionToDefaults(
   sectionKey: string,
 ): Promise<SaveResult> {
+  await requireSuperadmin()
   try {
     await authorize(PERMISSIONS.CONTENT_DELETE)
   } catch (err) {

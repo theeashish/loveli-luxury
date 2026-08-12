@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/roles'
+import { requireAdmin, requireSuperadmin } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const inputSchema = z.object({
@@ -118,5 +118,43 @@ export async function decideMsisdnChange(formData: FormData): Promise<void> {
     })
   }
 
+  revalidatePath('/admin/distributors/verifications')
+}
+
+/** Approve or reject a pending distributor KYC review. Phone verification is required before approval. */
+export async function decideKyc(formData: FormData): Promise<void> {
+  const session = await requireSuperadmin()
+  const distributorId = Number(formData.get('distributorId'))
+  const decision = String(formData.get('decision') ?? '')
+  if (!Number.isInteger(distributorId) || !['approve', 'reject'].includes(decision)) {
+    throw new Error('Invalid KYC decision')
+  }
+  const service = createServiceClient()
+  const row = await service
+    .from('distributors')
+    .select('id, user_id, kyc_status, payout_msisdn_verified_at')
+    .eq('id', distributorId)
+    .maybeSingle()
+  const dist = row.data as { id: number; user_id: string; kyc_status: string | null; payout_msisdn_verified_at: string | null } | null
+  if (!dist) throw new Error('Distributor not found')
+  if (dist.kyc_status !== 'pending') throw new Error('KYC is no longer pending')
+  if (decision === 'approve' && !dist.payout_msisdn_verified_at) {
+    throw new Error('Phone verification is required before KYC approval')
+  }
+  const approved = decision === 'approve'
+  const now = new Date().toISOString()
+  const update = await service
+    .from('distributors')
+    .update({ kyc_status: approved ? 'approved' : 'rejected', kyc_approved_at: approved ? now : null })
+    .eq('id', distributorId)
+    .eq('kyc_status', 'pending')
+  if (update.error) throw new Error(update.error.message)
+  await service.from('audit_log').insert({
+    actor_id: session.userId,
+    action: approved ? 'distributor.kyc_approved' : 'distributor.kyc_rejected',
+    resource_type: 'distributors',
+    resource_id: String(distributorId),
+    after_data: { kyc_status: approved ? 'approved' : 'rejected', phone_verified: Boolean(dist.payout_msisdn_verified_at) },
+  })
   revalidatePath('/admin/distributors/verifications')
 }

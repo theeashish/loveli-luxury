@@ -13,6 +13,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentDistributor } from '@/lib/distributors/current'
+import { AccountProtectionNotice } from '@/components/auth/AccountProtectionNotice'
+import { buildConciergeLink, buildConciergeMessage } from '@/lib/concierge/link'
+import { publicEnv } from '@/lib/env'
 import { partnerTierForRank } from '@/lib/partners/tiers'
 
 export const metadata = {
@@ -49,6 +52,23 @@ export default async function DistributorLayout({
 
   const distributor = await getCurrentDistributor()
   if (!distributor) redirect('/partners/signup')
+  const isAwaitingActivation = !distributor.isActive || !distributor.starterPaidAt
+  const supportUrl = buildConciergeLink(publicEnv.NEXT_PUBLIC_WHATSAPP_CONCIERGE_NUMBER, buildConciergeMessage({ pathname: '/account/partner' }))
+  if (isAwaitingActivation) {
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-12 lg:py-16">
+        <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Partner activation</p>
+        <h1 className="mt-3 font-serif text-4xl italic tracking-tight">Complete your activation</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">Your partner profile is approved but remains inactive until you purchase your stock package. Until then, we keep your portal limited to verification status, stock purchase, and support.</p>
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <Link href="/account/partner" className="rounded-md bg-[hsl(var(--foreground))] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--background))]">Verification status</Link>
+          <Link href="/partners/signup?activation=1" className="rounded-md border border-[hsl(var(--primary))] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--foreground))]">Purchase stock</Link>
+          {supportUrl ? <a href={supportUrl} target="_blank" rel="noreferrer" className="rounded-md border border-[hsl(var(--border))] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(var(--foreground))]">Contact support</a> : null}
+        </div>
+        <div className="mt-10"><AccountProtectionNotice /></div>
+      </div>
+    )
+  }
 
   const tier = partnerTierForRank(distributor.currentRankPosition)
 

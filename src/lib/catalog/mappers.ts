@@ -234,7 +234,7 @@ export function mapBundle(
   return {
     id: bundle.id,
     slug: bundle.slug,
-    name: bundle.name,
+    name: bundle.is_starter_package ? 'Welcome Package' : bundle.name,
     description: bundle.description,
     retailPriceMinor: bundle.retail_price_minor,
     distributorPriceMinor: bundle.distributor_price_minor,

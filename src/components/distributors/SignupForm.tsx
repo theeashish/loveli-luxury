@@ -40,6 +40,7 @@ type Props = {
   addresses: SignupAddress[]
   bundles: StarterBundleOption[]
   sponsorCookie: string
+  activationMode?: boolean
 }
 
 const NEW_ADDRESS_KEY = '__new__'
@@ -52,6 +53,7 @@ export function DistributorSignupForm({
   addresses,
   bundles,
   sponsorCookie,
+  activationMode = false,
 }: Props) {
   const initialAddressKey = useMemo(() => {
     if (addresses.length === 0) return NEW_ADDRESS_KEY
@@ -104,7 +106,7 @@ export function DistributorSignupForm({
     e.preventDefault()
     setError(null)
 
-    if (!SPONSOR_RE.test(sponsorCode)) {
+    if (!activationMode && !SPONSOR_RE.test(sponsorCode)) {
       setError('Sponsor code must look like LL-XX-XXXX.')
       return
     }
@@ -120,6 +122,7 @@ export function DistributorSignupForm({
     setSubmitting(true)
     const body = {
       starterBundleId: bundleId,
+      activationMode,
       sponsorCode,
       nationalId,
       dateOfBirth: dob,
@@ -285,22 +288,22 @@ export function DistributorSignupForm({
                 className={inputCls}
               />
             </Field>
-            <Field label="M-Pesa payout number (E.164)" required>
+            <Field label="M-Pesa payout number (+254712345678)" required>
               <input
                 type="tel"
                 required
-                pattern="^\+\d{8,15}$"
+                pattern="^\+254[17]\d{8}$"
                 placeholder="+254712345678"
                 value={payoutMsisdn}
                 onChange={(e) => setPayoutMsisdn(e.target.value)}
                 className={inputCls}
               />
             </Field>
-            <Field label="Contact phone (E.164)" required>
+            <Field label="Contact phone (+254712345678)" required>
               <input
                 type="tel"
                 required
-                pattern="^\+\d{8,15}$"
+                pattern="^\+254[17]\d{8}$"
                 placeholder="+254712345678"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -376,7 +379,7 @@ export function DistributorSignupForm({
                 <input
                   type="tel"
                   required={usingNew}
-                  pattern="^\+\d{8,15}$"
+                  pattern="^\+254[17]\d{8}$"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   className={inputCls}

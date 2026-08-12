@@ -7,7 +7,9 @@ import { imageUrl } from '@/lib/catalog/storage'
 import type { ProductDto, VariantDto } from '@/lib/catalog/types'
 import type { CartLineInput } from '@/lib/cart/types'
 
-export function VariantPicker({ product }: { product: ProductDto }) {
+export function VariantPicker({ product, pricingTier = 'retail' }: { product: ProductDto; pricingTier?: 'retail' | 'distributor' | 'wholesale' }) {
+  const isMemberActive = pricingTier === 'distributor'
+  const isWholesale = pricingTier === 'wholesale'
   const activeVariants = product.variants.filter((v) => v.isActive)
 
   const [selectedId, setSelectedId] = useState<number | null>(() => {
@@ -24,6 +26,7 @@ export function VariantPicker({ product }: { product: ProductDto }) {
   }
 
   const selected: VariantDto = activeVariants.find((v) => v.id === selectedId) ?? activeVariants[0]!
+  const displayPriceMinor = isWholesale ? ((BigInt(selected.retailPriceMinor) * 75n) / 100n).toString() : isMemberActive ? selected.distributorPriceMinor : selected.retailPriceMinor
   const productImage = product.images.find((i) => i.isPrimary) ?? product.images[0] ?? null
 
   const line: CartLineInput = {
@@ -32,7 +35,7 @@ export function VariantPicker({ product }: { product: ProductDto }) {
     productSlug: product.slug,
     name: `${product.name} — ${selected.sizeMl}ml`,
     sizeMl: selected.sizeMl,
-    unitPriceMinor: String(selected.retailPriceMinor),
+    unitPriceMinor: String(displayPriceMinor),
     image: productImage ? imageUrl(productImage.storagePrefix, 'thumb') : null,
     inventoryAtAdd: selected.inventoryQty,
   }
@@ -73,7 +76,11 @@ export function VariantPicker({ product }: { product: ProductDto }) {
 
       <div className="flex items-baseline gap-3">
         <p className="text-3xl font-light tabular-nums text-[hsl(var(--foreground))]">
-          {formatKes(BigInt(selected.retailPriceMinor))}
+          {(isMemberActive || isWholesale) ? (
+            <span className="mr-2 text-xs uppercase tracking-[0.2em] text-[hsl(var(--primary))]">{isWholesale ? 'Approved wholesale price' : 'Approved partner price'}</span>
+          ) : null}
+
+          {formatKes(BigInt(displayPriceMinor))}
         </p>
         {selected.inventoryQty > 0 && selected.inventoryQty <= 5 ? (
           <p className="text-xs uppercase tracking-[0.15em] text-[hsl(var(--accent))]">
@@ -95,7 +102,7 @@ export function VariantPicker({ product }: { product: ProductDto }) {
           {product.name} · {selected.sizeMl}ml
         </p>
         <p className="text-lg font-light tabular-nums text-[hsl(var(--foreground))]">
-          {formatKes(BigInt(selected.retailPriceMinor))}
+          {formatKes(BigInt(displayPriceMinor))}
         </p>
       </div>
       <AddToCartButton

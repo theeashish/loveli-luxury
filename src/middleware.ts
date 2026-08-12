@@ -150,7 +150,7 @@ export async function middleware(request: NextRequest) {
       .select('id')
       .eq('user_id', user.id)
       .maybeSingle()
-    if (dist.data) return redirectTo(request, '/account/partner')
+    if (dist.data && request.nextUrl.searchParams.get('activation') !== '1') return redirectTo(request, '/account/partner')
   }
 
   // Gate /admin/* — only admin and superadmin may enter.

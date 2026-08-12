@@ -165,11 +165,30 @@ export async function applyPaymentSuccess(
 
   // 4. provision_distributor (signup orders only).
   if (input.orderKind === 'distributor_signup') {
-    const provRes = (await service.rpc('provision_distributor', {
-      p_order_id: input.orderId,
-    })) as { error: { message: string } | null }
-    if (provRes.error) {
-      warnings.push(`provision_distributor: ${provRes.error.message}`)
+    const orderRes = await service.from('orders').select('user_id, notes').eq('id', input.orderId).maybeSingle()
+    const notes = orderRes.data?.notes
+    let activationMode = false
+    let starterBundleId: number | null = null
+    if (typeof notes === 'string') {
+      try {
+        const parsed = JSON.parse(notes) as { signup?: { activation_mode?: boolean; starter_bundle_id?: number } }
+        activationMode = parsed.signup?.activation_mode === true
+        starterBundleId = parsed.signup?.starter_bundle_id ?? null
+      } catch {
+        warnings.push('activation metadata could not be parsed')
+      }
+    }
+    if (activationMode && orderRes.data?.user_id) {
+      const distRes = await service.from('distributors').update({ is_active: true, starter_paid_at: paidAt, starter_package_id: starterBundleId }).eq('user_id', orderRes.data.user_id)
+      if (distRes.error) {
+        warnings.push(`activation update: ${distRes.error.message}`)
+      } else {
+        const roleRes = await service.from('user_roles').upsert({ user_id: orderRes.data.user_id, role: 'distributor', granted_at: paidAt }, { onConflict: 'user_id,role' })
+        if (roleRes.error) warnings.push(`activation role: ${roleRes.error.message}`)
+      }
+    } else if (!activationMode) {
+      const provRes = (await service.rpc('provision_distributor', { p_order_id: input.orderId })) as { error: { message: string } | null }
+      if (provRes.error) warnings.push(`provision_distributor: ${provRes.error.message}`)
     }
   }
 

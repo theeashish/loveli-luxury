@@ -14,12 +14,13 @@ export type UserRow = {
   roles: string[] // current non-revoked roles
 }
 
-const MANAGEABLE_ROLES = ['admin', 'superadmin'] as const
+const MANAGEABLE_ROLES = ['admin', 'superadmin', 'wholesale'] as const
 type ManageableRole = (typeof MANAGEABLE_ROLES)[number]
 
 function roleBadgeCls(role: string): string {
   if (role === 'superadmin')
     return 'border-violet-400 bg-violet-50 text-violet-700'
+  if (role === 'wholesale') return 'border-amber-400 bg-amber-50 text-amber-700'
   if (role === 'admin')
     return 'border-emerald-400 bg-emerald-50 text-emerald-700'
   if (role === 'distributor')

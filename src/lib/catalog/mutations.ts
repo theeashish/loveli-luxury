@@ -13,7 +13,7 @@
 
 import { revalidatePath } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { adminClient } from '../auth/roles'
+import { adminClient, requireSuperadmin } from '../auth/roles'
 import { authorize, PERMISSIONS } from '../auth'
 import {
   buildStoragePrefix,
@@ -179,6 +179,7 @@ export async function createVariant(input: CreateVariantInput) {
 }
 
 export async function updateVariant(input: UpdateVariantInput) {
+  await requireSuperadmin()
   const data = updateVariantSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
   const supabase = adminClient()
