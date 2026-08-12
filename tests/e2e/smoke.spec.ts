@@ -109,7 +109,17 @@ test.describe('public surfaces render', () => {
       '/policies/refund': '/policies/refund',
       '/ids': '/ids',
     }
-    for (const [route, expectedPath] of Object.entries(expected)) {
+    // GitHub Actions deliberately uses a non-routable Supabase hostname so CI
+    // never reaches a real database. These routes load catalog or CMS content
+    // at request time, so their HTTP canonical rendering belongs to the staging
+    // test; keep this CI check focused on routes that render without Supabase.
+    const usesPlaceholderSupabase =
+      process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
+    const routes = Object.entries(expected).filter(
+      ([route]) => !usesPlaceholderSupabase || !['/shop', '/bundles', '/partners', '/policies/authenticity', '/policies/delivery', '/policies/refund', '/ids'].includes(route),
+    )
+
+    for (const [route, expectedPath] of routes) {
       // A canonical tag is server-rendered metadata. Assert it from the raw
       // HTML response instead of driving Chromium through every page's client
       // resource lifecycle. This removes the intermittent frame-detach failure
