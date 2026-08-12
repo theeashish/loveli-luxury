@@ -23,6 +23,9 @@ export type SaveResult =
 
 const PUBLIC_PATHS: Partial<Record<SectionKey, readonly string[]>> = {
   policies_shell: ['/policies/authenticity', '/policies/delivery', '/policies/refund'],
+  partner_landing: ['/partners'],
+  partner_program: ['/partners'],
+  partner_ids: ['/ids'],
   policies_authenticity: ['/policies/authenticity'],
   policies_delivery: ['/policies/delivery'],
   policies_refund: ['/policies/refund'],

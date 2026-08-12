@@ -422,6 +422,13 @@ export const partnerIdsSchema = z.object({
     .max(6),
   /** The non-negotiable program rules — render as a fixed bullet list. */
   rules: z.array(z.string()).min(3),
+  photo: z
+    .object({
+      url: z.string().url().optional(),
+      alt: z.string(),
+      caption: z.string(),
+    })
+    .optional(),
   footnote: z.string(),
 })
 export type PartnerIdsContent = z.infer<typeof partnerIdsSchema>
@@ -461,6 +468,10 @@ export const PARTNER_IDS_DEFAULTS: PartnerIdsContent = {
     'Maintenance: a partner must place verified retail sales each month to remain active.',
     'No income is guaranteed. Earnings depend entirely on retail performance.',
   ],
+  photo: {
+    alt: 'Loveli Luxury partner program editorial photograph',
+    caption: 'Income disclosure photography space',
+  },
   footnote:
     'Loveli Luxury Scents is committed to transparent compensation. If you ever see a recruitment-only pitch in our name, that pitch is not from us. Report it: concierge@loveliluxuryscents.com.',
 }
@@ -551,6 +562,61 @@ export const BUNDLES_LANDING_DEFAULTS: BundlesLandingContent = {
   countSingular: 'set, composed with intention.',
   countPlural: 'sets, composed with intention.',
   emptyMessage: 'A new set is being composed. Please return shortly.',
+}
+
+
+/** partner_program — editorial sections and optional photography on /partners.
+ * Rate, pricing, commission, KYC, and rank-enforcement rules deliberately
+ * remain in code so content changes cannot weaken program safeguards. */
+export const partnerProgramSchema = z.object({
+  philosophyEyebrow: z.string(),
+  philosophyHeadline: z.string(),
+  philosophyBody: z.string(),
+  philosophyNote: z.string(),
+  tiersEyebrow: z.string(),
+  tiersHeadline: z.string(),
+  tiersLead: z.string(),
+  tiersFootnote: z.string(),
+  storiesEyebrow: z.string(),
+  storiesHeadline: z.string(),
+  storiesBody: z.string(),
+  startEyebrow: z.string(),
+  startHeadline: z.string(),
+  photo: z.object({
+    heroUrl: z.string().url().optional(),
+    heroAlt: z.string(),
+    heroCaption: z.string(),
+    storiesUrl: z.string().url().optional(),
+    storiesAlt: z.string(),
+    storiesCaption: z.string(),
+  }),
+})
+export type PartnerProgramContent = z.infer<typeof partnerProgramSchema>
+export const PARTNER_PROGRAM_DEFAULTS: PartnerProgramContent = {
+  philosophyEyebrow: 'A considered path',
+  philosophyHeadline: 'A partner program built around real retail.',
+  philosophyBody:
+    'Loveli Luxury recognises the work of people who place fragrance with care. The programme is designed for creators, resellers, and regional curators who value a real product, a considered customer relationship, and a brand that treats trust as part of the work.',
+  philosophyNote:
+    'Every commission is tied to a verified retail order. Recruitment alone is never rewarded.',
+  tiersEyebrow: 'The progression',
+  tiersHeadline: 'Five ranks. One considered standard.',
+  tiersLead:
+    'Progress is earned through verified retail performance over time. Each rank marks a deeper relationship with the house, not a promise of income.',
+  tiersFootnote:
+    'Pricing, retail margins, and complete earning information are shared with approved partners inside the portal.',
+  storiesEyebrow: 'The people behind the work',
+  storiesHeadline: 'A programme with room for real stories.',
+  storiesBody:
+    'Partner stories will be published only when they are verified, contextual, and representative. Until then, the focus stays on the programme, the product, and the work required to build with care.',
+  startEyebrow: 'Begin with clarity',
+  startHeadline: 'A first step should feel informed.',
+  photo: {
+    heroAlt: 'Loveli Luxury partner program editorial photograph',
+    heroCaption: 'Partner program photography space',
+    storiesAlt: 'Loveli Luxury partner community editorial photograph',
+    storiesCaption: 'Partner stories photography space',
+  },
 }
 
 // ---------------------------------------------------------------------
@@ -657,6 +723,12 @@ export const SECTIONS = {
     defaults: MARQUEE_DEFAULTS,
     label: 'Homepage marquee',
     description: 'The brand marquee strip on the homepage. List items scroll across the band with the separator between them.',
+  },
+  partner_program: {
+    schema: partnerProgramSchema,
+    defaults: PARTNER_PROGRAM_DEFAULTS,
+    label: 'Partner Program — editorial sections',
+    description: 'The public /partners editorial copy and its two optional photography spaces. Rates, pricing, commission logic, KYC rules, and rank enforcement stay locked in code.',
   },
   partner_ids: {
     schema: partnerIdsSchema,

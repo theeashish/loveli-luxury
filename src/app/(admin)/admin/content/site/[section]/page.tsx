@@ -174,6 +174,31 @@ const SCHEMA_HELP: Record<SectionKey, string> = {
   items           — array of strings that scroll across the band.
                     Order in the array is order on screen.`,
 
+  partner_program: `Fields (public Partner Program at /partners):
+  philosophyEyebrow  — small label above the programme philosophy
+  philosophyHeadline — display heading for the philosophy section
+  philosophyBody     — main editorial paragraph
+  philosophyNote     — short emphasis line below the main paragraph
+  tiersEyebrow       — label above the rank ladder
+  tiersHeadline      — rank ladder display heading
+  tiersLead          — short introduction to the rank ladder
+  tiersFootnote      — qualifying note below the rank ladder
+  storiesEyebrow     — label above the stories section
+  storiesHeadline    — display heading for partner stories
+  storiesBody        — contextual paragraph; keep claims factual and verified
+  startEyebrow       — label above the final call to action
+  startHeadline      — final call-to-action display heading
+  photo.heroUrl      — optional HTTPS URL for the hero photo; remove the field
+                       to show the designed photography placeholder
+  photo.heroAlt      — concise description for the hero image
+  photo.heroCaption  — small caption below the hero image
+  photo.storiesUrl   — optional HTTPS URL for the partner-stories photo
+  photo.storiesAlt   — concise description for the stories image
+  photo.storiesCaption — small caption below the stories image
+
+  LOCKED IN CODE — rates, prices, commissions, KYC gates, verified-sales
+  requirements, and rank enforcement. Do not make income promises.`,
+
   partner_ids: `Fields (Income Disclosure Statement at /ids):
   eyebrow         — small uppercase line above the headline
   headline        — display heading; *asterisks* for italic + gold
@@ -188,6 +213,10 @@ const SCHEMA_HELP: Record<SectionKey, string> = {
     sub             — caption under the value; include unit/caveat
   rules           — bullet list of the non-negotiable program rules.
                     Keep these factual and conservative.
+  photo.url       — optional HTTPS URL for an editorial photograph.
+                    Remove this field to show the designed photography placeholder.
+  photo.alt       — concise description for the image
+  photo.caption   — small caption below the image
   footnote        — closing paragraph; include the report-fraud email.
 
   LOCKED PRINCIPLE — this page is the OPPOSITE of an income claim. Stats
