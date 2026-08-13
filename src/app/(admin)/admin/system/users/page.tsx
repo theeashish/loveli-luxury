@@ -89,10 +89,10 @@ export default async function UsersAdminPage() {
           Two actions. <strong>Deactivate</strong> revokes all roles, bans the
           account, anonymises the email, and inactivates any distributor row —
           reversible, preserves the financial audit trail. <strong>Delete
-          permanently</strong> removes the auth user, profile, addresses, and
-          distributor row entirely; it refuses when the user has audit-required
-          financial history (earned commissions, payouts, or paid orders) and
-          tells you exactly what's blocking. Protected accounts (
+          permanently</strong> removes the auth identity and profile, redacts
+          direct identity fields from linked orders, and retains their monetary
+          rows for accounting. It remains blocked when commission or payout
+          history requires the distributor identity to remain. Protected accounts (
           <code className="rounded bg-neutral-100 px-1 text-xs">capernstone</code>,
           <code className="ml-1 rounded bg-neutral-100 px-1 text-xs">ashishke79</code>,
           <code className="ml-1 rounded bg-neutral-100 px-1 text-xs">ashirumaabala1</code>,

@@ -22,6 +22,7 @@ type Preview = {
   addresses_count: number
   distributors_count: number
   orphan_orders_count: number
+  financial_orders_count: number
 }
 
 export function UserRow({
@@ -234,11 +235,11 @@ export function UserRow({
           ) : safety.safe ? (
             <>
               <p className="text-xs text-rose-900">
-                <strong>Delete permanently (NOT reversible)</strong> — removes the
-                auth user, profile, addresses, distributor row, and closure-tree
-                links. {safety.preview.orphan_orders_count} non-financial order(s)
-                will be orphaned (kept for audit, but no longer linked to a person).
-                Type <strong className="font-mono">{email}</strong> below to confirm.
+                <strong>Delete account permanently (NOT reversible)</strong> — removes
+                the auth user, profile, addresses, and eligible distributor identity.
+                {safety.preview.financial_orders_count} financial order(s) remain for
+                accounting, but their email, phone, account link, and shipping link are
+                redacted. Type <strong className="font-mono">{email}</strong> below to confirm.
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-rose-800 sm:grid-cols-4">
                 <span>profile: {safety.preview.profile_exists ? '1' : '0'}</span>
@@ -266,9 +267,10 @@ export function UserRow({
           ) : (
             <>
               <p className="text-xs text-rose-900">
-                <strong>Hard delete REFUSED.</strong> This account has audit-required
-                financial history. Use <em>Deactivate</em> instead, or purge each
-                blocking item via its own admin page first.
+                <strong>Permanent deletion blocked.</strong> This account has distributor
+                commission or payout history that must retain its financial identity.
+                Use <em>Deactivate</em> instead, or review the listed accounting records
+                with your accountant before changing the retention policy.
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-[11px] text-rose-900">
                 {safety.blocks.map((b) => (
