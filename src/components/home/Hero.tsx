@@ -1,19 +1,6 @@
 /**
- * Hero — the headline section above the fold.
- *
- * Server Component. Copy comes from `getSection('home_hero')` in
- * `src/app/(public)/page.tsx`, which falls back to in-code defaults if the
- * DB row is missing or malformed. Admin-editable via
- * `/admin/content/site/home_hero`.
- *
- * Design (2026-06-03): single bottle showcase, no rotation. The earlier
- * 5-image client crossfade shipped Hero as `'use client'` plus an
- * interval-driven `useState`, and eagerly mounted all five fragrance
- * images after hydration (~330 KiB of image weight on the LCP route).
- * The owner authorised the perf trade-off on 2026-06-03; the brand brief
- * principle "UI restraint" favours one well-photographed signature anyway.
- * If the owner ever wants a hero rotation back, push it down into a
- * deferred client island so the LCP path stays static.
+ * Editorial hero — a warm, image-led campaign entrance for Loveli Luxury.
+ * Copy remains sourced from the editable home_hero content section.
  */
 
 import Link from 'next/link'
@@ -29,66 +16,59 @@ export function Hero({ copy }: { copy: HeroContent }) {
   if (!bottle) return null
 
   return (
-    <section className="relative isolate overflow-hidden">
+    <section className="relative isolate overflow-hidden bg-[hsl(37_42%_90%)] text-[hsl(22_18%_12%)]">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-70"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(60% 50% at 78% 50%, hsl(38 40% 60% / 0.18) 0%, transparent 60%), radial-gradient(40% 40% at 12% 88%, hsl(19 35% 45% / 0.15) 0%, transparent 60%)',
+            'radial-gradient(60% 72% at 80% 34%, hsl(39 65% 96% / 0.95) 0%, transparent 64%), radial-gradient(48% 60% at 8% 92%, hsl(26 38% 78% / 0.45) 0%, transparent 70%)',
         }}
       />
-      <div className="mx-auto grid min-h-[90vh] max-w-7xl grid-cols-1 items-center gap-8 px-6 py-24 lg:grid-cols-12 lg:gap-16 lg:py-40">
-        {/* Copy */}
-        <div className="lg:col-span-6">
-          <p className="text-eyebrow">{copy.eyebrow}</p>
-          <h1 className="mt-5 whitespace-pre-line font-serif text-[clamp(2.75rem,7vw,5.5rem)] leading-[1.02] tracking-tight">
+      <div aria-hidden className="pointer-events-none absolute right-[9%] top-[8%] h-64 w-64 rounded-full border border-[hsl(35_45%_48%/0.18)] sm:h-96 sm:w-96" />
+      <div className="relative mx-auto grid min-h-[34rem] max-w-7xl grid-cols-1 lg:min-h-[42rem] lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="relative z-10 flex flex-col justify-center px-6 py-16 sm:py-20 lg:px-10 lg:py-24">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[hsl(35_45%_42%)]">
+            {copy.eyebrow}
+          </p>
+          <h1 className="mt-6 max-w-2xl font-serif text-[clamp(3.35rem,8vw,7.4rem)] leading-[0.88] tracking-[-0.055em]">
             <HighlightText text={copy.headline} />
           </h1>
-          <p className="mt-7 max-w-md text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
+          <p className="mt-7 max-w-md text-base leading-8 text-[hsl(22_12%_28%)] sm:text-lg">
             {copy.subhead}
           </p>
-
-          <div className="mt-10 flex items-center gap-5">
-            <div className="h-px flex-1 bg-gradient-to-r from-[hsl(var(--primary))]/60 to-transparent" />
-            <div className="text-right">
-              <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
-                {copy.rotatingLabel}
-              </p>
-              <p className="mt-1 font-serif text-xl text-[hsl(var(--foreground))]">
-                {bottle.name}
-              </p>
-              <p className="mt-1 text-xs italic text-[hsl(var(--primary))]">{bottle.tagline}</p>
-            </div>
-          </div>
-
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-9 flex flex-wrap items-center gap-5">
             <Link
               href={copy.ctaHref}
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--foreground))] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:scale-[1.02]"
+              className="inline-flex items-center justify-center bg-[hsl(22_18%_10%)] px-8 py-4 text-[10px] font-semibold uppercase tracking-[0.28em] text-[hsl(38_52%_87%)] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(35_45%_42%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(35_45%_42%)] focus-visible:ring-offset-2"
             >
-              <span className="relative z-10">{copy.ctaLabel}</span>
-              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+              {copy.ctaLabel}
             </Link>
+            <div className="min-w-[10rem] border-l border-[hsl(35_45%_42%/0.35)] pl-5">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[hsl(35_45%_42%)]">
+                {copy.rotatingLabel}
+              </p>
+              <p className="mt-1 font-serif text-2xl tracking-tight">{bottle.name}</p>
+              <p className="mt-1 text-xs italic text-[hsl(35_45%_42%)]">{bottle.tagline}</p>
+            </div>
           </div>
         </div>
 
-        {/* Bottle — single signature, server-rendered */}
-        <div className="relative lg:col-span-6">
-          <div className="relative mx-auto aspect-[3/4] w-full max-w-[580px]">
-            <Image
-              src={bottle.image}
-              alt={bottle.name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 90vw, 520px"
-              className="absolute inset-0 object-contain drop-shadow-[0_24px_50px_rgba(60,42,28,0.22)]"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-x-10 -bottom-2 h-10 rounded-[50%] bg-[hsl(22_14%_13%/0.15)] blur-2xl"
-            />
-          </div>
+        <div className="relative min-h-[24rem] overflow-hidden sm:min-h-[31rem] lg:min-h-[42rem]">
+          <div aria-hidden className="absolute inset-x-[12%] bottom-[9%] h-16 rounded-[50%] bg-[hsl(22_18%_12%/0.18)] blur-2xl" />
+          <div aria-hidden className="absolute bottom-[10%] left-[25%] right-[15%] h-4 rounded-full bg-[hsl(35_45%_42%/0.28)] blur-md" />
+          <Image
+            src={bottle.image}
+            alt={bottle.name}
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 55vw"
+            className="object-contain p-10 mix-blend-multiply sm:p-14 lg:p-16"
+          />
+          <div aria-hidden className="absolute bottom-[8%] left-[19%] right-[10%] h-px bg-[hsl(35_45%_42%/0.35)]" />
+          <p className="absolute bottom-[5%] right-[10%] text-[9px] font-semibold uppercase tracking-[0.32em] text-[hsl(35_45%_42%)]">
+            Loveli Luxury Scents
+          </p>
         </div>
       </div>
     </section>

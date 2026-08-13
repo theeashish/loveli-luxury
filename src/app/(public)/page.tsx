@@ -77,8 +77,8 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero copy={heroCopy} />
-      <TrustStrip />
       <FeaturedGrid />
+      <TrustStrip />
       <FindYourScent copy={findYourScentCopy} />
       <Story />
       <Marquee />
