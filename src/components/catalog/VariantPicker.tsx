@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { AddToCartButton } from './AddToCartButton'
 import { imageUrl } from '@/lib/catalog/storage'
+import { getFragrance } from '@/lib/catalog/fragrance-meta'
 import type { ProductDto, VariantDto } from '@/lib/catalog/types'
 import type { CartLineInput } from '@/lib/cart/types'
 
@@ -28,6 +29,7 @@ export function VariantPicker({ product, pricingTier = 'retail' }: { product: Pr
   const selected: VariantDto = activeVariants.find((v) => v.id === selectedId) ?? activeVariants[0]!
   const displayPriceMinor = isWholesale ? ((BigInt(selected.retailPriceMinor) * 75n) / 100n).toString() : isMemberActive ? selected.distributorPriceMinor : selected.retailPriceMinor
   const productImage = product.images.find((i) => i.isPrimary) ?? product.images[0] ?? null
+  const marketingImage = getFragrance(product.slug)?.image
 
   const line: CartLineInput = {
     kind: 'variant',
@@ -36,7 +38,7 @@ export function VariantPicker({ product, pricingTier = 'retail' }: { product: Pr
     name: `${product.name} — ${selected.sizeMl}ml`,
     sizeMl: selected.sizeMl,
     unitPriceMinor: String(displayPriceMinor),
-    image: productImage ? imageUrl(productImage.storagePrefix, 'thumb') : null,
+    image: marketingImage ?? (productImage ? imageUrl(productImage.storagePrefix, 'thumb') : null),
     inventoryAtAdd: selected.inventoryQty,
   }
   const soldOut = selected.inventoryQty <= 0
