@@ -46,7 +46,7 @@ export async function setSponsorAction(
     return { ok: false, error: 'That sponsor is inactive.' }
   }
 
-  cookies().set(SPONSOR_COOKIE, code, {
+  (await cookies()).set(SPONSOR_COOKIE, code, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

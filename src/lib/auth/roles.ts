@@ -30,7 +30,7 @@ export class AuthError extends Error {
 }
 
 export async function getSession(): Promise<Session | null> {
-  const supabase = createClient() as unknown as Client
+  const supabase = (await createClient()) as unknown as Client
   // Use getSession() (local cookie read) rather than getUser() (network
   // call). On Vercel Edge, getUser() can intermittently return null even
   // when the session cookies are present and valid, which bounces

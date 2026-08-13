@@ -29,7 +29,7 @@ type Status =
     }
 
 async function loadStatus(): Promise<Status> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -62,7 +62,7 @@ async function loadStatus(): Promise<Status> {
   )
   if (roles.has('admin') || roles.has('superadmin')) return { kind: 'admin' }
 
-  const sponsor = cookies().get('ll_sponsor')?.value ?? null
+  const sponsor = (await cookies()).get('ll_sponsor')?.value ?? null
 
   return {
     kind: 'customer',

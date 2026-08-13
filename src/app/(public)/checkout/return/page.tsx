@@ -50,7 +50,7 @@ export default async function CheckoutReturnPage({
 }: {
   searchParams: SearchParams
 }) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

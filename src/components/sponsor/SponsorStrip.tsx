@@ -13,8 +13,8 @@
 import { cookies } from 'next/headers'
 import { SponsorStripClient } from './SponsorStripClient'
 
-export function SponsorStrip() {
-  const sponsor = cookies().get('ll_sponsor')?.value
+export async function SponsorStrip() {
+  const sponsor = (await cookies()).get('ll_sponsor')?.value
   if (!sponsor) return null
   return <SponsorStripClient currentCode={sponsor} />
 }

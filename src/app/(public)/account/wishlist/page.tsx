@@ -48,7 +48,7 @@ type BundleCard = {
 type Card = ProductCard | BundleCard
 
 export default async function WishlistPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

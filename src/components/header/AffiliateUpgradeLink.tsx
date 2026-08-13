@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export async function AffiliateUpgradeLink() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

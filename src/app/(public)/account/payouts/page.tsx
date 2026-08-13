@@ -29,7 +29,7 @@ type PayoutRow = {
 }
 
 export default async function MyPayoutsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

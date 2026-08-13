@@ -35,10 +35,10 @@ type ReadOpts = { includeInactive?: boolean }
 
 type Client = SupabaseClient<Database>
 
-function readClient(opts: ReadOpts): Client {
+async function readClient(opts: ReadOpts): Promise<Client> {
   return opts.includeInactive
     ? (createServiceClient() as Client)
-    : (createClient() as unknown as Client)
+    : ((await createClient()) as unknown as Client)
 }
 
 // -----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ function readClient(opts: ReadOpts): Client {
 // -----------------------------------------------------------------------------
 
 export async function listCategories(opts: ReadOpts = {}): Promise<CategoryDto[]> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let query = supabase
     .from('categories')
     .select()
@@ -63,7 +63,7 @@ export async function listCategories(opts: ReadOpts = {}): Promise<CategoryDto[]
 // -----------------------------------------------------------------------------
 
 export async function listProductSummaries(opts: ReadOpts = {}): Promise<ProductSummaryDto[]> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('products').select().order('id', { ascending: false })
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data: products, error } = await q
@@ -95,7 +95,7 @@ export async function getProductBySlug(
   slug: string,
   opts: ReadOpts = {},
 ): Promise<ProductDto | null> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('products').select().eq('slug', slug).limit(1)
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data, error } = await q.maybeSingle()
@@ -133,7 +133,7 @@ export async function getProductById(
   id: number,
   opts: ReadOpts = {},
 ): Promise<ProductDto | null> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('products').select().eq('id', id).limit(1)
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data, error } = await q.maybeSingle()
@@ -182,7 +182,7 @@ export async function listActiveProductSlugs(): Promise<string[]> {
 // -----------------------------------------------------------------------------
 
 export async function listBundles(opts: ReadOpts = {}): Promise<BundleDto[]> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('bundles').select().order('id', { ascending: false })
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data: bundles, error } = await q
@@ -196,7 +196,7 @@ export async function getBundleBySlug(
   slug: string,
   opts: ReadOpts = {},
 ): Promise<BundleDto | null> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('bundles').select().eq('slug', slug).limit(1)
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data, error } = await q.maybeSingle()
@@ -209,7 +209,7 @@ export async function getBundleById(
   id: number,
   opts: ReadOpts = {},
 ): Promise<BundleDto | null> {
-  const supabase = readClient(opts)
+  const supabase = await readClient(opts)
   let q = supabase.from('bundles').select().eq('id', id).limit(1)
   if (!opts.includeInactive) q = q.eq('is_active', true)
   const { data, error } = await q.maybeSingle()

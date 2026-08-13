@@ -42,7 +42,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'rate limited' }, { status: 429 })
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

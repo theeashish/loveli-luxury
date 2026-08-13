@@ -34,7 +34,7 @@ const inputSchema = z.object({
 })
 
 export async function updateProfile(formData: FormData): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -130,7 +130,7 @@ const emailSchema = z.object({
 })
 
 export async function requestEmailChange(formData: FormData): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

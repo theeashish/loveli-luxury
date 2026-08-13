@@ -143,7 +143,7 @@ export async function POST(req: Request) {
   }
 
   // 1. Auth
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -544,7 +544,7 @@ export async function POST(req: Request) {
 
   // 7. Resolve sponsor cookie (Step 5 sets it; tolerate absent)
   let sponsorDistributorId: number | null = null
-  const sponsorCode = cookies().get('ll_sponsor')?.value
+  const sponsorCode = (await cookies()).get('ll_sponsor')?.value
   if (sponsorCode) {
     const r = await service
       .from('distributors')

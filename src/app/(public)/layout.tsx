@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import { Toaster } from '@/lib/toast'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
@@ -9,19 +8,7 @@ import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
 import { getSection } from '@/lib/content/site'
-
-// Both of these are below-the-fold, client-only widgets — defer them out
-// of the LCP critical path so initial JS ships only what the hero/grid
-// need. Each renders nothing during SSR (loading: () => null), keeping
-// the server payload smaller too.
-const WhatsAppConcierge = dynamic(
-  () => import('@/components/concierge/WhatsAppConcierge').then((m) => m.WhatsAppConcierge),
-  { ssr: false, loading: () => null },
-)
-const WishlistHydrator = dynamic(
-  () => import('@/components/wishlist/WishlistHydrator').then((m) => m.WishlistHydrator),
-  { ssr: false, loading: () => null },
-)
+import { PublicDeferredWidgets } from '@/components/public/PublicDeferredWidgets'
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
@@ -90,8 +77,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
       <CartDrawer />
       <Toaster />
-      <WhatsAppConcierge />
-      <WishlistHydrator />
+      <PublicDeferredWidgets />
     </div>
   )
 }

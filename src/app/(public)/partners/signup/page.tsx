@@ -106,7 +106,7 @@ function BrandHeading({ subtitle }: { subtitle: string }) {
 export default async function DistributorSignupPage({ searchParams }: { searchParams?: { activation?: string } }) {
   // Middleware guarantees user is signed in and not already a distributor.
   // We still need their id for the DB reads.
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -244,7 +244,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
     )
   }
 
-  const sponsorCookie = cookies().get('ll_sponsor')?.value ?? ''
+  const sponsorCookie = (await cookies()).get('ll_sponsor')?.value ?? ''
   const activationMode = searchParams?.activation === '1'
 
   const addresses: SignupAddress[] = ((addressesRes.data ?? []) as AddressRow[]).map(

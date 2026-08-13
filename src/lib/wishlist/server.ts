@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 
 /** List the signed-in user's wishlist, ordered most-recent first. */
 export async function listMyWishlist(): Promise<WishlistItem[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -58,7 +58,7 @@ export async function addToMyWishlist(target: {
     return { error: 'Only one of productId / bundleId may be provided' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -95,7 +95,7 @@ export async function removeFromMyWishlist(target: {
     return { error: 'Only one of productId / bundleId may be provided' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

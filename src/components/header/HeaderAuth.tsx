@@ -34,7 +34,7 @@ const ROLE_STYLES: Record<RoleLabel, string> = {
 }
 
 export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

@@ -9,23 +9,23 @@ function Card({ f, index }: { f: FragranceMeta; index: number }) {
     <Link
       href={'/p/' + f.slug}
       className={
-        'loveli-reveal-up group relative min-h-[22rem] overflow-hidden border border-[hsl(35_45%_42%/0.24)] bg-[hsl(38_42%_93%)] p-5 text-[hsl(22_18%_12%)] transition duration-300 hover:-translate-y-1 hover:border-[hsl(35_45%_42%/0.62)] sm:min-h-[28rem] sm:p-7 ' +
+        'loveli-reveal-up group relative flex min-h-0 flex-col overflow-hidden border border-[hsl(35_45%_42%/0.24)] bg-[hsl(38_42%_93%)] p-4 text-[hsl(22_18%_12%)] transition duration-300 hover:-translate-y-1 hover:border-[hsl(35_45%_42%/0.62)] sm:p-7 md:block md:min-h-[28rem] ' +
         (index === 0 ? ' md:col-span-6' : ' md:col-span-3')
       }
     >
-      <div className="absolute inset-x-5 top-5 flex justify-center sm:inset-x-7 sm:top-7">
-        <div className="loveli-sheen relative aspect-[4/5] w-full max-w-[15rem] overflow-hidden bg-transparent">
+      <div className="relative mx-auto flex w-full justify-center md:absolute md:inset-x-7 md:top-7">
+        <div className="loveli-sheen relative aspect-[4/5] w-full max-w-[18rem] overflow-hidden bg-transparent md:max-w-[15rem]">
           <Image
             src={f.image}
             alt={f.name}
             fill
-            sizes="(max-width: 768px) 78vw, 240px"
+            sizes="(max-width: 767px) calc(100vw - 3rem), 240px"
             quality={78}
             className="object-contain mix-blend-multiply transition duration-700 ease-out group-hover:scale-[1.035]"
           />
         </div>
       </div>
-      <div className="relative z-10 flex min-h-[19rem] flex-col justify-between sm:min-h-[25rem]">
+      <div className="relative z-10 mt-4 flex min-h-[8rem] flex-1 flex-col justify-between md:mt-0 md:min-h-[25rem]">
         <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[hsl(35_45%_42%)]">{f.family}</p>
         <div className="mt-auto max-w-[17rem] border-l border-[hsl(35_45%_42%/0.55)] pl-4">
           <h3 className="font-serif text-3xl leading-none tracking-tight sm:text-4xl">{f.name}</h3>

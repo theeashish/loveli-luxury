@@ -15,7 +15,7 @@
 
 import 'server-only'
 
-import sharp from 'sharp'
+import sharp, { type Metadata } from 'sharp'
 
 export {
   buildStoragePrefix,
@@ -79,7 +79,7 @@ function isAllowedMime(mime: string): boolean {
 }
 
 export async function processImage(input: Buffer): Promise<ProcessedImage> {
-  let meta: sharp.Metadata
+  let meta: Metadata
   try {
     meta = await sharp(input).metadata()
   } catch (err) {

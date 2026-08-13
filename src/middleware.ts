@@ -12,8 +12,39 @@ const SPONSOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 // LL-XX-XXXX. The DB alphabet excludes 0/O/1/I; we accept any A-Z + 2-9 here.
 const SPONSOR_CODE_RE = /^LL-[A-Z2-9]{2}-[A-Z2-9]{4}$/
 
+function buildContentSecurityPolicy(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com`,
+    "script-src-attr 'none'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob: https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://intasend-prod-static.s3.amazonaws.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://payment.intasend.com https://sandbox.intasend.com https://www.google-analytics.com https://*.sentry.io https://analytics.tiktok.com",
+    "frame-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    'upgrade-insecure-requests',
+  ].join('; ')
+}
+
+function createCspResponse(
+  requestHeaders: Headers,
+  contentSecurityPolicy: string,
+): NextResponse {
+  const response = NextResponse.next({ request: { headers: requestHeaders } })
+  response.headers.set('Content-Security-Policy', contentSecurityPolicy)
+  return response
+}
+
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request })
+  const nonce = btoa(crypto.randomUUID())
+  const contentSecurityPolicy = buildContentSecurityPolicy(nonce)
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-nonce', nonce)
+  let response = createCspResponse(requestHeaders, contentSecurityPolicy)
 
   // Sponsor capture: first-touch attribution. If `?ref=LL-XX-XXXX` is in the
   // URL and the visitor has no sponsor cookie yet, persist it for 30 days.
@@ -37,7 +68,7 @@ export async function middleware(request: NextRequest) {
   const ref = request.nextUrl.searchParams.get('ref')
   if (ref && SPONSOR_CODE_RE.test(ref) && !request.cookies.get(SPONSOR_COOKIE)) {
     request.cookies.set(SPONSOR_COOKIE, ref)
-    response = NextResponse.next({ request })
+    response = createCspResponse(requestHeaders, contentSecurityPolicy)
     response.cookies.set(SPONSOR_COOKIE, ref, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -57,7 +88,7 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
+          response = createCspResponse(requestHeaders, contentSecurityPolicy)
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           )
@@ -104,7 +135,7 @@ export async function middleware(request: NextRequest) {
     const defaultCode = await getDefaultSponsorCode(supabase)
     if (defaultCode) {
       request.cookies.set(SPONSOR_COOKIE, defaultCode)
-      response = NextResponse.next({ request })
+      response = createCspResponse(requestHeaders, contentSecurityPolicy)
       response.cookies.set(SPONSOR_COOKIE, defaultCode, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

@@ -10,7 +10,7 @@ export default async function ResetPasswordPage() {
   // Must be signed in via the recovery link. If the user lands here
   // without a session (link expired or accessed directly), bounce them
   // to /forgot-password so they can request a fresh link.
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

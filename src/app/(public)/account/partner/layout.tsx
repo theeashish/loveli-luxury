@@ -40,7 +40,7 @@ export default async function DistributorLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createClient()
+  const supabase = await createClient()
   // getSession() reads cookies locally; getUser() makes a network call that
   // can intermittently fail on Vercel Edge and produce a login bounce loop.
   // See /partners/signup/page.tsx for the long note.

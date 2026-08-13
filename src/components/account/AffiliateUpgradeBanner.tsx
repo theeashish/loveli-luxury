@@ -25,7 +25,7 @@ export async function AffiliateUpgradeBanner({
   /** 'card' for full standalone block; 'inline' for compact strip variant. */
   variant?: 'card' | 'inline'
 } = {}) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -41,7 +41,7 @@ export async function AffiliateUpgradeBanner({
 
   if (distRes.data) return null
 
-  const sponsor = cookies().get('ll_sponsor')?.value ?? null
+  const sponsor = (await cookies()).get('ll_sponsor')?.value ?? null
 
   if (variant === 'inline') {
     return (

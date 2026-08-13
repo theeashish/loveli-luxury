@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const next = safeNext(searchParams.get('next') ?? undefined) || '/'
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // Preferred path: token_hash + type (no PKCE dependency).
   if (token_hash && typeRaw && VALID_OTP_TYPES.has(typeRaw as EmailOtpType)) {

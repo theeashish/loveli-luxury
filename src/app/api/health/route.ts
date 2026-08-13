@@ -15,7 +15,7 @@
  *     monitor probe (e.g. every minute) — it's the cheapest possible
  *     signal that the app is up at all.
  *
- *   GET /api/health?deep=1
+ *   GET /api/health?deep=1 with Authorization: Bearer <REVALIDATE_SECRET>
  *     Liveness + dependency depth-check. Probes each money-critical
  *     dependency in parallel:
  *       - Supabase DB reachable (executes a trivial SELECT 1 via RPC)
@@ -39,6 +39,7 @@
  * Security: returns nothing sensitive — no env values, no DB row counts,
  * no secret lengths. Just pass/fail and probe timings.
  */
+import { timingSafeEqual } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getServerEnv } from '@/lib/env'
@@ -109,8 +110,25 @@ const noStoreHeaders = {
   'CDN-Cache-Control': 'no-store',
 }
 
+function isDeepHealthAuthorized(req: NextRequest): boolean {
+  const expected = process.env.REVALIDATE_SECRET
+  const auth = req.headers.get('authorization')
+  if (!expected || expected.length < 32 || !auth?.startsWith('Bearer ')) return false
+
+  const presented = Buffer.from(auth.slice('Bearer '.length).trim(), 'utf8')
+  const expectedBuffer = Buffer.from(expected, 'utf8')
+  return presented.length === expectedBuffer.length && timingSafeEqual(presented, expectedBuffer)
+}
+
 export async function GET(req: NextRequest) {
   const deep = req.nextUrl.searchParams.get('deep') === '1'
+
+  if (deep && !isDeepHealthAuthorized(req)) {
+    return NextResponse.json(
+      { error: 'unauthorized' },
+      { status: 401, headers: noStoreHeaders },
+    )
+  }
 
   if (!deep) {
     return NextResponse.json(

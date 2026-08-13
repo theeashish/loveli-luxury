@@ -39,7 +39,7 @@ const inputSchema = z.object({
 })
 
 export async function submitPayoutMsisdnChange(formData: FormData): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -165,7 +165,7 @@ const codeSchema = z.object({
 })
 
 export async function confirmMsisdnCode(formData: FormData): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

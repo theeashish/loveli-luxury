@@ -13,8 +13,8 @@ import type { Database } from '../../types/database'
 
 type CookieToSet = { name: string; value: string; options: CookieOptions }
 
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = await cookies()
 
   return createServerClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
