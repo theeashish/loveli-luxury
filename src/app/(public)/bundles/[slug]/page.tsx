@@ -31,9 +31,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const bundle = await getBundleBySlug(params.slug)
+  const { slug } = await params
+  const bundle = await getBundleBySlug(slug)
   if (!bundle) return { title: 'Not found' }
   return {
     title: bundle.name,
@@ -43,8 +44,9 @@ export async function generateMetadata({
   }
 }
 
-export default async function BundlePage({ params }: { params: { slug: string } }) {
-  const bundle = await getBundleBySlug(params.slug)
+export default async function BundlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const bundle = await getBundleBySlug(slug)
   if (!bundle) notFound()
 
   return (

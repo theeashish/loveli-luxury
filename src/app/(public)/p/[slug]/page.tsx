@@ -48,9 +48,10 @@ function primaryImageUrl(images: ImageDto[], marketingImage?: string): string | 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const product = await getProductBySlug(params.slug)
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
   if (!product) return { title: 'Not found' }
   const image = primaryImageUrl(product.images, getFragrance(product.slug)?.image)
   const description =
@@ -70,8 +71,9 @@ export async function generateMetadata({
   }
 }
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await getProductBySlug(params.slug)
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
   if (!product) notFound()
   const pricingContext = await getPricingContext()
   const fragrance = getFragrance(product.slug)
