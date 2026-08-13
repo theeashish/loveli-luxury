@@ -31,7 +31,7 @@ export async function TrustStrip() {
   return (
     <section
       aria-label={content.ariaLabel}
-      className="border-y border-[hsl(35_45%_42%/0.42)] bg-[hsl(22_18%_10%)] text-[hsl(38_52%_87%)]"
+      className="loveli-reveal-up border-y border-[hsl(35_45%_42%/0.42)] bg-[hsl(22_18%_10%)] text-[hsl(38_52%_87%)]"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-6 py-10 md:grid-cols-4 md:py-14">
         {content.pillars.map((p) => {

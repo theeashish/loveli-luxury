@@ -10,22 +10,22 @@ function Card({ f, index }: { f: FragranceMeta; index: number }) {
     <Link
       href={'/p/' + f.slug}
       className={
-        'group relative min-h-[25rem] overflow-hidden border border-[hsl(35_45%_42%/0.24)] p-5 transition duration-300 hover:-translate-y-1 sm:p-7 ' +
+        'loveli-reveal-up group relative min-h-[22rem] overflow-hidden border border-[hsl(35_45%_42%/0.24)] p-5 transition duration-300 hover:-translate-y-1 sm:min-h-[28rem] sm:p-7 ' +
         (isDark ? 'bg-[hsl(22_18%_10%)] text-[hsl(38_52%_87%)]' : 'bg-[hsl(38_42%_93%)] text-[hsl(22_18%_12%)]') +
         (index === 0 ? ' md:col-span-6' : ' md:col-span-3')
       }
     >
-      <div className="absolute inset-5 overflow-hidden bg-white/85 sm:inset-7">
+      <div className="loveli-sheen absolute inset-5 overflow-hidden bg-white/85 sm:inset-7">
         <Image
           src={f.image}
           alt={f.name}
           fill
           sizes="(max-width: 768px) 92vw, (max-width: 1280px) 46vw, 360px"
           quality={72}
-          className="object-contain p-8 mix-blend-multiply transition duration-700 ease-out group-hover:scale-[1.04] sm:p-10"
+          className="object-cover mix-blend-multiply transition duration-700 ease-out group-hover:scale-[1.04]"
         />
       </div>
-      <div className="relative z-10 flex min-h-[22rem] flex-col justify-between">
+      <div className="relative z-10 flex min-h-[19rem] flex-col justify-between sm:min-h-[25rem]">
         <p className={'text-[9px] font-semibold uppercase tracking-[0.28em] ' + (isDark ? 'text-[hsl(35_58%_67%)]' : 'text-[hsl(35_45%_42%)]')}>
           {f.family}
         </p>
@@ -45,13 +45,11 @@ export function FeaturedGrid() {
   const featured = FEATURED_SLUGS.map((slug) => FRAGRANCES.find((f) => f.slug === slug)).filter(
     (f): f is FragranceMeta => Boolean(f),
   )
-  const heroPanel = FRAGRANCES.find((f) => f.slug === 'ocean-desire')
-  const panels = heroPanel ? [heroPanel, ...featured] : featured
 
   return (
     <section className="relative border-b border-[hsl(35_45%_42%/0.24)] bg-[hsl(28_22%_18%)] py-7 sm:py-10">
       <div className="mx-auto max-w-7xl px-6">
-        <header className="mb-7 flex flex-wrap items-end justify-between gap-5 sm:mb-10">
+        <header className="loveli-reveal-up mb-7 flex flex-wrap items-end justify-between gap-5 sm:mb-10">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[hsl(35_58%_67%)]">The Loveli edit</p>
             <h2 className="mt-3 max-w-2xl font-serif text-4xl leading-[0.94] tracking-tight text-[hsl(38_52%_87%)] sm:text-5xl">
@@ -63,7 +61,7 @@ export function FeaturedGrid() {
           </Link>
         </header>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
-          {panels.map((f, index) => <Card key={f.slug} f={f} index={index} />)}
+          {featured.map((f, index) => <Card key={f.slug} f={f} index={index} />)}
         </div>
       </div>
     </section>
