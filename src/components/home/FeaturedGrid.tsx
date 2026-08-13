@@ -10,7 +10,7 @@ function Card({ f }: { f: FragranceMeta }) {
   return (
     <Link
       href={`/p/${f.slug}`}
-      className="group block transition"
+      className="group mx-auto block w-full max-w-[20rem] transition"
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-[hsl(var(--muted))]/40">
         <Image
@@ -57,7 +57,7 @@ export function FeaturedGrid() {
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {FRAGRANCES.map((f) => (
             <Card key={f.slug} f={f} />
           ))}
