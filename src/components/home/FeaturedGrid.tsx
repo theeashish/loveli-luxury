@@ -14,7 +14,7 @@ function Card({ f, index }: { f: FragranceMeta; index: number }) {
       }
     >
       <div className="absolute inset-x-5 top-5 flex justify-center sm:inset-x-7 sm:top-7">
-        <div className="loveli-sheen relative aspect-[4/5] w-full max-w-[15rem] overflow-hidden bg-white/90">
+        <div className="loveli-sheen relative aspect-[4/5] w-full max-w-[15rem] overflow-hidden bg-transparent">
           <Image
             src={f.image}
             alt={f.name}
