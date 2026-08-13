@@ -14,6 +14,7 @@ import { FragranceDetail } from '@/components/catalog/FragranceDetail'
 import { SimilarProducts } from '@/components/catalog/SimilarProducts'
 import { ProductReviews } from '@/components/catalog/ProductReviews'
 import { buildConciergeLink, buildConciergeMessage } from '@/lib/concierge/link'
+import { getFragrance } from '@/lib/catalog/fragrance-meta'
 
 // Catalog reads use the auth-bound Supabase client (cookies()), which
 // breaks static generation with DYNAMIC_SERVER_USAGE. Render fresh
@@ -35,7 +36,8 @@ export async function generateStaticParams() {
   }
 }
 
-function primaryImageUrl(images: ImageDto[]): string | undefined {
+function primaryImageUrl(images: ImageDto[], marketingImage?: string): string | undefined {
+  if (marketingImage) return marketingImage
   const primary = images.find((i) => i.isPrimary) ?? images[0]
   return primary
     ? joinImageUrl(publicEnv.NEXT_PUBLIC_SUPABASE_URL, primary.storagePrefix, 'display')
@@ -49,7 +51,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const product = await getProductBySlug(params.slug)
   if (!product) return { title: 'Not found' }
-  const image = primaryImageUrl(product.images)
+  const image = primaryImageUrl(product.images, getFragrance(product.slug)?.image)
   const description =
     product.metaDescription ??
     (product.description ? product.description.slice(0, 200) : undefined)
@@ -71,6 +73,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const product = await getProductBySlug(params.slug)
   if (!product) notFound()
   const pricingContext = await getPricingContext()
+  const fragrance = getFragrance(product.slug)
 
   // Order via WhatsApp: deep link to the concierge with product context.
   const waLink = buildConciergeLink(
@@ -79,7 +82,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   )
 
   // ── SEO: Product + BreadcrumbList JSON-LD ───────────────────────────────
-  const image = primaryImageUrl(product.images)
+  const image = primaryImageUrl(product.images, fragrance?.image)
   const appUrl = publicEnv.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '')
   const productUrl = `${appUrl}/p/${product.slug}`
   const activeVariants = product.variants.filter((v) => v.isActive)
@@ -123,7 +126,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const ldJson = (obj: unknown) => JSON.stringify(obj).replace(/</g, '\\u003c')
 
   return (
-    <div className="mx-auto max-w-7xl px-6 pt-12 pb-28 md:pb-20 lg:pt-20">
+    <div className="mx-auto max-w-7xl px-6 pt-10 pb-20 md:pt-12 md:pb-16 lg:pt-14">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: ldJson(productLd) }}
@@ -132,8 +135,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbLd) }}
       />
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[7fr_5fr] lg:gap-16">
-        <ProductGallery images={product.images} productName={product.name} />
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(20rem,30rem)_minmax(0,1fr)] lg:items-start lg:gap-20">
+        <ProductGallery
+          images={product.images}
+          productName={product.name}
+          marketingImage={fragrance?.image}
+          marketingAlt={fragrance ? `${fragrance.name} Eau de Parfum` : undefined}
+        />
 
         <div className="flex flex-col lg:pt-4">
           <div className="mb-8">
@@ -147,6 +155,22 @@ export default async function ProductPage({ params }: { params: { slug: string }
               <p className="mt-6 whitespace-pre-line text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
                 {product.description}
               </p>
+            ) : null}
+            {fragrance ? (
+              <dl className="mt-7 grid gap-4 border-y border-[hsl(var(--border))] py-5 sm:grid-cols-3">
+                <div>
+                  <dt className="text-[9px] font-medium uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Scent family</dt>
+                  <dd className="mt-2 text-sm capitalize text-[hsl(var(--foreground))]">{fragrance.family}</dd>
+                </div>
+                <div>
+                  <dt className="text-[9px] font-medium uppercase tracking-[0.24em] text-[hsl(var(--primary))]">Key notes</dt>
+                  <dd className="mt-2 text-sm leading-6 text-[hsl(var(--foreground))]">{fragrance.notes}</dd>
+                </div>
+                <div>
+                  <dt className="text-[9px] font-medium uppercase tracking-[0.24em] text-[hsl(var(--primary))]">The feeling</dt>
+                  <dd className="mt-2 text-sm leading-6 text-[hsl(var(--foreground))]">{fragrance.mood}</dd>
+                </div>
+              </dl>
             ) : null}
           </div>
 
