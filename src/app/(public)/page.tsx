@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { Hero } from '@/components/home/Hero'
 import { TrustStrip } from '@/components/home/TrustStrip'
 import { FeaturedGrid } from '@/components/home/FeaturedGrid'
@@ -67,11 +68,13 @@ export default async function HomePage() {
     getSection('home_find_your_scent'),
   ])
   const baseUrl = publicEnv.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '')
+  const nonce = (await headers()).get('x-nonce') ?? undefined
   const jsonLd = buildHomeJsonLd(baseUrl)
   return (
     <>
       {/* Organization + WebSite JSON-LD for brand SERPs + sitelink search box. */}
       <script
+        nonce={nonce}
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

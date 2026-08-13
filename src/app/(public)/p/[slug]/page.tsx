@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getProductBySlug, listActiveProductSlugs } from '@/lib/catalog/queries'
@@ -84,6 +85,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   // ── SEO: Product + BreadcrumbList JSON-LD ───────────────────────────────
   const image = primaryImageUrl(product.images, fragrance?.image)
   const appUrl = publicEnv.NEXT_PUBLIC_APP_URL.replace(/\/+$/, '')
+  const nonce = (await headers()).get('x-nonce') ?? undefined
   const productUrl = `${appUrl}/p/${product.slug}`
   const activeVariants = product.variants.filter((v) => v.isActive)
   const priceMinors = activeVariants
@@ -128,10 +130,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
   return (
     <div className="mx-auto max-w-7xl px-6 pt-10 pb-20 md:pt-12 md:pb-16 lg:pt-14">
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: ldJson(productLd) }}
       />
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: ldJson(breadcrumbLd) }}
       />
