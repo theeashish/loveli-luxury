@@ -12,12 +12,12 @@ function Card({ f }: { f: FragranceMeta }) {
       href={`/p/${f.slug}`}
       className="group block transition"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[hsl(var(--muted))]/40">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-[hsl(var(--muted))]/40">
         <Image
           src={f.image}
           alt={f.name}
           fill
-          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 47vw, (max-width: 1536px) 31vw, 420px"
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 47vw, (max-width: 1536px) 31vw, 380px"
           quality={60}
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />

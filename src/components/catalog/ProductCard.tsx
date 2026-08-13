@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
               src={imageUrl(product.primaryImage.storagePrefix, 'display')}
               alt={product.primaryImage.alt ?? product.name}
               fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, (max-width: 1280px) 30vw, 300px"
               className="object-cover transition duration-700 ease-out group-hover:scale-[1.035]"
             />
           ) : (
