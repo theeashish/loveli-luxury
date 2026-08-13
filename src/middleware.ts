@@ -13,9 +13,10 @@ const SPONSOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 const SPONSOR_CODE_RE = /^LL-[A-Z2-9]{2}-[A-Z2-9]{4}$/
 
 function buildContentSecurityPolicy(nonce: string): string {
+  const developmentScriptPolicy = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com`,
+    `script-src 'self' 'nonce-${nonce}${developmentScriptPolicy} https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com`,
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://intasend-prod-static.s3.amazonaws.com",

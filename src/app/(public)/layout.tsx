@@ -3,7 +3,6 @@ import { Suspense } from 'react'
 import { Toaster } from '@/lib/toast'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
-import { AffiliateUpgradeLink } from '@/components/header/AffiliateUpgradeLink'
 import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
@@ -14,6 +13,10 @@ const NAV = [
   { href: '/shop', label: 'Shop' },
   { href: '/bundles', label: 'Bundles' },
   { href: '/story', label: 'Story' },
+] as const
+
+const SECONDARY_NAV = [
+  { href: '/partners', label: 'Partner with us' },
   { href: '/#faq', label: 'FAQ' },
 ] as const
 
@@ -41,17 +44,16 @@ export default async function PublicLayout({ children }: { children: React.React
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/partners"
-              className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
-            >
-              Partners
-            </Link>
-            <Suspense fallback={null}>
-              {/* Server component — renders nothing for signed-out
-                  users, admins, or existing distributors. */}
-              <AffiliateUpgradeLink />
-            </Suspense>
+            {SECONDARY_NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-[hsl(var(--muted-foreground))] transition hover:text-[hsl(var(--primary))]"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <span className="h-4 w-px bg-[hsl(var(--border))]/70" aria-hidden="true" />
             <Suspense fallback={null}>
               <HeaderAuth variant="desktop" />
             </Suspense>
@@ -61,6 +63,7 @@ export default async function PublicLayout({ children }: { children: React.React
             <CartIndicator />
             <MobileMenu
               nav={NAV}
+              secondaryNav={SECONDARY_NAV}
               authSlot={
                 <Suspense fallback={null}>
                   <HeaderAuth variant="mobile" />

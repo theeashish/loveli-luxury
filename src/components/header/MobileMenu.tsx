@@ -1,24 +1,27 @@
 'use client'
 
 /**
- * Mobile menu — hamburger button + slide-down panel. Renders below the
- * sticky header on mobile (md-). Closes automatically on pathname
- * change (i.e., when the user taps any link inside).
+ * Mobile navigation for the public storefront. Links are grouped by intent so
+ * shopping, support, and account actions remain easy to scan on small screens.
  */
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { ChevronRight, Menu, X } from 'lucide-react'
 
 type NavItem = { href: string; label: string }
 
 interface Props {
   nav: readonly NavItem[]
+  secondaryNav: readonly NavItem[]
   authSlot: React.ReactNode
 }
 
-export function MobileMenu({ nav, authSlot }: Props) {
+const linkClassName =
+  'flex min-h-12 items-center justify-between border-b border-[hsl(var(--border))]/40 py-3 text-sm uppercase tracking-[0.2em] text-[hsl(var(--foreground))] transition-colors hover:text-[hsl(var(--primary))]'
+
+export function MobileMenu({ nav, secondaryNav, authSlot }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -28,12 +31,14 @@ export function MobileMenu({ nav, authSlot }: Props) {
 
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
+    const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = previousOverflow
     }
   }, [open])
+
+  const closeMenu = () => setOpen(false)
 
   return (
     <>
@@ -42,7 +47,7 @@ export function MobileMenu({ nav, authSlot }: Props) {
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
         aria-controls="mobile-menu-panel"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((value) => !value)}
         className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[hsl(var(--muted-foreground))] transition hover:bg-[hsl(var(--muted))]/60 hover:text-[hsl(var(--primary))]"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -50,33 +55,56 @@ export function MobileMenu({ nav, authSlot }: Props) {
 
       <div
         id="mobile-menu-panel"
+        role="dialog"
+        aria-label="Mobile navigation"
         aria-hidden={!open}
-        className={`absolute inset-x-0 top-full border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))] shadow-lg transition-all duration-200 ease-out md:hidden ${
-          open
-            ? 'visible translate-y-0 opacity-100'
-            : 'pointer-events-none invisible -translate-y-2 opacity-0'
-        }`}
+        className={
+          'absolute inset-x-0 top-full border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/98 shadow-[0_18px_40px_hsl(22_18%_12%/0.12)] backdrop-blur-md transition-[opacity,transform,visibility] duration-200 ' +
+          (open
+            ? 'pointer-events-auto visible translate-y-0 opacity-100'
+            : 'pointer-events-none invisible -translate-y-2 opacity-0')
+        }
       >
-        <nav className="mx-auto flex max-w-7xl flex-col px-6 py-4">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block py-3 text-sm uppercase tracking-[0.25em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <Link
-            href="/partners"
-            className="block py-3 text-sm uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:opacity-80"
-          >
-            Partners
-          </Link>
-          <div className="mt-1 flex flex-col border-t border-[hsl(var(--border))]/40 pt-1">
-            {authSlot}
+        <div className="mx-auto max-h-[calc(100vh-5rem)] max-w-7xl overflow-y-auto px-6 pb-6 pt-3">
+          <div className="border-b border-[hsl(var(--border))]/50 pb-3">
+            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
+              Navigate Loveli Luxury
+            </p>
           </div>
-        </nav>
+
+          <nav aria-label="Explore" className="pt-2">
+            <p className="py-3 text-[10px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+              Explore
+            </p>
+            {nav.map((item) => (
+              <Link key={item.href} href={item.href} onClick={closeMenu} className={linkClassName}>
+                <span>{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-[hsl(var(--primary))]" aria-hidden="true" />
+              </Link>
+            ))}
+          </nav>
+
+          <nav aria-label="Support and partnerships" className="mt-4 border-t border-[hsl(var(--border))]/50 pt-2">
+            <p className="py-3 text-[10px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+              Support & partnerships
+            </p>
+            {secondaryNav.map((item) => (
+              <Link key={item.href} href={item.href} onClick={closeMenu} className={linkClassName}>
+                <span>{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-[hsl(var(--primary))]" aria-hidden="true" />
+              </Link>
+            ))}
+          </nav>
+
+          <div className="mt-4 border-t border-[hsl(var(--border))]/50 pt-2">
+            <p className="py-3 text-[10px] font-medium uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+              Account
+            </p>
+            <div className="flex flex-col gap-1" onClick={closeMenu}>
+              {authSlot}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )
