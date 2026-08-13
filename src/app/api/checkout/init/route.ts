@@ -44,6 +44,7 @@ import {
   shouldRefireStk,
 } from '@/lib/payments/idempotency'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -115,6 +116,15 @@ const requestSchema = z
 // -----------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'checkout-init-strict',
+    limit: 8,
+    windowSeconds: 60,
+    requireSameOrigin: true,
+  })
+  if (guard) return guard
+
+
   // Deploy-safety guard. If the IntaSend env is not wired we return a
   // 503 with a customer-safe message rather than letting the dispatcher
   // throw bubble up as an opaque 502. The /checkout page already shows

@@ -2,72 +2,109 @@ import 'server-only'
 import type { Duration } from '@upstash/ratelimit'
 
 /**
- * Fail-open, no-op-without-config rate limiter.
- *
- * Uses Upstash Redis when UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
- * are set; otherwise every call is allowed. ANY error (missing config,
- * network, Upstash outage) FALLS OPEN (allows the request) — a broken or
- * unconfigured limiter must never block legitimate traffic or break a route.
- *
- * env + the Upstash SDKs are imported lazily so this module is safe to import
- * in unit tests and adds nothing to a route's bundle until actually invoked.
+ * Shared request limiter. Legacy callers retain the historic fail-open mode.
+ * Sensitive routes opt into closed-in-production mode and reject requests if
+ * their shared Redis limiter is unavailable in production.
  */
+export type RateLimitFailureMode = 'open' | 'closed-in-production'
 
-type LimitResult = { ok: boolean; limit: number; remaining: number; resetMs: number }
+export type LimitResult = {
+  ok: boolean
+  limit: number
+  remaining: number
+  resetMs: number
+  reason?: 'limited' | 'unavailable'
+}
 
-const limiterCache = new Map<string, unknown>()
+type RuntimeLimiter = {
+  limit: (identifier: string) => Promise<{
+    success: boolean
+    limit: number
+    remaining: number
+    reset: number
+  }>
+}
 
-async function getLimiter(bucket: string, limit: number, windowS: number): Promise<unknown | null> {
+const limiterCache = new Map<string, RuntimeLimiter>()
+
+async function getLimiter(
+  bucket: string,
+  limit: number,
+  windowSeconds: number,
+): Promise<RuntimeLimiter | null> {
   try {
-    const { getServerEnv } = await import('@/lib/env')
+    const { getServerEnv } = await import('./env')
     const env = getServerEnv()
     const url = env.UPSTASH_REDIS_REST_URL
     const token = env.UPSTASH_REDIS_REST_TOKEN
     if (!url || !token) return null
 
-    const key = `${bucket}:${limit}:${windowS}`
+    const key = `${bucket}:${limit}:${windowSeconds}`
     const cached = limiterCache.get(key)
     if (cached) return cached
 
     const { Redis } = await import('@upstash/redis')
     const { Ratelimit } = await import('@upstash/ratelimit')
-    const rl = new Ratelimit({
+    const limiter = new Ratelimit({
       redis: new Redis({ url, token }),
-      limiter: Ratelimit.slidingWindow(limit, `${windowS} s` as Duration),
+      limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s` as Duration),
       prefix: `rl:${bucket}`,
       analytics: false,
-    })
-    limiterCache.set(key, rl)
-    return rl
+    }) as RuntimeLimiter
+    limiterCache.set(key, limiter)
+    return limiter
   } catch {
     return null
   }
 }
 
 /**
- * Check a rate limit for `identifier` (typically the client IP) under a named
- * bucket. Returns ok:true (allow) when unconfigured or on any error.
+ * Check a rate limit for a named bucket. Sensitive routes can reject traffic
+ * when the shared limiter is unavailable in production; other callers retain
+ * availability-preserving fail-open behavior.
  */
 export async function checkRateLimit(
   bucket: string,
   identifier: string,
-  opts: { limit: number; windowSeconds: number },
+  opts: {
+    limit: number
+    windowSeconds: number
+    failureMode?: RateLimitFailureMode
+  },
 ): Promise<LimitResult> {
-  const allow: LimitResult = { ok: true, limit: opts.limit, remaining: opts.limit, resetMs: 0 }
+  const allow: LimitResult = {
+    ok: true,
+    limit: opts.limit,
+    remaining: opts.limit,
+    resetMs: 0,
+  }
+  const unavailable: LimitResult = {
+    ok: false,
+    limit: opts.limit,
+    remaining: 0,
+    resetMs: opts.windowSeconds * 1000,
+    reason: 'unavailable',
+  }
+  const failClosed =
+    opts.failureMode === 'closed-in-production' && process.env.NODE_ENV === 'production'
+  const limiter = await getLimiter(bucket, opts.limit, opts.windowSeconds)
+  if (!limiter) return failClosed ? unavailable : allow
+
   try {
-    const limiter = await getLimiter(bucket, opts.limit, opts.windowSeconds)
-    if (!limiter) return allow
-    const rl = limiter as {
-      limit: (id: string) => Promise<{ success: boolean; limit: number; remaining: number; reset: number }>
+    const result = await limiter.limit(identifier)
+    return {
+      ok: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      resetMs: result.reset,
+      ...(result.success ? {} : { reason: 'limited' as const }),
     }
-    const res = await rl.limit(identifier)
-    return { ok: res.success, limit: res.limit, remaining: res.remaining, resetMs: res.reset }
   } catch {
-    return allow
+    return failClosed ? unavailable : allow
   }
 }
 
-/** Best-effort client IP from request headers. Pure — unit-tested. */
+/** Best-effort client IP from proxy headers. Pure and unit-tested. */
 export function clientIp(req: Request): string {
   const xff = req.headers.get('x-forwarded-for')
   if (xff) {

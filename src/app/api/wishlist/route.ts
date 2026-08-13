@@ -13,6 +13,7 @@
 
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 import {
   addToMyWishlist,
   listMyWishlist,
@@ -44,6 +45,14 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'wishlist-write-strict',
+    limit: 30,
+    windowSeconds: 60,
+    requireSameOrigin: true,
+  })
+  if (guard) return guard
+
   let raw: unknown
   try {
     raw = await req.json()
@@ -68,6 +77,14 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'wishlist-write-strict',
+    limit: 30,
+    windowSeconds: 60,
+    requireSameOrigin: true,
+  })
+  if (guard) return guard
+
   let raw: unknown
   try {
     raw = await req.json()

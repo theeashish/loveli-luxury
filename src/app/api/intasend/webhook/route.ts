@@ -29,11 +29,22 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { processIntasendWebhook } from '@/lib/intasend/webhook-handler'
 import { WebhookVerificationError } from '@/lib/payments/errors'
 import { checkRateLimit } from '@/lib/ratelimit'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
+  // Provider callbacks do not carry a browser Origin. Signature verification
+  // remains mandatory below; this strict per-source limit absorbs floods.
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'intasend-webhook-strict',
+    limit: 240,
+    windowSeconds: 60,
+  })
+  if (guard) return guard
+
+
   // Global flood guard — generous, since legitimate volume (collections +
   // payouts + chargebacks) all land here. Fails open if Upstash isn't
   // configured, matching every other rate-limited route in this codebase.

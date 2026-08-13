@@ -121,6 +121,30 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               <li>
                 <Link
                   className="hover:text-[hsl(var(--primary))]"
+                  href="/policies/privacy"
+                >
+                  Privacy & data
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="hover:text-[hsl(var(--primary))]"
+                  href="/policies/terms"
+                >
+                  Terms of sale
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="hover:text-[hsl(var(--primary))]"
+                  href="/policies/complaints"
+                >
+                  Complaints
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="hover:text-[hsl(var(--primary))]"
                   href="/track"
                 >
                   Track an order

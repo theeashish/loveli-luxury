@@ -49,6 +49,7 @@ import {
   shouldRefireStk,
 } from '@/lib/payments/idempotency'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -119,6 +120,15 @@ const requestSchema = z
 // -----------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'partner-signup-init-strict',
+    limit: 3,
+    windowSeconds: 600,
+    requireSameOrigin: true,
+  })
+  if (guard) return guard
+
+
   // Deploy-safety guard. Mirrors /api/checkout/init — returns 503 with a
   // customer-safe message when the IntaSend env is not wired, so the
   // signup form sees a clean error instead of an opaque 502.

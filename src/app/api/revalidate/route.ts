@@ -17,6 +17,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { NextResponse, type NextRequest } from 'next/server'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 import { timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import { validateRevalidatePath } from '@/lib/catalog/revalidate-paths'
@@ -29,6 +30,13 @@ const bodySchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const guard = await enforceSensitiveRequest(request, {
+    bucket: 'revalidate-strict',
+    limit: 15,
+    windowSeconds: 60,
+  })
+  if (guard) return guard
+
   // Read the secret lazily so the route module loads cleanly during build-time
   // page-data collection without a populated .env. Validation matches
   // `serverSchema` in lib/env.ts (min 32 chars).

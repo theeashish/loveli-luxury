@@ -20,6 +20,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { reconcileByInvoiceId } from '@/lib/payments/payment-service'
 import { checkRateLimit, clientIp } from '@/lib/ratelimit'
+import { enforceSensitiveRequest } from '@/lib/security/request-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -36,6 +37,14 @@ const TERMINAL_STATUSES = new Set([
 ])
 
 export async function GET(req: Request) {
+  const guard = await enforceSensitiveRequest(req, {
+    bucket: 'intasend-status-strict',
+    limit: 20,
+    windowSeconds: 60,
+  })
+  if (guard) return guard
+
+
   const ip = clientIp(req)
   const limit = await checkRateLimit('intasend-status', ip, { limit: 60, windowSeconds: 60 })
   if (!limit.ok) {
