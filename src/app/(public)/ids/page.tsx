@@ -71,7 +71,7 @@ export default async function IncomeDisclosurePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-12 md:py-18">
         <div className="flex flex-col justify-between gap-5 border-b border-[hsl(var(--border))] pb-8 md:flex-row md:items-end">
           <div>
             <p className="text-eyebrow">Verified distribution</p>
@@ -121,7 +121,7 @@ export default async function IncomeDisclosurePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-12 md:py-18">
         <div className="grid gap-12 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-24">
           <div>
             <p className="text-eyebrow">Programme rules</p>

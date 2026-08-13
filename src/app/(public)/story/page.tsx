@@ -81,7 +81,7 @@ export default function StoryPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+      <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-24">
           <div className="lg:sticky lg:top-32 lg:self-start">
             <p className="text-eyebrow">Our story</p>
@@ -128,7 +128,7 @@ export default function StoryPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+      <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
         <div className="grid gap-10 border border-[hsl(var(--primary))]/25 bg-[hsl(var(--background))]/70 p-8 shadow-[0_20px_48px_-38px_hsl(var(--foreground)/0.6)] md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-12">
           <div className="max-w-2xl">
             <p className="text-eyebrow">Find your signature</p>

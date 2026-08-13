@@ -29,7 +29,7 @@ export default async function ShopPage() {
         detail={countLine}
       />
 
-      <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <section className="mx-auto max-w-7xl px-6 py-10 md:py-14">
         {products.length > 0 ? (
           <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (

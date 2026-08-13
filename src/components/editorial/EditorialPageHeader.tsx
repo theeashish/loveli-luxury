@@ -19,7 +19,7 @@ export function EditorialPageHeader({
         <div className="absolute -left-20 top-0 h-56 w-56 rounded-full bg-[hsl(var(--primary))]/[0.06] blur-3xl" />
         <div className="absolute right-[8%] top-[-7rem] h-64 w-64 rounded-full border border-[hsl(var(--primary))]/15" />
       </div>
-      <div className="relative mx-auto max-w-7xl px-6 py-16 md:py-20">
+      <div className="relative mx-auto max-w-7xl px-6 py-10 md:py-14">
         <div className="max-w-3xl">
           <p className="text-eyebrow">{eyebrow}</p>
           <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-[hsl(var(--foreground))] md:text-6xl">

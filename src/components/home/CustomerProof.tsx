@@ -42,9 +42,9 @@ export async function CustomerProof() {
   if (reviews.length === 0) return null
 
   return (
-    <section className="relative border-t border-[hsl(var(--border))]/60 py-28 md:py-40 lg:py-48">
+    <section className="relative border-t border-[hsl(var(--border))]/60 py-16 md:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <header className="mb-16 text-center md:mb-24">
+        <header className="mb-10 text-center md:mb-14">
           <p className="text-eyebrow">In their words</p>
           <h2 className="mt-5 font-serif text-4xl tracking-tight md:text-5xl">
             Worn, and{' '}

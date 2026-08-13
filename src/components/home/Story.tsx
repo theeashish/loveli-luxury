@@ -15,7 +15,7 @@ export async function Story() {
   return (
     <section
       id="story"
-      className="relative overflow-hidden border-t border-[hsl(var(--border))]/60 py-32 md:py-48 lg:py-56"
+      className="relative overflow-hidden border-t border-[hsl(var(--border))]/60 py-16 md:py-24 lg:py-32"
     >
       <div
         aria-hidden
@@ -34,7 +34,7 @@ export async function Story() {
           {content.body}
         </p>
 
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-left sm:grid-cols-3 md:mt-20">
+        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-8 text-left sm:grid-cols-3 md:mt-14">
           {content.stats.map((item) => (
             <div key={item.k}>
               <p className="text-eyebrow">{item.k}</p>

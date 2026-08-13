@@ -23,7 +23,7 @@ export default async function PoliciesLayout({
         detail={content.lastUpdated}
       />
 
-      <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
+      <div className="mx-auto max-w-7xl px-6 py-10 md:py-14">
         <div className="grid gap-12 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-24">
           <aside className="lg:sticky lg:top-28 lg:self-start">
             <div className="border-y border-[hsl(var(--border))] py-6">

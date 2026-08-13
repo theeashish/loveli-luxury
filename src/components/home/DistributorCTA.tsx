@@ -9,7 +9,7 @@ const STATS = [
 
 export function DistributorCTA() {
   return (
-    <section className="relative overflow-hidden border-t border-[hsl(var(--border))]/60 py-28 md:py-40 lg:py-48">
+    <section className="relative overflow-hidden border-t border-[hsl(var(--border))]/60 py-16 md:py-24 lg:py-32">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -31,7 +31,7 @@ export function DistributorCTA() {
           quarterly, tied to real sales.
         </p>
 
-        <ul className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4">
+        <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4">
           {STATS.map((s) => (
             <li key={s.l} className="text-center">
               <p className="font-serif text-3xl text-[hsl(var(--primary))]">{s.v}</p>
@@ -40,7 +40,7 @@ export function DistributorCTA() {
           ))}
         </ul>
 
-        <div className="mt-12">
+        <div className="mt-8">
           <Link
             href="/partners"
             className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-[hsl(var(--foreground))] px-10 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:scale-[1.02]"

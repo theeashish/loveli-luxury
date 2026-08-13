@@ -86,7 +86,7 @@ export default async function PartnerProgramPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-12 md:py-18">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-24">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="text-eyebrow">{program.philosophyEyebrow}</p>
@@ -106,7 +106,7 @@ export default async function PartnerProgramPage() {
       </section>
 
       <section id="tiers" className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))]/35">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6 py-12 md:py-18">
           <div className="max-w-3xl">
             <p className="text-eyebrow">{program.tiersEyebrow}</p>
             <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight text-[hsl(var(--foreground))] md:text-5xl">
@@ -128,7 +128,7 @@ export default async function PartnerProgramPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-12 md:py-18">
         <div className="grid gap-12 md:grid-cols-[minmax(17rem,0.74fr)_minmax(0,1.26fr)] md:items-center lg:gap-24">
           <EditorialPhotoFrame
             src={program.photo.storiesUrl}
@@ -157,7 +157,7 @@ export default async function PartnerProgramPage() {
       </section>
 
       <section className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted))]/30">
-        <div className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6 py-12 md:py-18">
           <div className="max-w-3xl">
             <p className="text-eyebrow">Programme integrity</p>
             <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight text-[hsl(var(--foreground))] md:text-5xl">
@@ -181,7 +181,7 @@ export default async function PartnerProgramPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <section className="mx-auto max-w-7xl px-6 py-12 md:py-18">
         <div className="grid gap-10 border border-[hsl(var(--primary))]/25 bg-[hsl(var(--background))]/80 p-8 shadow-[0_20px_48px_-38px_hsl(var(--foreground)/0.6)] md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-12">
           <div className="max-w-2xl">
             <p className="text-eyebrow">{program.startEyebrow}</p>

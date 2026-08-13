@@ -29,7 +29,7 @@ export default async function BundlesIndexPage() {
         detail={countLine}
       />
 
-      <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <section className="mx-auto max-w-7xl px-6 py-10 md:py-14">
         {bundles.length > 0 ? (
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-2 xl:gap-10">
             {bundles.map((bundle) => (
