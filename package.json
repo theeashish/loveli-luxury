@@ -5,7 +5,7 @@
   "description": "Loveli Luxury International ecommerce + MLM platform",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
