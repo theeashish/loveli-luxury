@@ -1,14 +1,15 @@
 /**
  * Header auth slot.
  *
- * Signed-out: explicit "Log in" + "Sign up" text links.
- * Signed-in:  identity strip ([email] · [ROLE]) acting as the Account
+ * Signed-out desktop: a compact "Sign up" disclosure with account access links.
+ * Signed-out mobile: explicit "Log in" + "Sign up" text links.
+ * Signed-in:  identity strip ([email] Â· [ROLE]) acting as the Account
  *             link, plus a separate Sign out form button.
  *
  * Account destination + role label by user state:
- *   - has distributor row              → /account/partner   · PARTNER
- *   - admin / superadmin role          → /admin/catalog          · ADMIN
- *   - else (default)                    → /account/orders         · CUSTOMER
+ *   - has distributor row              â†’ /account/partner   Â· PARTNER
+ *   - admin / superadmin role          â†’ /admin/catalog          Â· ADMIN
+ *   - else (default)                    â†’ /account/orders         Â· CUSTOMER
  *
  * Server component (cookie-only session read via getSession; matches
  * the pattern AffiliateUpgradeLink uses to avoid the Vercel login loop).
@@ -46,12 +47,31 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
   const linkCls = variant === 'desktop' ? desktopLinkCls : mobileLinkCls
 
   if (!session?.user) {
+    if (variant === 'desktop') {
+      return (
+        <details data-testid="desktop-auth-menu" className="group relative">
+          <summary className={`${desktopLinkCls} inline-flex cursor-pointer list-none items-center gap-1.5 [&::-webkit-details-marker]:hidden`}>
+            Sign up
+            <span aria-hidden className="text-[0.7rem] transition-transform duration-200 group-open:rotate-45">+</span>
+          </summary>
+          <div className="absolute right-0 top-full z-50 mt-3 min-w-40 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 shadow-[0_14px_32px_hsl(22_18%_12%/0.14)]">
+            <Link href="/signup" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
+              Create account
+            </Link>
+            <Link href="/login" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
+              Log in
+            </Link>
+          </div>
+        </details>
+      )
+    }
+
     return (
       <>
-        <Link href="/login" className={linkCls}>
+        <Link href="/login" className={mobileLinkCls}>
           Log in
         </Link>
-        <Link href="/signup" className={linkCls}>
+        <Link href="/signup" className={mobileLinkCls}>
           Sign up
         </Link>
       </>
