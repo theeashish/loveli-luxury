@@ -32,6 +32,7 @@ type CartActions = {
   clear: () => void
   openDrawer: () => void
   closeDrawer: () => void
+  markHydrated: (cartId: string) => void
   /** Becomes true after the persist middleware has finished its first read. */
   hasHydrated: boolean
 }
@@ -62,6 +63,7 @@ export const useCartStore = create<Store>()(
       clear: () => set({ lines: [] }),
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),
+      markHydrated: (cartId) => set({ cartId, hasHydrated: true }),
     }),
     {
       name: STORAGE_KEY,
@@ -77,7 +79,7 @@ export const useCartStore = create<Store>()(
               ? crypto.randomUUID()
               : fallbackUuid()
         }
-        state.hasHydrated = true
+        state.markHydrated(state.cartId)
       },
     },
   ),

@@ -34,7 +34,7 @@ export default async function PublicLayout({ children }: { children: React.React
               Luxury Scents
             </span>
           </Link>
-          <nav className="hidden items-center gap-9 text-xs uppercase tracking-[0.25em] md:flex">
+          <nav className="hidden items-center gap-9 text-xs font-semibold uppercase tracking-[0.2em] md:flex">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -46,7 +46,7 @@ export default async function PublicLayout({ children }: { children: React.React
             ))}
             <Link
               href="/partners"
-              className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
+              className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--foreground))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
             >
               Partners
             </Link>
