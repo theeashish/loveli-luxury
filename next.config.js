@@ -33,16 +33,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-
-  // Lint is run separately in CI via `npm run lint`. We don't want
-  // cosmetic ESLint rules (e.g. react/no-unescaped-entities) to block
-  // production builds — the rules-of-hooks violation that mattered is
-  // fixed in the source.
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
-  images: {
+images: {
     formats: ['image/avif', 'image/webp'],
     // Mobile-first Kenyan 4G audience — narrow the device-size matrix so
     // the optimizer doesn't generate (and the CDN doesn't cache) a long
@@ -92,7 +83,6 @@ const nextConfig = {
   },
 
   experimental: {
-    instrumentationHook: true,
     serverActions: {
       // Catalog image uploads cap at 8 MB (see image-pipeline.ts MAX_FILE_BYTES).
       // Keep this in sync if that limit moves.

@@ -25,8 +25,8 @@ const INTEGRITY_RULES = [
   ['Verified retail only', 'Every commission references a real, paid, non-refunded order.'],
   ['Progress needs sales', 'Rank progression and retention depend on verified retail performance, not network size alone.'],
   ['No recruitment-only rewards', 'A partner without personal retail activity cannot earn from a network.'],
-  ['Refunds follow through', 'When an order is refunded, the related commission is handled through the programme’s clawback process.'],
-  ['KYC protects payouts', 'Payout checks are applied when required to protect legitimate partners and payment access.'],
+  ['Refunds are handled', 'If an order is refunded, we may adjust the related commission.'],
+  ['Checks protect payments', 'We check details when needed to keep partner payments safe.'],
   ['No income guarantees', 'The programme does not promise an income. Outcomes depend on verified retail performance.'],
 ] as const
 

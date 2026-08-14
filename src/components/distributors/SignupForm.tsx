@@ -108,7 +108,7 @@ export function DistributorSignupForm({
     setError(null)
 
     if (!activationMode && !SPONSOR_RE.test(sponsorCode)) {
-      setError('Sponsor code must look like LL-XX-XXXX.')
+      setError('Your invitation code should look like LL-XX-XXXX.')
       return
     }
     if (!agreed) {
@@ -207,8 +207,8 @@ export function DistributorSignupForm({
     <form onSubmit={onSubmit} className="space-y-10">
       <div className="space-y-10">
         <Section
-          title="Sponsor"
-          subtitle="The partner program is invite-only. Enter the code from your sponsor."
+          title="Invitation code"
+          subtitle="You need an invitation code to join. Enter the code you received from the person who invited you."
         >
           <div className="max-w-sm">
             <input
@@ -228,7 +228,7 @@ export function DistributorSignupForm({
           </div>
         </Section>
 
-        <Section title="Onboarding kit" subtitle="Pick the kit you'll be placing.">
+        <Section title="Starter package" subtitle="Choose the Starter package you want to buy.">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {bundles.map((b) => (
               <label
@@ -268,7 +268,7 @@ export function DistributorSignupForm({
           </div>
         </Section>
 
-        <Section title="KYC" subtitle="Required by the regulator for distributor payouts.">
+        <Section title="ID details" subtitle="Your ID helps us check your account before we send payments.">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="National ID" required>
               <input

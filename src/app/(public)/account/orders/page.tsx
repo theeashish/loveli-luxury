@@ -74,8 +74,8 @@ export default async function MyOrdersPage() {
         <div className="space-y-10">
           {signupOrders.length > 0 ? (
             <OrderGroup
-              title="Signup attempts"
-              subtitle="Distributor signup orders. Pending rows are attempts where M-Pesa payment did not confirm. They are not perfume purchases."
+              title="Starter package payments"
+              subtitle="These are Starter package payment attempts. If a payment is still pending, M-Pesa did not confirm it. They are not perfume purchases."
               orders={signupOrders}
               variant="signup"
             />
