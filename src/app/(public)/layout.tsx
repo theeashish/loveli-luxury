@@ -35,7 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
               Luxury Scents
             </span>
           </Link>
-          <nav className="hidden items-center gap-8 text-[0.72rem] font-semibold uppercase tracking-[0.14em] md:flex">
+          <nav className="hidden items-center gap-6 text-[0.76rem] font-semibold uppercase tracking-[0.1em] md:flex">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -45,19 +45,25 @@ export default async function PublicLayout({ children }: { children: React.React
                 {item.label}
               </Link>
             ))}
+            <Suspense fallback={null}>
+              <HeaderAuth variant="desktop" />
+            </Suspense>
+            <CartIndicator />
             <Link
               href="/partners"
               className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--foreground))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
             >
               Partners
             </Link>
-            <Suspense fallback={null}>
-              <HeaderAuth variant="desktop" />
-            </Suspense>
-            <CartIndicator />
           </nav>
           <div className="flex items-center gap-2 md:hidden">
             <CartIndicator />
+            <Link
+              href="/partners"
+              className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--foreground))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
+            >
+              Partners
+            </Link>
             <MobileMenu
               nav={NAV}
               secondaryNav={SECONDARY_NAV}

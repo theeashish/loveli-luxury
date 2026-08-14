@@ -40,9 +40,9 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
   } = await supabase.auth.getSession()
 
   const desktopLinkCls =
-    'text-xs uppercase tracking-[0.25em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
+    'text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
   const mobileLinkCls =
-    'block w-full py-3 text-left text-sm uppercase tracking-[0.25em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
+    'block w-full py-3 text-left text-sm font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
   const linkCls = variant === 'desktop' ? desktopLinkCls : mobileLinkCls
 
   if (!session?.user) {
@@ -114,7 +114,7 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
     <>
       <Link
         href={accountHref}
-        className="group flex max-w-[18rem] items-center gap-2 text-xs uppercase tracking-[0.25em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
+        className="group flex max-w-[18rem] items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
         title={email}
       >
         <span className="hidden truncate normal-case tracking-normal text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--primary))] lg:inline">
