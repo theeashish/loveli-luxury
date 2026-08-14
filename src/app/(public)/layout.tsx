@@ -3,7 +3,6 @@ import { Suspense } from 'react'
 import { Toaster } from '@/lib/toast'
 import { CartIndicator } from '@/components/cart/CartIndicator'
 import { CartDrawer } from '@/components/cart/CartDrawer'
-import { CartHydrator } from '@/components/cart/CartHydrator'
 import { HeaderAuth } from '@/components/header/HeaderAuth'
 import { MobileMenu } from '@/components/header/MobileMenu'
 import { PublicFooter } from '@/components/footer/PublicFooter'
@@ -76,7 +75,6 @@ export default async function PublicLayout({ children }: { children: React.React
       <PublicFooter copy={footerCopy} />
 
       <CartDrawer />
-      <CartHydrator />
       <Toaster />
       <PublicDeferredWidgets />
     </div>

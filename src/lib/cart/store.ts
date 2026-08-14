@@ -50,14 +50,22 @@ const noopStorage: StateStorage = {
   removeItem: () => {},
 }
 
+function createCartId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+
+  return 'cart-' + Date.now() + '-' + Math.random().toString(16).slice(2)
+}
+
 export const useCartStore = create<Store>()(
   persist(
     (set) => ({
       cartId: '',
       lines: [],
-      hasHydrated: false,
+      hasHydrated: true,
       isDrawerOpen: false,
-      add: (input, qty = 1) => set((s) => ({ lines: addLine(s.lines, input, qty) })),
+      add: (input, qty = 1) => set((s) => ({ cartId: s.cartId || createCartId(), lines: addLine(s.lines, input, qty) })),
       setQty: (key, qty) => set((s) => ({ lines: setQty(s.lines, key, qty) })),
       remove: (key) => set((s) => ({ lines: removeLine(s.lines, key) })),
       clear: () => set({ lines: [] }),
