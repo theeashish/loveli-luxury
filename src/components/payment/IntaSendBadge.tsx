@@ -8,6 +8,7 @@ export default function IntaSendBadge() {
         target="_blank"
         rel="noopener noreferrer"
       >
+        {/* eslint-disable-next-line @next/next/no-img-element -- IntaSend hosts this fixed external payment-security badge. */}
         <img
           src="https://intasend-prod-static.s3.amazonaws.com/img/trust-badges/intasend-trust-badge-with-mpesa-hr-light.png"
           alt="IntaSend Secure Payments"

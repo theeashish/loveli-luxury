@@ -1,10 +1,11 @@
+
 /**
- * Smoke suite — catches deployment-level regressions, not full UI behaviour.
+ * Smoke suite â€” catches deployment-level regressions, not full UI behaviour.
  *
  * These tests run against `next start` with a placeholder (unreachable)
  * database, so they only exercise pages that degrade cleanly when DB-bound
  * data is missing. Anything that genuinely needs DB data is OUT of scope here
- * — that belongs in the integration suite (pglite) or a later DB-backed e2e.
+ * â€” that belongs in the integration suite (pglite) or a later DB-backed e2e.
  */
 import { test, expect } from '@playwright/test'
 
@@ -141,9 +142,10 @@ test.describe('public surfaces render', () => {
       // expectedPath before building the regex makes the trailing slash
       // truly optional for every route, root included, instead of
       // accidentally requiring one only for '/'.
-      const trimmedPath = expectedPath.replace(/\/$/, '')
-      expect(href, `canonical on ${route} should end in ${expectedPath}`).toMatch(
-        new RegExp(`${trimmedPath.replace(/\//g, '\\/')}\\/?$`),
+      const canonicalPath = new URL(href as string, 'http://127.0.0.1:3000').pathname
+      const expectedCanonicalPath = expectedPath === '/' ? '/' : expectedPath.replace(/\/$/, '')
+      expect(canonicalPath, `canonical on ${route} should match ${expectedPath}`).toBe(
+        expectedCanonicalPath,
       )
     }
   })
@@ -174,7 +176,7 @@ test.describe('auth-gated routes redirect unauthenticated users', () => {
 test.describe('sponsor-cookie attribution (first-touch MLM input)', () => {
   // The middleware sets the ll_sponsor cookie on any visit with ?ref=LL-XX-XXXX
   // matching the SPONSOR_CODE_RE pattern. This is the entry point for every
-  // commission downstream — a regression here breaks MLM correctness silently.
+  // commission downstream â€” a regression here breaks MLM correctness silently.
   test('?ref=LL-AB-CDEF sets the ll_sponsor cookie for 30 days', async ({ page, context }) => {
     await page.goto('/?ref=LL-AB-CDEF')
     const cookies = await context.cookies()
@@ -195,7 +197,7 @@ test.describe('sponsor-cookie attribution (first-touch MLM input)', () => {
 
 test.describe('security headers (strict CSP / HSTS / frame deny)', () => {
   // next.config.js sets these on every response. A misconfigured deploy
-  // (env var typo, accidental override) silently drops them — that's exactly
+  // (env var typo, accidental override) silently drops them â€” that's exactly
   // what a smoke suite should catch before it reaches production.
   test('homepage carries the documented security headers', async ({ request }) => {
     const res = await request.get('/')

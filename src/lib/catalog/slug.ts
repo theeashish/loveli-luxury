@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-unsafe-regex -- Fixed, bounded slug and Unicode-normalisation expressions are not user-controlled. */
+
 /**
  * Slug helpers for catalog URLs.
  *

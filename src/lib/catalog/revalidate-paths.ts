@@ -14,6 +14,7 @@ const STATIC_PATHS: ReadonlySet<string> = new Set(['/', '/shop', '/bundles'])
 
 const DYNAMIC_PREFIXES: readonly string[] = ['/p', '/bundles']
 
+// eslint-disable-next-line security/detect-unsafe-regex -- Fixed, anchored slug rule; caller limits input to 80 characters.
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 export type PathValidation =

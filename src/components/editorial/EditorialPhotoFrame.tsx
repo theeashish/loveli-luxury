@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element -- Editor-managed HTTPS images intentionally stay independent of a broad remote-host allow-list. */
+
 type EditorialPhotoFrameProps = {
   src?: string
   alt?: string

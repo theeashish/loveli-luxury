@@ -17,6 +17,7 @@ export function ResetPasswordForm() {
       setError('Password must be at least 8 characters.')
       return
     }
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- Browser-local confirmation only; Supabase performs the real password handling.
     if (password !== confirm) {
       setError('Passwords do not match.')
       return

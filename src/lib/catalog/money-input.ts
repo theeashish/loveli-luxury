@@ -6,7 +6,10 @@
  * between the two representations without ever touching a float.
  */
 
+// eslint-disable-next-line security/detect-unsafe-regex -- Fixed, anchored KES input; digits are bounded to 15.
 const KES_INPUT_RE = /^\d{1,15}(?:\.\d{0,2})?$/
+// eslint-disable-next-line security/detect-unsafe-regex -- Fixed, anchored conversion pattern with bounded input.
+const KES_PARTS_RE = /^(\d{1,15})(?:\.(\d{0,2}))?$/
 
 export function isValidKesInput(input: string): boolean {
   const trimmed = input.trim()
@@ -17,7 +20,7 @@ export function isValidKesInput(input: string): boolean {
 /** "4000" → "400000", "4000.5" → "400050", "4000.55" → "400055" */
 export function kesInputToMinor(input: string): string {
   const trimmed = input.trim()
-  const match = trimmed.match(/^(\d{1,15})(?:\.(\d{0,2}))?$/)
+  const match = trimmed.match(KES_PARTS_RE)
   if (!match) throw new Error(`Invalid KES input: ${input}`)
   const whole = match[1] ?? '0'
   const cents = (match[2] ?? '').padEnd(2, '0').slice(0, 2)

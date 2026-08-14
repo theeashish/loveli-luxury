@@ -53,6 +53,7 @@ export async function createTestDb(): Promise<TestDb> {
   await db.exec(readFileSync(join(here, 'supabase-preamble.sql'), 'utf8'))
   for (const f of migrationFiles()) {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- f comes from readdirSync(migDir) and is filtered to local .sql migrations.
       await db.exec(readFileSync(join(migDir, f), 'utf8'))
     } catch (e) {
       await db.close()
