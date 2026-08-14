@@ -21,13 +21,13 @@ export default async function ProductsListPage() {
           href="/admin/catalog/products/new"
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
         >
-          New product
+          Add product
         </Link>
       </header>
 
       {products.length === 0 ? (
         <p className="rounded-lg border border-dashed border-neutral-300 bg-white p-10 text-center text-sm text-neutral-500">
-          No products yet. Click <strong>New product</strong> to start.
+          No products yet. Click <strong>Add product</strong> to start.
         </p>
       ) : (
         <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
@@ -36,7 +36,7 @@ export default async function ProductsListPage() {
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Slug</th>
-                <th className="px-4 py-3 font-medium">From</th>
+                <th className="px-4 py-3 font-medium">Price from</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3" />
               </tr>
