@@ -172,7 +172,7 @@ export default async function CohortsPage() {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Cohort analytics</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Retention, ARPU, and GSV-vs-payout health for the last 12 months.
+          Retention, sales, payouts, and revenue per customer for the last 12 months.
         </p>
       </header>
 

@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Loveli Luxury Partner Agreement',
-  description: 'Terms governing participation in the Loveli Luxury Partner Programme.',
+  description: 'Rules for joining and taking part in the Loveli Luxury Partner Programme.',
   robots: { index: false, follow: false },
 }
 
@@ -33,7 +33,7 @@ export default function PartnerAgreementPage() {
             Partner Agreement
           </h1>
           <p className="mt-6 max-w-3xl text-base leading-8 text-[hsl(var(--muted-foreground))] md:text-lg">
-            The terms governing participation in the Loveli Luxury Partner Programme.
+            Rules for joining and taking part in the Loveli Luxury Partner Programme.
           </p>
           <dl className="mt-8 grid max-w-2xl gap-5 border-t border-[hsl(var(--border))] pt-6 sm:grid-cols-3">
             <div>
@@ -51,36 +51,36 @@ export default function PartnerAgreementPage() {
           </dl>
         </header>
 
-        <nav aria-label="Agreement contents" className="mt-8 border-y border-[hsl(var(--border))] py-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Agreement contents</p>
+        <nav aria-label="In this agreement" className="mt-8 border-y border-[hsl(var(--border))] py-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--primary))]">In this agreement</p>
           <div className="mt-4 grid gap-x-5 gap-y-2 text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-2">
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#1-purpose-and-acceptance">1. Purpose and acceptance</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#2-invitation-eligibility-and-partner-status">2. Eligibility and partner status</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#3-activation-and-the-starter-package">3. Starter package</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#4-retail-first-business-model-and-compensation">4. Compensation</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#5-prices-wholesale-access-and-customer-treatment">5. Products and customers</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#6-brand-marketing-and-conduct">6. Brand and conduct</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#7-kyc-payout-details-and-taxes">7. Verification and payouts</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#8-data-protection-and-confidentiality">8. Data and confidentiality</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#9-payouts-adjustments-and-records">9. Adjustments and records</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#10-suspension-termination-and-consequences">10. Suspension and termination</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#11-changes-to-the-programme-or-agreement">11. Changes to the programme</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#12-notices-complaints-governing-law-and-disputes">12. Notices and disputes</a>
-            <a className="transition hover:text-[hsl(var(--foreground))]" href="#13-entire-agreement-and-severability">13. Entire agreement</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#1-joining-the-programme">1. Joining the programme</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#2-who-can-join">2. Eligibility and partner status</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#3-starter-package-and-activation">3. Starter package</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#4-sales-and-commission">4. Compensation</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#5-prices-and-customers">5. Products and customers</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#6-using-the-brand">6. Brand and conduct</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#7-verification-payouts-and-tax">7. Verification and payouts</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#8-data-and-confidential-information">8. Data and confidentiality</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#9-payouts-and-records">9. Adjustments and records</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#10-suspension-and-termination">10. Suspension and termination</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#11-changes-to-the-programme">11. Changes to the programme</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#12-notices-and-disputes">12. Notices and disputes</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#13-the-full-agreement">13. Entire agreement</a>
           </div>
         </nav>
 
         <div className="mt-14">
-          <Clause title="1. Purpose and acceptance">
+          <Clause title="1. Joining the programme">
             <p>
-              This Partner Agreement governs participation in the Loveli Luxury partner programme. The programme allows approved partners to promote and sell genuine Loveli Luxury products to retail customers in accordance with this Agreement, the approved compensation plan, the Income Disclosure Statement, and the published customer policies.
+              This Agreement sets the rules for taking part in the Loveli Luxury partner programme. Approved partners may promote and sell genuine Loveli Luxury products to retail customers under this Agreement, the approved compensation plan, the Income Disclosure Statement, and the published customer policies.
             </p>
             <p>
               A final version of this Agreement will be accepted electronically. The Company must retain the partner identity, agreement version, acceptance time, acceptance method, and the complete accepted text. A partner must not participate unless the final version has been accepted and all required onboarding checks are complete.
             </p>
           </Clause>
 
-          <Clause title="2. Invitation, eligibility, and partner status">
+          <Clause title="2. Who can join">
             <p>
               Participation is invitation-only. A prospective partner requires a valid sponsor invitation and must provide accurate, complete, and current onboarding information. The Company may accept, defer, decline, suspend, or terminate participation where lawful and reasonable, including where information is inaccurate, identity or phone verification is incomplete, fraud or misuse is suspected, or the programme rules are not followed.
             </p>
@@ -89,7 +89,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="3. Activation and the Starter package">
+          <Clause title="3. Starter package and activation">
             <p>
               A prospective partner may be asked to select and pay for a Starter package. The product, any joining fee, delivery charge, and any permitted processing charge must be shown clearly before payment. Prices, stock availability, and the contents of the Starter package are those displayed at the time of the order and may change prospectively.
             </p>
@@ -101,7 +101,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="4. Retail-first business model and compensation">
+          <Clause title="4. Sales and commission">
             <p>
               The programme is retail-first. Commissions are payable only on confirmed, paid, non-refunded qualifying retail product sales under the approved compensation plan. Recruiting, enrolling, sponsoring, or activating a partner does not by itself generate commission. A partner’s own Starter package purchase is not commissionable.
             </p>
@@ -113,7 +113,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="5. Prices, wholesale access, and customer treatment">
+          <Clause title="5. Prices and customers">
             <p>
               Active partners may receive the partner price shown by the Company for eligible products. A separately approved wholesale participant may receive the wholesale price then shown by the Company, currently calculated as 25% below the retail price, subject to a minimum order of 12 bottles and any additional written conditions. Wholesale access is approval-controlled and may be suspended or withdrawn for misuse, non-payment, fraud, or material breach.
             </p>
@@ -122,7 +122,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="6. Brand, marketing, and conduct">
+          <Clause title="6. Using the brand">
             <p>
               The Company grants the partner a limited, revocable, non-transferable permission to use the Loveli Luxury name and approved marketing materials solely to promote genuine Loveli Luxury products in compliance with this Agreement. The partner must not register or use confusingly similar names, domains, social accounts, adverts, packaging, or documents; modify the Company’s trademarks; or represent an unofficial product or offer as authorised.
             </p>
@@ -131,7 +131,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="7. KYC, payout details, and taxes">
+          <Clause title="7. Verification, payouts, and tax">
             <p>
               The Company may require identity, age, contact, address, tax, payment-account, and other verification information before activation, payout, or where a risk, legal, fraud-prevention, or regulatory concern arises. A phone number used for M-Pesa payouts must be verified before a payout is made. The Company may delay or decline a payout where required verification is incomplete, inconsistent, or reasonably suspected to be inaccurate or fraudulent.
             </p>
@@ -140,7 +140,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="8. Data protection and confidentiality">
+          <Clause title="8. Data and confidential information">
             <p>
               The Company processes personal data for onboarding, identity and phone verification, order fulfilment, customer service, compensation administration, payout administration, fraud prevention, security, legal compliance, audit, and communication about the programme. The partner must read the Company’s Privacy Policy before accepting the final agreement. The final policy link, data-controller contact details, lawful bases, retention periods, international-transfer safeguards, and data-subject-rights process must be confirmed by counsel before publication.
             </p>
@@ -149,7 +149,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="9. Payouts, adjustments, and records">
+          <Clause title="9. Payouts and records">
             <p>
               Eligible commissions are subject to the Company’s payout timetable, thresholds, verification requirements, and reconciliation processes. The Company may hold, offset, reverse, or claw back a commission or payout where it reasonably identifies a refund, chargeback, duplicate payment, calculation error, breach, fraud, manipulation, or legal requirement. The Company will maintain reasonable records of such adjustments and provide an explanation on request, subject to confidentiality and legal limits.
             </p>
@@ -158,7 +158,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="10. Suspension, termination, and consequences">
+          <Clause title="10. Suspension and termination">
             <p>
               The Company may suspend access or terminate this Agreement immediately where necessary to protect customers, the Company, the programme, or compliance obligations, including for fraud, unlawful conduct, material breach, unauthorised claims, non-payment, counterfeit activity, misuse of data or marks, or a material verification concern. Where practicable, the Company will give the partner notice and a reasonable opportunity to respond.
             </p>
@@ -167,13 +167,13 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="11. Changes to the programme or agreement">
+          <Clause title="11. Changes to the programme">
             <p>
               The Company may update products, prices, programme rules, compensation mechanics, policies, or this Agreement prospectively where reasonably necessary for operations, security, law, customer fairness, or programme integrity. Material changes to the final agreement must be communicated before taking effect, recorded with a new version number, and accepted where applicable law or the nature of the change requires renewed acceptance. Changes will not retrospectively take away rights already earned under valid prior terms except to correct error, fraud, refund, or legal non-compliance.
             </p>
           </Clause>
 
-          <Clause title="12. Notices, complaints, governing law, and disputes">
+          <Clause title="12. Notices and disputes">
             <p>
               Notices from the Company may be sent through the partner portal, the registered email address, SMS, or another recorded contact channel. Partners must keep their contact details current. Customer complaints and partner concerns should first be sent to the Company through the published support channel so the matter can be investigated promptly.
             </p>
@@ -182,7 +182,7 @@ export default function PartnerAgreementPage() {
             </p>
           </Clause>
 
-          <Clause title="13. Entire agreement and severability">
+          <Clause title="13. The full agreement">
             <p>
               Once approved, this Agreement, the accepted compensation plan, the Income Disclosure Statement, the applicable product and customer policies, and any signed written addendum will form the entire agreement between the Company and the partner regarding programme participation. If a provision is unenforceable, it will be interpreted or replaced only to the extent necessary, and the remaining provisions will continue where lawful.
             </p>

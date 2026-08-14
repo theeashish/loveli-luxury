@@ -20,7 +20,7 @@ export default async function NewBundlePage() {
         eyebrow="← Bundles"
         eyebrowHref="/admin/catalog/bundles"
         title="New bundle"
-        subtitle="Bundles power retail combos and the comp-plan starter packages. Define identity, pricing, and contents below."
+        subtitle="Set the bundle name, price, and items. Use it for retail or Starter packages."
       />
       <AdminBundleForm mode={{ kind: 'create' }} products={products} initialItems={[]} />
     </div>

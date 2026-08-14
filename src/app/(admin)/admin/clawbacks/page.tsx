@@ -86,8 +86,7 @@ export default async function ClawbacksPage() {
           Clawback resolutions
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Refunded orders whose commissions were already disbursed. Each
-          one needs a decision so the books match reality.
+          Refunded orders with commission already paid. Review each one and choose what to do.
         </p>
       </header>
 

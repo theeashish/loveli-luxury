@@ -139,7 +139,7 @@ export default async function AdminAnalyticsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Operational pulse. All figures in KES.
+            Key figures in KES.
           </p>
         </div>
         <a
