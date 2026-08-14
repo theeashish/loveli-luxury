@@ -71,16 +71,6 @@ export const useCartStore = create<Store>()(
         typeof window === 'undefined' ? noopStorage : window.localStorage,
       ),
       partialize: (s): CartState => ({ cartId: s.cartId, lines: s.lines }),
-      onRehydrateStorage: () => (state) => {
-        if (!state) return
-        if (!state.cartId) {
-          state.cartId =
-            typeof crypto !== 'undefined' && 'randomUUID' in crypto
-              ? crypto.randomUUID()
-              : fallbackUuid()
-        }
-        state.markHydrated(state.cartId)
-      },
     },
   ),
 )
@@ -91,12 +81,6 @@ if (typeof window !== 'undefined') {
   })
 }
 
-function fallbackUuid(): string {
-  // Last-resort UUIDv4-ish for very old runtimes. crypto.randomUUID is
-  // available in all browsers we target; this is just defensive.
-  const r = () => Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0')
-  return `${r()}${r()}-${r()}-${r()}-${r()}-${r()}${r()}${r()}`
-}
 
 export { lineKey }
 export type { CartLine, CartLineInput, CartState }
