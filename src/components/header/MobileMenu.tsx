@@ -59,7 +59,7 @@ export function MobileMenu({ nav, secondaryNav, authSlot }: Props) {
         aria-label="Mobile navigation"
         aria-hidden={!open}
         className={
-          'absolute inset-x-0 top-full border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/98 shadow-[0_18px_40px_hsl(22_18%_12%/0.12)] backdrop-blur-md transition-[opacity,transform,visibility] duration-200 ' +
+          'absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))] shadow-[0_18px_40px_hsl(22_18%_12%/0.12)] transition-[opacity,transform,visibility] duration-200 ' +
           (open
             ? 'pointer-events-auto visible translate-y-0 opacity-100'
             : 'pointer-events-none invisible -translate-y-2 opacity-0')
