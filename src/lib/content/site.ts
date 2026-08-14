@@ -613,9 +613,9 @@ export const PARTNER_PROGRAM_DEFAULTS: PartnerProgramContent = {
   startHeadline: 'A first step should feel informed.',
   photo: {
     heroAlt: 'Loveli Luxury partner program editorial photograph',
-    heroCaption: 'Partner program photography space',
+    heroCaption: 'The partner programme',
     storiesAlt: 'Loveli Luxury partner community editorial photograph',
-    storiesCaption: 'Partner stories photography space',
+    storiesCaption: 'Life around the programme',
   },
 }
 

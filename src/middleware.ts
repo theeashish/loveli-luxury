@@ -16,7 +16,7 @@ function buildContentSecurityPolicy(nonce: string): string {
   const developmentScriptPolicy = process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}${developmentScriptPolicy} https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com`,
+    `script-src 'self' 'nonce-${nonce}'${developmentScriptPolicy} https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com`,
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://intasend-prod-static.s3.amazonaws.com",
@@ -35,6 +35,7 @@ function createCspResponse(
   requestHeaders: Headers,
   contentSecurityPolicy: string,
 ): NextResponse {
+  requestHeaders.set('Content-Security-Policy', contentSecurityPolicy)
   const response = NextResponse.next({ request: { headers: requestHeaders } })
   response.headers.set('Content-Security-Policy', contentSecurityPolicy)
   return response
