@@ -2,69 +2,73 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Partner Agreement — Draft for Legal Review',
-  description: 'Draft Loveli Luxury Partner Agreement for legal review before publication.',
+  title: 'Loveli Luxury Partner Agreement',
+  description: 'Terms governing participation in the Loveli Luxury Partner Programme.',
   robots: { index: false, follow: false },
 }
 
-const reviewItems = [
-  'Insert Loveli Luxury’s registered legal entity name, registration number, registered address, and the notices email address.',
-  'Confirm the final version number, effective date, governing-law and dispute-resolution wording, and any mandatory statutory notices.',
-  'Confirm the final Starter package cancellation, return, refund, and repurchase rules against the live refund policy and Kenyan law.',
-  'Confirm the KYC, tax, record-retention, and payout requirements for the Company’s actual operating model and transaction volumes.',
-]
-
 function Clause({ title, children }: { title: string; children: React.ReactNode }) {
+  const sectionId = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+
   return (
-    <section className="border-t border-[hsl(var(--border))] py-8 first:border-t-0 first:pt-0">
+    <section id={sectionId} className="border-t border-[hsl(var(--border))] py-8 first:border-t-0 first:pt-0">
       <h2 className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))]">{title}</h2>
       <div className="mt-4 space-y-4 text-sm leading-7 text-[hsl(var(--muted-foreground))]">{children}</div>
     </section>
   )
 }
 
-export default function PartnerAgreementDraftPage() {
+export default function PartnerAgreementPage() {
   return (
     <div className="bg-[hsl(var(--background))]">
       <article className="mx-auto max-w-4xl px-6 py-16 md:px-10 md:py-24">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[hsl(var(--primary))]">
-          Loveli Luxury partners
-        </p>
-        <h1 className="mt-4 font-serif text-4xl tracking-tight text-[hsl(var(--foreground))] md:text-6xl">
-          Partner Agreement
-        </h1>
-        <p className="mt-6 max-w-3xl text-base leading-8 text-[hsl(var(--muted-foreground))]">
-          <strong className="font-semibold text-[hsl(var(--foreground))]">Draft for legal review only.</strong>{' '}
-          This document is not yet an approved or final contract. It must be reviewed, completed, and approved by qualified Kenyan legal counsel before it is used for acceptance, onboarding, activation, or payment.
-        </p>
-
-        <aside className="mt-10 rounded-lg border border-amber-300 bg-amber-50 p-6 text-sm leading-6 text-amber-950">
-          <p className="font-semibold">Publication hold</p>
-          <p className="mt-2">
-            Until counsel approves a final version, no person should be asked to accept this draft as binding. The final approved version must carry a version number, effective date, complete Company details, and a preserved record of the exact text accepted by each partner.
+        <header className="border-b border-[hsl(var(--border))] pb-10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[hsl(var(--primary))]">
+            Loveli Luxury International
           </p>
-        </aside>
-
-        <div className="mt-12 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/30 p-6 text-sm">
-          <dl className="grid gap-5 sm:grid-cols-2">
+          <h1 className="mt-4 font-serif text-5xl leading-[0.95] tracking-tight text-[hsl(var(--foreground))] md:text-7xl">
+            Partner Agreement
+          </h1>
+          <p className="mt-6 max-w-3xl text-base leading-8 text-[hsl(var(--muted-foreground))] md:text-lg">
+            The terms governing participation in the Loveli Luxury Partner Programme.
+          </p>
+          <dl className="mt-8 grid max-w-2xl gap-5 border-t border-[hsl(var(--border))] pt-6 sm:grid-cols-3">
             <div>
-              <dt className="text-xs uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Document status</dt>
-              <dd className="mt-1 font-medium text-[hsl(var(--foreground))]">Draft 0.1 — legal review required</dd>
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">Programme</dt>
+              <dd className="mt-1 text-sm font-medium">Partner Programme</dd>
             </div>
             <div>
-              <dt className="text-xs uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Effective date</dt>
-              <dd className="mt-1 font-medium text-[hsl(var(--foreground))]">[To be inserted after approval]</dd>
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">Access</dt>
+              <dd className="mt-1 text-sm font-medium">Invitation-only</dd>
             </div>
             <div>
-              <dt className="text-xs uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Company</dt>
-              <dd className="mt-1 font-medium text-[hsl(var(--foreground))]">Loveli Luxury — [insert registered legal entity details]</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">Partner</dt>
-              <dd className="mt-1 font-medium text-[hsl(var(--foreground))]">The individual accepted into the partner programme</dd>
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--muted-foreground))]">Model</dt>
+              <dd className="mt-1 text-sm font-medium">Retail-first</dd>
             </div>
           </dl>
-        </div>
+        </header>
+
+        <nav aria-label="Agreement contents" className="mt-8 border-y border-[hsl(var(--border))] py-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--primary))]">Agreement contents</p>
+          <div className="mt-4 grid gap-x-5 gap-y-2 text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-2">
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#1-purpose-and-acceptance">1. Purpose and acceptance</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#2-invitation-eligibility-and-partner-status">2. Eligibility and partner status</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#3-activation-and-the-starter-package">3. Starter package</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#4-retail-first-business-model-and-compensation">4. Compensation</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#5-prices-wholesale-access-and-customer-treatment">5. Products and customers</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#6-brand-marketing-and-conduct">6. Brand and conduct</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#7-kyc-payout-details-and-taxes">7. Verification and payouts</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#8-data-protection-and-confidentiality">8. Data and confidentiality</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#9-payouts-adjustments-and-records">9. Adjustments and records</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#10-suspension-termination-and-consequences">10. Suspension and termination</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#11-changes-to-the-programme-or-agreement">11. Changes to the programme</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#12-notices-complaints-governing-law-and-disputes">12. Notices and disputes</a>
+            <a className="transition hover:text-[hsl(var(--foreground))]" href="#13-entire-agreement-and-severability">13. Entire agreement</a>
+          </div>
+        </nav>
 
         <div className="mt-14">
           <Clause title="1. Purpose and acceptance">
@@ -184,25 +188,6 @@ export default function PartnerAgreementDraftPage() {
             </p>
           </Clause>
         </div>
-
-        <section className="mt-14 rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/30 p-6">
-          <h2 className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))]">Counsel approval checklist</h2>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-            {reviewItems.map((item) => (
-              <li key={item} className="flex gap-3"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[hsl(var(--primary))]" />{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="mt-12 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-          <h2 className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))]">Legal-review sources</h2>
-          <p className="mt-4">
-            Counsel should review the final agreement against the applicable law, including Kenya’s{' '}
-            <a href="https://www.odpc.go.ke/data-protection-laws-kenya/" target="_blank" rel="noreferrer" className="font-medium text-[hsl(var(--foreground))] underline underline-offset-4">data-protection framework</a>{' '}
-            and the{' '}
-            <a href="https://faolex.fao.org/docs/pdf/ken121992.pdf" target="_blank" rel="noreferrer" className="font-medium text-[hsl(var(--foreground))] underline underline-offset-4">Consumer Protection Act</a>.
-          </p>
-        </section>
 
         <p className="mt-12 text-xs leading-6 text-[hsl(var(--muted-foreground))]">
           <Link href="/partners" className="font-medium underline underline-offset-4">Return to partners</Link>
