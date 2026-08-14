@@ -102,7 +102,8 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key_for_e2e_only
       SUPABASE_SERVICE_ROLE_KEY: placeholder_service_role_key_e2e_only
-      REVALIDATE_SECRET: placeholder_revalidate_secret_min_32_chars_e2e    steps:
+      REVALIDATE_SECRET: placeholder_revalidate_secret_min_32_chars_e2e
+    steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
