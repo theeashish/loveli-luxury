@@ -67,13 +67,13 @@ export function MobileMenu({ nav, secondaryNav, authSlot }: Props) {
       >
         <div className="mx-auto max-h-[calc(100vh-5rem)] max-w-7xl overflow-y-auto px-6 pb-6 pt-3">
           <div className="border-b border-[hsl(var(--border))]/50 pb-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--muted-foreground))]">
               Navigate Loveli Luxury
             </p>
           </div>
 
           <nav aria-label="Explore" className="pt-2">
-            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
               Explore
             </p>
             {nav.map((item) => (
@@ -85,7 +85,7 @@ export function MobileMenu({ nav, secondaryNav, authSlot }: Props) {
           </nav>
 
           <div className="mt-4 border-t border-[hsl(var(--border))]/50 pt-2">
-            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
               Account
             </p>
             <div className="flex flex-col gap-1" onClick={closeMenu}>
@@ -93,7 +93,7 @@ export function MobileMenu({ nav, secondaryNav, authSlot }: Props) {
             </div>
 
           <nav aria-label="Support and partnerships" className="mt-4 border-t border-[hsl(var(--border))]/50 pt-2">
-            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+            <p className="py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--primary))]">
               Support & partnerships
             </p>
             {secondaryNav.map((item) => (

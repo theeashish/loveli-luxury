@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
   return (
     <article className="group relative mx-auto w-full max-w-[19rem] overflow-hidden border border-[hsl(35_45%_42%/0.28)] bg-[hsl(38_42%_93%)] transition duration-300 hover:-translate-y-1 hover:border-[hsl(35_45%_42%/0.72)] hover:shadow-[0_22px_46px_-34px_hsl(22_18%_12%/0.28)]">
       <Link href={`/p/${product.slug}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[linear-gradient(145deg,hsl(var(--muted))_0%,hsl(var(--background))_72%)]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(var(--muted))]">
           {cardImage ? (
             <Image
               src={cardImage}

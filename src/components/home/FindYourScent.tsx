@@ -1,14 +1,14 @@
 'use client'
 
 /**
- * Find-your-scent — homepage quiz.
+ * Find-your-scent â€” homepage quiz.
  *
  * Copy comes from the server-side `getSection('home_find_your_scent')` call
  * in `src/app/(public)/page.tsx`, which falls back to in-code defaults if the
  * DB row is missing or malformed. Admin-editable via
  * `/admin/content/site/home_find_your_scent`.
  *
- * The component stays client-side because of the step / answer state — the
+ * The component stays client-side because of the step / answer state â€” the
  * matching engine still picks a fragrance from FRAGRANCES by the option's
  * vibe tag (kept in code; the labels are the editable part).
  */
@@ -54,10 +54,21 @@ export function FindYourScent({ copy }: { copy: FindYourScentContent }) {
           </h2>
         </header>
 
-        <div className="rounded-lg border border-[hsl(var(--border))]/60 bg-[hsl(var(--muted))]/30 p-8 md:p-14">
+        <div className="rounded-none border border-[hsl(var(--border))]/60 bg-[hsl(var(--muted))]/20 p-6 md:p-12 lg:p-14">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[hsl(var(--muted-foreground))]">Your ritual</p>
+            <div className="flex items-center gap-2" aria-label={`Question ${Math.min(step + 1, total)} of ${total}`}>
+              {copy.steps.map((_, index) => (
+                <span
+                  key={index}
+                  className={index < Math.min(step + 1, total) ? 'h-px w-10 bg-[hsl(var(--primary))]' : 'h-px w-10 bg-[hsl(var(--border))]'}
+                />
+              ))}
+            </div>
+          </div>
           {result ? (
             <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-md">
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
                   src={result.image}
                   alt={result.name}
@@ -104,7 +115,7 @@ export function FindYourScent({ copy }: { copy: FindYourScentContent }) {
                       setAnswers((prev) => [...prev, o.tag])
                       setStep((s) => s + 1)
                     }}
-                    className="group rounded-md border border-[hsl(var(--border))] px-5 py-4 text-left text-sm transition hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/5"
+                    className="group rounded-none border border-[hsl(var(--border))] px-5 py-4 text-left text-sm transition-colors duration-200 hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
                   >
                     <span className="block transition group-hover:text-[hsl(var(--primary))]">
                       {o.label}

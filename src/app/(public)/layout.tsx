@@ -35,7 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
               Luxury Scents
             </span>
           </Link>
-          <nav className="hidden items-center gap-9 text-xs font-semibold uppercase tracking-[0.2em] md:flex">
+          <nav className="hidden items-center gap-8 text-[0.72rem] font-semibold uppercase tracking-[0.14em] md:flex">
             {NAV.map((item) => (
               <Link
                 key={item.href}
