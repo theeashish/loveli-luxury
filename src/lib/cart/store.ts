@@ -63,7 +63,7 @@ export const useCartStore = create<Store>()(
     (set) => ({
       cartId: '',
       lines: [],
-      hasHydrated: true,
+      hasHydrated: false,
       isDrawerOpen: false,
       add: (input, qty = 1) => set((s) => ({ cartId: s.cartId || createCartId(), lines: addLine(s.lines, input, qty) })),
       setQty: (key, qty) => set((s) => ({ lines: setQty(s.lines, key, qty) })),
@@ -79,6 +79,11 @@ export const useCartStore = create<Store>()(
         typeof window === 'undefined' ? noopStorage : window.localStorage,
       ),
       partialize: (s): CartState => ({ cartId: s.cartId, lines: s.lines }),
+      skipHydration: true,
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        state.markHydrated(state.cartId || createCartId())
+      },
     },
   ),
 )
