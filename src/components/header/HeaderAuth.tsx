@@ -1,7 +1,7 @@
 /**
  * Header auth slot.
  *
- * Signed-out desktop: a compact "Sign up" disclosure with account access links.
+ * Signed-out desktop: Create account link with a Log in disclosure.
  * Signed-out mobile: explicit "Log in" + "Sign up" text links.
  * Signed-in:  identity strip ([email] Â· [ROLE]) acting as the Account
  *             link, plus a separate Sign out form button.
@@ -49,20 +49,14 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
   if (!session?.user) {
     if (variant === 'desktop') {
       return (
-        <details data-testid="desktop-auth-menu" className="group relative">
-          <summary className={`${desktopLinkCls} inline-flex cursor-pointer list-none items-center gap-1.5 [&::-webkit-details-marker]:hidden`}>
-            Sign up
-            <span aria-hidden className="text-[0.7rem] transition-transform duration-200 group-open:rotate-45">+</span>
-          </summary>
-          <div className="absolute right-0 top-full z-50 mt-3 min-w-40 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 shadow-[0_14px_32px_hsl(22_18%_12%/0.14)]">
-            <Link href="/signup" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
-              Create account
-            </Link>
+        <div data-testid="desktop-auth-menu" className="group relative">
+          <Link href="/signup" className={desktopLinkCls}>Create account</Link>
+          <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-40 translate-y-1 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 opacity-0 shadow-[0_14px_32px_hsl(22_18%_12%/0.14)] transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
             <Link href="/login" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
               Log in
             </Link>
           </div>
-        </details>
+        </div>
       )
     }
 

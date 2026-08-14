@@ -1,18 +1,20 @@
 import { test, expect } from '@playwright/test'
 
-test('desktop Sign up disclosure keeps authentication links grouped', async ({ page }) => {
+test('desktop Create account link keeps Log in in the secondary menu', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('/')
 
   const authMenu = page.getByTestId('desktop-auth-menu')
-  await expect(authMenu).toBeVisible()
-  await expect(authMenu.locator('summary')).toContainText('Sign up')
-  await expect(authMenu.getByRole('link', { name: 'Create account', exact: true })).not.toBeVisible()
-  await expect(authMenu.getByRole('link', { name: 'Log in', exact: true })).not.toBeVisible()
+  const createAccount = authMenu.getByRole('link', { name: 'Create account', exact: true })
+  const login = authMenu.getByRole('link', { name: 'Log in', exact: true })
 
-  await authMenu.locator('summary').click()
-  await expect(authMenu.getByRole('link', { name: 'Create account', exact: true })).toBeVisible()
-  await expect(authMenu.getByRole('link', { name: 'Log in', exact: true })).toBeVisible()
+  await expect(createAccount).toBeVisible()
+  await expect(createAccount).toHaveAttribute('href', '/signup')
+  await expect(login).not.toBeVisible()
+
+  await createAccount.hover()
+  await expect(login).toBeVisible()
+  await expect(login).toHaveAttribute('href', '/login')
 })
 
 test('mobile menu keeps explicit Log in and Sign up links', async ({ page }) => {
