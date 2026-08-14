@@ -42,7 +42,7 @@ export function EditorialPhotoFrame({
                 {label}
               </span>
               <span className="mt-2 max-w-[13rem] text-[9px] uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
-                Photography space
+                Loveli Luxury
               </span>
             </div>
           </div>

@@ -35,7 +35,7 @@ export function BundleHighlight({ bundle }: { bundle: BundleDto }) {
         <div className="flex min-w-0 flex-col justify-between border-l border-[hsl(var(--border))] p-6 md:p-8">
           <div>
             <p className="text-[9px] font-medium uppercase tracking-[0.28em] text-[hsl(var(--primary))]">
-              {bundle.starterPackageCode ? `Starter package ${bundle.starterPackageCode}` : 'Curated set'}
+              {bundle.isStarterPackage ? 'Starter package' : 'Curated set'}
             </p>
             <h3 className="mt-4 font-serif text-3xl leading-tight tracking-tight text-[hsl(var(--foreground))] transition group-hover:text-[hsl(var(--primary))]">
               {bundle.name}
