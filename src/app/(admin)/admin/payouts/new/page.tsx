@@ -101,14 +101,14 @@ export default async function NewPayoutPage({
       <AdminPageHeader
         eyebrow="← All payouts"
         eyebrowHref="/admin/payouts"
-        title="New payout"
-        subtitle="Aggregates unpaid commissions, salary, and rank-up bonuses for a single month into a draft. Initiate the M-Pesa transfer from the detail page."
+        title="Prepare a payment"
+        subtitle="Review the commission, salary, and bonus amounts for one month. Send the payment from the next page when you are ready."
       />
 
       <div className="space-y-5">
         <AdminFormSection
-          title="Preview unpaid earnings"
-          subtitle="Pick a distributor and period; we show what would be paid before you commit."
+          title="Check the amount"
+          subtitle="Choose a partner and month to see the amount before you prepare the payment."
         >
           <form className="flex flex-wrap items-end gap-3 text-sm">
             <label className="flex flex-1 min-w-[14rem] flex-col">

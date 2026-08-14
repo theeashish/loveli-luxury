@@ -13,7 +13,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { findOrdersMissingCommission } from '@/lib/mlm/commission-reconcile'
 import { runReconcileNow } from './actions'
 
-export const metadata = { title: 'Commission health', robots: { index: false } }
+export const metadata = { title: 'Commission check', robots: { index: false } }
 export const dynamic = 'force-dynamic'
 
 export default async function CommissionHealthPage() {
@@ -23,30 +23,27 @@ export default async function CommissionHealthPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <header className="mb-8">
-        <p className="text-eyebrow text-neutral-500">Comp</p>
+        <p className="text-eyebrow text-neutral-500">Commissions</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-neutral-900">
-          Commission health
+          Commission check
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Detects paid, commissionable orders that have no commission rows (e.g. a
-          webhook ledger-write that failed non-fatally) and backfills them. The daily
-          cron <code>/api/cron/commission-reconcile</code> runs this automatically;
-          this is the manual view + trigger.
+          Finds paid orders that should have a commission but do not. The daily check normally fixes them; use this page when you want to check now.
         </p>
       </header>
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">Orders missing commissions</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">Orders without commission</h2>
           <form action={runReconcileNow}>
             <button className="rounded bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700">
-              Backfill now
+              Add missing commission
             </button>
           </form>
         </div>
         {missing.length === 0 ? (
           <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-6 text-sm text-emerald-900">
-            All paid, commissionable orders have their commissions. Nothing to backfill.
+            Every paid order that should earn commission has one. Nothing needs fixing.
           </div>
         ) : (
           <ul className="space-y-2">

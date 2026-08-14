@@ -39,33 +39,33 @@ const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: '/admin/orders', label: 'Orders' },
       { href: '/admin/payouts', label: 'Payouts' },
-      { href: '/admin/close', label: 'Monthly close' },
-      { href: '/admin/clawbacks', label: 'Clawbacks' },
+      { href: '/admin/close', label: 'Month-end' },
+      { href: '/admin/clawbacks', label: 'Refunded orders' },
     ],
   },
   {
     label: 'People',
     items: [
       { href: '/admin/distributors', label: 'Distributors' },
-      { href: '/admin/distributors/verifications', label: 'KYC queue' },
-      { href: '/admin/people/tree', label: 'Comp tree' },
+      { href: '/admin/distributors/verifications', label: 'ID checks' },
+      { href: '/admin/people/tree', label: 'Partner network' },
     ],
   },
   {
-    label: 'Comp',
+    label: 'Commissions',
     items: [
       { href: '/admin/comp/starter-packages', label: 'Starter packages' },
-      { href: '/admin/comp/commission-health', label: 'Commission health' },
+      { href: '/admin/comp/commission-health', label: 'Commission check' },
     ],
   },
   {
     label: 'System',
     items: [
-      { href: '/admin/system/users', label: 'Users (superadmin)' },
-      { href: '/admin/system/roles', label: 'User roles' },
-      { href: '/admin/diagnostics', label: 'Diagnostics' },
+      { href: '/admin/system/users', label: 'Admin users' },
+      { href: '/admin/system/roles', label: 'Access roles' },
+      { href: '/admin/diagnostics', label: 'System checks' },
       { href: '/admin/analytics', label: 'Analytics' },
-      { href: '/admin/analytics/cohorts', label: 'Cohorts' },
+      { href: '/admin/analytics/cohorts', label: 'Customer activity' },
     ],
   },
 ] as const
@@ -124,7 +124,7 @@ export function AdminSidebar({ email, isSuperadmin }: Props) {
       <nav className="flex-1 overflow-y-auto px-4 py-6">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-6 last:mb-0">
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+            <p className="mb-2 px-3 text-xs font-medium text-neutral-500">
               {group.label}
             </p>
             <ul className="flex flex-col gap-0.5">

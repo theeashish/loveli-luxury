@@ -133,23 +133,23 @@ export default async function AdminClosePage({
   return (
     <div className="max-w-6xl">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Monthly close</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Month-end</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Compute GSV, salaries, and rank-ups for a calendar month, then auto-draft payouts.
+          Work out monthly sales, salaries, and promotions, then prepare payments.
         </p>
       </header>
 
       {/* Summary banners after action redirects */}
       {searchParams.ran ? (
         <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Close ran for <strong>{searchParams.ran}</strong>: processed{' '}
+          Month processed: <strong>{searchParams.ran}</strong>: processed{' '}
           {searchParams.processed ?? '0'}, promoted {searchParams.promoted ?? '0'},
           failed {searchParams.failed ?? '0'}.
         </div>
       ) : null}
       {searchParams.drafted ? (
         <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Drafted payouts for <strong>{searchParams.drafted}</strong>:{' '}
+          Payments prepared for <strong>{searchParams.drafted}</strong>:{' '}
           {searchParams.created ?? '0'} created,{' '}
           {searchParams.existed ?? '0'} already existed,{' '}
           {searchParams.zero ?? '0'} had zero earnings,{' '}
@@ -202,7 +202,7 @@ export default async function AdminClosePage({
             type="submit"
             className="rounded-md bg-neutral-900 px-4 py-2 text-sm text-white"
           >
-            Run close for {year}-{String(month).padStart(2, '0')}
+            Process {year}-{String(month).padStart(2, '0')}
           </button>
         </form>
         <form action={draftPayoutsForPeriodAction}>
@@ -212,7 +212,7 @@ export default async function AdminClosePage({
             type="submit"
             className="rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm"
           >
-            Draft payouts for {year}-{String(month).padStart(2, '0')}
+            Prepare payments for {year}-{String(month).padStart(2, '0')}
           </button>
         </form>
       </div>
@@ -228,7 +228,7 @@ export default async function AdminClosePage({
               <th className="px-4 py-3">Distributor</th>
               <th className="px-4 py-3 text-right">Bottles</th>
               <th className="px-4 py-3 text-right">Personal sales</th>
-              <th className="px-4 py-3 text-right">Team GSV</th>
+              <th className="px-4 py-3 text-right">Team sales</th>
               <th className="px-4 py-3 text-right">Active recruits</th>
               <th className="px-4 py-3 text-right">Salary</th>
             </tr>
@@ -237,7 +237,7 @@ export default async function AdminClosePage({
             {snapshots.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-neutral-500">
-                  No snapshots for this period yet. Run close to populate.
+                  No results for this month yet. Process the month to see them.
                 </td>
               </tr>
             ) : (

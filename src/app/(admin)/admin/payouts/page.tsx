@@ -55,16 +55,14 @@ export default async function AdminPayoutsListPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Payouts</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Monthly cron drafts payouts; admin reviews and fires them. Use the
-            bulk-fire button below to process every eligible pending payout in
-            one click, or click into a row to fire individually.
+            Payments are prepared each month. Review them, then send one payment or all ready payments at once.
           </p>
         </div>
         <Link
           href="/admin/payouts/new"
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm text-white"
         >
-          New payout
+          Prepare a payment
         </Link>
       </header>
 

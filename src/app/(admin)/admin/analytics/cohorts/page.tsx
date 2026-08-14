@@ -170,9 +170,9 @@ export default async function CohortsPage() {
   return (
     <div className="max-w-6xl space-y-10">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Cohort analytics</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Customer activity</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Retention, sales, payouts, and revenue per customer for the last 12 months.
+          See repeat orders, sales, payouts, and average spend for the last 12 months.
         </p>
       </header>
 
@@ -261,7 +261,7 @@ export default async function CohortsPage() {
                 <th className="px-4 py-3">Cohort</th>
                 <th className="px-4 py-3 text-right">Size</th>
                 <th className="px-4 py-3 text-right">Lifetime revenue</th>
-                <th className="px-4 py-3 text-right">ARPU</th>
+                <th className="px-4 py-3 text-right">Average spend</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -305,7 +305,7 @@ export default async function CohortsPage() {
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-[0.15em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Month</th>
-                <th className="px-4 py-3 text-right">GSV (commissionable)</th>
+                <th className="px-4 py-3 text-right">Sales that earn commission</th>
                 <th className="px-4 py-3 text-right">Commissions paid</th>
                 <th className="px-4 py-3 text-right">Ratio</th>
               </tr>

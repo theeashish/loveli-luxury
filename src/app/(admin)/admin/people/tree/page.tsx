@@ -20,7 +20,7 @@ import { redirect } from 'next/navigation'
 import { getSession, isAdmin } from '@/lib/auth/roles'
 import { createServiceClient } from '@/lib/supabase/service'
 
-export const metadata = { title: 'Comp tree', robots: { index: false } }
+export const metadata = { title: 'Partner network', robots: { index: false } }
 export const dynamic = 'force-dynamic'
 
 type DistributorRow = {
@@ -120,7 +120,7 @@ export default async function CompTreePage() {
         <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">
           People
         </p>
-        <h1 className="mt-2 text-3xl font-semibold">Comp tree</h1>
+        <h1 className="mt-2 text-3xl font-semibold">Partner network</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
           Every distributor in the network, sorted by depth from the founding
           distributor. <strong>L0</strong> is the founder, <strong>L1</strong>{' '}

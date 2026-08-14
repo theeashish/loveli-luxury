@@ -64,20 +64,20 @@ export default async function VerificationQueuePage() {
   return (
     <div className="mx-auto max-w-6xl space-y-10">
       <header>
-        <p className="text-eyebrow text-neutral-500">People / verification</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">KYC and phone review</h1>
+        <p className="text-eyebrow text-neutral-500">People / checks</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">ID and phone checks</h1>
         <p className="mt-2 max-w-3xl text-sm text-neutral-500">
-          Review phone verification first. Government ID is shown only as an on-file signal here; keep the full document out of routine screens and request it only for a first payout or a risk flag.
+          Check the phone number first. An ID is only shown here as a note. Keep the full document out of normal screens and ask for it only before a first payment or when something looks wrong.
         </p>
       </header>
 
       <section className="rounded-lg border border-neutral-200 bg-white">
         <div className="border-b border-neutral-200 px-6 py-5">
-          <h2 className="text-lg font-semibold">Pending partner KYC ({kycRows.length})</h2>
+          <h2 className="text-lg font-semibold">ID checks waiting ({kycRows.length})</h2>
           <p className="mt-1 text-sm text-neutral-500">Approve only when the partner's phone number is verified. Approval does not activate the partner until the welcome-package stock purchase is paid.</p>
         </div>
         {kycRows.length === 0 ? (
-          <p className="px-6 py-10 text-sm text-neutral-500">No pending KYC reviews.</p>
+          <p className="px-6 py-10 text-sm text-neutral-500">No ID checks waiting.</p>
         ) : (
           <div className="divide-y divide-neutral-200">
             {kycRows.map((row) => {
@@ -119,11 +119,11 @@ export default async function VerificationQueuePage() {
 
       <section className="rounded-lg border border-neutral-200 bg-white">
         <div className="border-b border-neutral-200 px-6 py-5">
-          <h2 className="text-lg font-semibold">Pending payout-number changes ({msisdnRows.length})</h2>
+          <h2 className="text-lg font-semibold">Phone number changes waiting ({msisdnRows.length})</h2>
           <p className="mt-1 text-sm text-neutral-500">Approve a new M-Pesa number only after the normal verification evidence is present.</p>
         </div>
         {msisdnRows.length === 0 ? (
-          <p className="px-6 py-10 text-sm text-neutral-500">No pending payout-number changes.</p>
+          <p className="px-6 py-10 text-sm text-neutral-500">No phone number changes waiting.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

@@ -23,7 +23,7 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
   const [result, setResult] = useState<BulkFireResult | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const expectedConfirm = `FIRE ${pendingCount}`
+  const expectedConfirm = `SEND ${pendingCount}`
   const canFire = pendingCount > 0 && confirm.trim() === expectedConfirm
 
   function run() {
@@ -52,18 +52,18 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
           }}
           className="rounded-md border border-rose-300 bg-white px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-50"
         >
-          {open ? 'Cancel' : `Fire all ${pendingCount} pending`}
+          {open ? 'Cancel' : `Send all ${pendingCount} ready payments`}
         </button>
         <span className="text-xs text-neutral-500">
-          Same safety gates as per-payout: MSISDN verified, no drift, ENABLE_PAYOUTS on.
+          A payment can only be sent when the phone number is verified, the amount has not changed, and payments are enabled.
         </span>
       </div>
 
       {open && !result && (
         <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 p-4">
           <p className="text-sm text-rose-900">
-            <strong>This fires real B2C transfers</strong> from the IntaSend
-            wallet to every eligible pending payout. Each fire is logged.
+            <strong>This sends real M-Pesa payments</strong> from the IntaSend
+            wallet to every eligible pending payout. Each payment is recorded.
             Failures roll back to <code className="font-mono">pending</code>{' '}
             and can be retried. Type{' '}
             <strong className="font-mono">{expectedConfirm}</strong> to confirm.
@@ -81,7 +81,7 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
               disabled={pending || !canFire}
               className="rounded bg-rose-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {pending ? 'Firing…' : 'Confirm fire'}
+              {pending ? 'Sending...' : 'Confirm sending'}
             </button>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
           {result.ok ? (
             <>
               <p className="text-sm font-medium text-emerald-900">
-                Bulk fire complete · fired {result.summary.fired} · skipped{' '}
+                Batch complete - sent {result.summary.fired} - not sent{' '}
                 {result.summary.skipped} · failed {result.summary.failed}
               </p>
               {result.outcomes.length > 0 && (
@@ -115,7 +115,7 @@ export function BulkFireButton({ pendingCount }: { pendingCount: number }) {
                       }`}
                     >
                       <span className="font-mono">#{o.payoutId}</span> ·{' '}
-                      <strong>{o.status}</strong>
+                      <strong>{o.status === 'fired' ? 'sent' : o.status === 'skipped' ? 'not sent' : o.status}</strong>
                       {o.status === 'fired' && (
                         <>
                           {' '}

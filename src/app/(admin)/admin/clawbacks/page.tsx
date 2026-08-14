@@ -83,22 +83,22 @@ export default async function ClawbacksPage() {
     <div className="max-w-6xl space-y-10">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Clawback resolutions
+          Refunded orders
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Refunded orders with commission already paid. Review each one and choose what to do.
+          Orders refunded after commission was paid. Choose whether to leave the payment as it is or take it from a future payout.
         </p>
       </header>
 
       <section>
         <header className="mb-3 flex items-baseline justify-between">
           <h2 className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-            Pending — {pending.length} ({formatKes(totalPendingMinor)})
+            Needs a decision - {pending.length} ({formatKes(totalPendingMinor)})
           </h2>
         </header>
         {pending.length === 0 ? (
           <div className="rounded-lg border border-neutral-200 bg-white p-12 text-center text-sm text-neutral-500">
-            No outstanding clawback decisions.
+            Nothing needs your attention.
           </div>
         ) : (
           <ul className="space-y-3">
@@ -145,7 +145,7 @@ export default async function ClawbacksPage() {
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-[10px] uppercase tracking-[0.15em] text-neutral-500">
-                        Payout id (if deducting)
+                        Payout number (if taking it from a payout)
                       </span>
                       <input
                         type="number"
@@ -162,7 +162,7 @@ export default async function ClawbacksPage() {
                         value="written_off"
                         className="flex-1 rounded-md border border-neutral-300 bg-white px-3 py-2 text-xs uppercase tracking-[0.15em] text-neutral-800 hover:bg-neutral-50"
                       >
-                        Write off
+                        Leave payment as it is
                       </button>
                       <button
                         type="submit"
@@ -170,7 +170,7 @@ export default async function ClawbacksPage() {
                         value="deducted_from_payout"
                         className="flex-1 rounded-md bg-neutral-900 px-3 py-2 text-xs uppercase tracking-[0.15em] text-white"
                       >
-                        Deducted
+                        Take from payout
                       </button>
                     </div>
                   </form>
@@ -182,24 +182,24 @@ export default async function ClawbacksPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
-          Resolved — last {Math.min(50, resolved.length)}
+        <h2 className="mb-3 text-sm font-semibold text-neutral-700">
+          Past decisions - last {Math.min(50, resolved.length)}
         </h2>
         <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
           <table className="min-w-full divide-y divide-neutral-200 text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase tracking-[0.15em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Order</th>
-                <th className="px-4 py-3">Decision</th>
+                <th className="px-4 py-3">Choice</th>
                 <th className="px-4 py-3 text-right">Amount</th>
-                <th className="px-4 py-3">Resolved</th>
+                <th className="px-4 py-3">Handled</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {resolved.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-neutral-500">
-                    No resolutions yet.
+                    No past decisions yet.
                   </td>
                 </tr>
               ) : (
@@ -221,10 +221,10 @@ export default async function ClawbacksPage() {
                       </td>
                       <td className="px-4 py-3 text-xs uppercase tracking-[0.15em]">
                         {row.resolution === 'written_off' ? (
-                          <span className="text-rose-700">written off</span>
+                          <span className="text-rose-700">left as paid</span>
                         ) : (
                           <span className="text-emerald-700">
-                            deducted
+                            taken from payout
                             {row.deducted_from_payout_id
                               ? ` · payout #${row.deducted_from_payout_id}`
                               : ''}
