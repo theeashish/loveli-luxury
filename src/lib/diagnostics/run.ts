@@ -18,6 +18,7 @@ import 'server-only'
 import { getServerEnv, publicEnv } from '../env'
 import { createServiceClient } from '../supabase/service'
 import { lastFullUtcMonth } from '../close/orchestrate'
+import { Redis } from '@upstash/redis'
 
 const AFRICAS_TALKING_USER = 'https://api.africastalking.com/version1/user'
 
@@ -356,8 +357,37 @@ export async function runDiagnostics(): Promise<DiagnosticsResult> {
     )
   }
 
+    // ---------------------------------------------------------------------
+  // Group: Upstash — a read-only ping confirms the strict rate limiter can
+  // reach Redis with the configured REST URL/token. Error details stay
+  // intentionally redacted so no provider URL or credential can appear in
+  // the admin result.
+  // ---------------------------------------------------------------------
+
+  checks.push(
+    await timed('Upstash', 'Redis REST connectivity', async () => {
+      const url =
+        env.UPSTASH_REDIS_REST_URL ??
+        env.UPSTASH_REDIS_REST_KV_REST_API_URL
+      const token =
+        env.UPSTASH_REDIS_REST_TOKEN ??
+        env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN
+      if (!url || !token) {
+        return { status: 'fail', detail: 'REST URL/token not configured' }
+      }
+      try {
+        const redis = new Redis({ url, token })
+        const pong = await redis.ping()
+        return { status: 'ok', detail: `ping=${String(pong)}` }
+      } catch {
+        return { status: 'fail', detail: 'Redis REST request failed' }
+      }
+    }),
+  )
+
   // ---------------------------------------------------------------------
   // Group: IntaSend
+
   //
   // Phase 0 (2026-06-03) status: PayHero has been removed. The IntaSend
   // integration is being built in Phase 1+. The env-presence checks below
