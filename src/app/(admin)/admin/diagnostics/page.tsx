@@ -30,9 +30,10 @@ const STATUS_META: Record<CheckStatus, { label: string; color: string; bg: strin
 export default async function DiagnosticsPage({
   searchParams,
 }: {
-  searchParams: { run?: string }
+  searchParams: Promise<{ run?: string }>
 }) {
-  const shouldRun = searchParams.run === '1'
+  const { run } = await searchParams
+  const shouldRun = run === '1'
 
   if (!shouldRun) {
     return (
