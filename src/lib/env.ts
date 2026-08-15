@@ -103,7 +103,9 @@ const serverSchema = z.object({
     .transform((v) => (v === undefined ? 100_000 : Number.parseInt(v, 10))),
   // Upstash Redis for rate limiting. Unset → limiter is a no-op (fail-open).
   UPSTASH_REDIS_REST_URL: z.preprocess(emptyToUndef, z.string().url().optional()),
-  UPSTASH_REDIS_REST_TOKEN: z.preprocess(emptyToUndef, z.string().min(10).optional()),
+    UPSTASH_REDIS_REST_TOKEN: z.preprocess(emptyToUndef, z.string().min(10).optional()),
+  UPSTASH_REDIS_REST_KV_REST_API_URL: z.preprocess(emptyToUndef, z.string().url().optional()),
+  UPSTASH_REDIS_REST_KV_REST_API_TOKEN: z.preprocess(emptyToUndef, z.string().min(10).optional()),
   // Admin 2FA enforcement. 'true' → admins with an enrolled TOTP factor must
   // pass an aal2 challenge to use /admin. Default off (inert).
   ENFORCE_ADMIN_MFA: z.string().transform((v) => v === 'true').default('false'),
@@ -165,6 +167,8 @@ export function getServerEnv() {
       process.env.INTASEND_PAYOUT_APPROVAL_CEILING_KES,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    UPSTASH_REDIS_REST_KV_REST_API_URL: process.env.UPSTASH_REDIS_REST_KV_REST_API_URL,
+    UPSTASH_REDIS_REST_KV_REST_API_TOKEN: process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN,
     ENFORCE_ADMIN_MFA: process.env.ENFORCE_ADMIN_MFA,
   })
 
