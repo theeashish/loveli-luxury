@@ -58,7 +58,7 @@ function bumpStorefront(paths: readonly string[]) {
 export async function createCategory(input: CreateCategoryInput) {
   const data = createCategorySchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_CREATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { error } = await supabase.from('categories').insert({
     slug: data.slug,
     name: data.name,
@@ -73,7 +73,7 @@ export async function createCategory(input: CreateCategoryInput) {
 export async function updateCategory(input: UpdateCategoryInput) {
   const data = updateCategorySchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const patch: Tables['categories']['Update'] = {}
   if (data.slug !== undefined) patch.slug = data.slug
   if (data.name !== undefined) patch.name = data.name
@@ -87,7 +87,7 @@ export async function updateCategory(input: UpdateCategoryInput) {
 
 export async function deleteCategory(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { error } = await supabase.from('categories').delete().eq('id', id)
   if (error) throw error
   bumpStorefront(['/shop'])
@@ -100,7 +100,7 @@ export async function deleteCategory(id: number) {
 export async function createProduct(input: CreateProductInput): Promise<{ id: number; slug: string }> {
   const data = createProductSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_CREATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: row, error } = await supabase
     .from('products')
     .insert({
@@ -122,7 +122,7 @@ export async function createProduct(input: CreateProductInput): Promise<{ id: nu
 export async function updateProduct(input: UpdateProductInput) {
   const data = updateProductSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const patch: Tables['products']['Update'] = {}
   if (data.slug !== undefined) patch.slug = data.slug
   if (data.name !== undefined) patch.name = data.name
@@ -144,7 +144,7 @@ export async function updateProduct(input: UpdateProductInput) {
 
 export async function deleteProduct(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: existing, error: readErr } = await supabase
     .from('products')
     .select()
@@ -163,7 +163,7 @@ export async function deleteProduct(id: number) {
 export async function createVariant(input: CreateVariantInput) {
   const data = createVariantSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { error } = await supabase.from('product_variants').insert({
     product_id: data.productId,
     sku: data.sku,
@@ -182,7 +182,7 @@ export async function updateVariant(input: UpdateVariantInput) {
   await requireSuperadmin()
   const data = updateVariantSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const patch: Tables['product_variants']['Update'] = {}
   if (data.sku !== undefined) patch.sku = data.sku
   if (data.sizeMl !== undefined) patch.size_ml = data.sizeMl
@@ -205,7 +205,7 @@ export async function updateVariant(input: UpdateVariantInput) {
 
 export async function deleteVariant(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: row, error: readErr } = await supabase
     .from('product_variants')
     .select()
@@ -233,7 +233,7 @@ async function revalidateProductFromVariant(supabase: Client, productId: number)
 export async function createBundle(input: CreateBundleInput): Promise<{ id: number; slug: string }> {
   const data = createBundleSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_CREATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
 
   const { data: bundle, error: bErr } = await supabase
     .from('bundles')
@@ -268,7 +268,7 @@ export async function createBundle(input: CreateBundleInput): Promise<{ id: numb
 export async function updateBundle(input: UpdateBundleInput) {
   const data = updateBundleSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const patch: Tables['bundles']['Update'] = {}
   if (data.slug !== undefined) patch.slug = data.slug
   if (data.name !== undefined) patch.name = data.name
@@ -308,7 +308,7 @@ export async function updateBundle(input: UpdateBundleInput) {
 
 export async function deleteBundle(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: existing, error: readErr } = await supabase
     .from('bundles')
     .select()
@@ -327,7 +327,7 @@ export async function deleteBundle(id: number) {
 export async function updateProductImage(input: UpdateImageInput) {
   const data = updateImageSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
 
   if (data.isPrimary === true) {
     const { data: row, error: readErr } = await supabase
@@ -355,7 +355,7 @@ export async function updateProductImage(input: UpdateImageInput) {
 
 export async function deleteProductImage(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: row, error: readErr } = await supabase
     .from('product_images')
     .select()
@@ -392,7 +392,7 @@ export async function deleteProductImage(id: number) {
 export async function updateBundleImage(input: UpdateImageInput) {
   const data = updateImageSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
 
   if (data.isPrimary === true) {
     const { data: row, error: readErr } = await supabase
@@ -420,7 +420,7 @@ export async function updateBundleImage(input: UpdateImageInput) {
 
 export async function deleteBundleImage(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const { data: row, error: readErr } = await supabase
     .from('bundle_images')
     .select()
@@ -474,7 +474,7 @@ export async function uploadProductImage(
   const processed = await processImage(buffer)
 
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const uuid = crypto.randomUUID()
   const prefix = buildStoragePrefix('products', productId, uuid)
 
@@ -522,7 +522,7 @@ export async function uploadBundleImage(
   const processed = await processImage(buffer)
 
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
-  const supabase = adminClient()
+  const supabase = await adminClient()
   const uuid = crypto.randomUUID()
   const prefix = buildStoragePrefix('bundles', bundleId, uuid)
 

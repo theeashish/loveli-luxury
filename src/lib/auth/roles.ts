@@ -93,7 +93,7 @@ export async function adminMfaRedirect(): Promise<string | null> {
   const { getServerEnv } = await import('../env')
   if (!getServerEnv().ENFORCE_ADMIN_MFA) return null
   try {
-    const supabase = createClient() as unknown as Client
+    const supabase = (await createClient()) as unknown as Client
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     if (error || !data) return null
     // nextLevel === 'aal2' means the user has a verified factor. If the
@@ -107,6 +107,6 @@ export async function adminMfaRedirect(): Promise<string | null> {
   }
 }
 
-export function adminClient(): Client {
-  return createClient() as unknown as Client
+export async function adminClient(): Promise<Client> {
+  return (await createClient()) as unknown as Client
 }
