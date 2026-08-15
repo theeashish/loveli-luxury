@@ -367,11 +367,11 @@ export async function runDiagnostics(): Promise<DiagnosticsResult> {
   checks.push(
     await timed('Upstash', 'Redis REST connectivity', async () => {
       const url =
-        env.UPSTASH_REDIS_REST_URL ??
-        env.UPSTASH_REDIS_REST_KV_REST_API_URL
+        env.UPSTASH_REDIS_REST_KV_REST_API_URL ??
+        env.UPSTASH_REDIS_REST_URL
       const token =
-        env.UPSTASH_REDIS_REST_TOKEN ??
-        env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN
+        env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN ??
+        env.UPSTASH_REDIS_REST_TOKEN
       if (!url || !token) {
         return { status: 'fail', detail: 'REST URL/token not configured' }
       }

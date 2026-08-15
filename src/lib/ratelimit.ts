@@ -36,11 +36,11 @@ async function getLimiter(
     const { getServerEnv } = await import('./env')
     const env = getServerEnv()
     const url =
-      env.UPSTASH_REDIS_REST_URL ??
-      env.UPSTASH_REDIS_REST_KV_REST_API_URL
+      env.UPSTASH_REDIS_REST_KV_REST_API_URL ??
+      env.UPSTASH_REDIS_REST_URL
     const token =
-      env.UPSTASH_REDIS_REST_TOKEN ??
-      env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN
+      env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN ??
+      env.UPSTASH_REDIS_REST_TOKEN
     if (!url || !token) return null
 
     const key = `${bucket}:${limit}:${windowSeconds}`
