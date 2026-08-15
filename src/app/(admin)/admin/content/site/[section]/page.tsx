@@ -227,12 +227,14 @@ const SCHEMA_HELP: Record<SectionKey, string> = {
 export default async function SectionEditPage({
   params,
 }: {
-  params: { section: string }
+  params: Promise<{ section: string }>
 }) {
-  if (!(params.section in SECTIONS)) {
+  const { section } = await params
+
+  if (!(section in SECTIONS)) {
     notFound()
   }
-  const key = params.section as SectionKey
+  const key = section as SectionKey
 
   const current = await getSection(key)
   const initialJson = JSON.stringify(current, null, 2)
