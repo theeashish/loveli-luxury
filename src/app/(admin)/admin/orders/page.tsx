@@ -44,11 +44,12 @@ type OrderRow = {
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: SearchParams
+  searchParams: Promise<SearchParams>
 }) {
-  const q = (searchParams.q ?? '').trim()
-  const status = STATUSES.find((s) => s === searchParams.status) ?? null
-  const kind = KINDS.find((k) => k === searchParams.kind) ?? null
+  const queryParams = await searchParams
+  const q = (queryParams.q ?? '').trim()
+  const status = STATUSES.find((s) => s === queryParams.status) ?? null
+  const kind = KINDS.find((k) => k === queryParams.kind) ?? null
 
   const service = createServiceClient()
   let query = service

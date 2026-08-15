@@ -24,8 +24,9 @@ type DistRow = {
 export default async function DistributorSettingsPage({
   searchParams,
 }: {
-  searchParams?: { verified?: string }
+  searchParams?: Promise<{ verified?: string }>
 }) {
+  const query = searchParams ? await searchParams : undefined
   const me = await getCurrentDistributor()
   if (!me) return null
 
@@ -39,7 +40,7 @@ export default async function DistributorSettingsPage({
     .single()
   const row = (r.data as DistRow | null) ?? null
 
-  const justVerified = searchParams?.verified === '1'
+  const justVerified = query?.verified === '1'
 
   return (
     <div className="max-w-xl space-y-8">

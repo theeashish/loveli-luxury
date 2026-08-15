@@ -29,8 +29,9 @@ export const metadata = {
 export default async function PostLoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string }
+  searchParams: Promise<{ next?: string }>
 }) {
+  const query = await searchParams
   const supabase = await createClient()
   const {
     data: { session },
@@ -40,7 +41,7 @@ export default async function PostLoginPage({
     redirect('/login')
   }
 
-  const explicitNext = safeNext(searchParams.next)
+  const explicitNext = safeNext(query.next)
   if (explicitNext) {
     redirect(explicitNext)
   }

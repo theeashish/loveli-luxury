@@ -65,10 +65,11 @@ const now = new Date()
 export default async function AdminClosePage({
   searchParams,
 }: {
-  searchParams: SearchParams
+  searchParams: Promise<SearchParams>
 }) {
-  const year = Number(searchParams.year ?? now.getUTCFullYear())
-  const month = Number(searchParams.month ?? now.getUTCMonth() + 1)
+  const query = await searchParams
+  const year = Number(query.year ?? now.getUTCFullYear())
+  const month = Number(query.month ?? now.getUTCMonth() + 1)
   const validPeriod =
     Number.isFinite(year) &&
     year >= 2024 &&
@@ -140,20 +141,20 @@ export default async function AdminClosePage({
       </header>
 
       {/* Summary banners after action redirects */}
-      {searchParams.ran ? (
+      {query.ran ? (
         <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Month processed: <strong>{searchParams.ran}</strong>: processed{' '}
-          {searchParams.processed ?? '0'}, promoted {searchParams.promoted ?? '0'},
-          failed {searchParams.failed ?? '0'}.
+          Month processed: <strong>{query.ran}</strong>: processed{' '}
+          {query.processed ?? '0'}, promoted {query.promoted ?? '0'},
+          failed {query.failed ?? '0'}.
         </div>
       ) : null}
-      {searchParams.drafted ? (
+      {query.drafted ? (
         <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Payments prepared for <strong>{searchParams.drafted}</strong>:{' '}
-          {searchParams.created ?? '0'} created,{' '}
-          {searchParams.existed ?? '0'} already existed,{' '}
-          {searchParams.zero ?? '0'} had zero earnings,{' '}
-          {searchParams.failed ?? '0'} failed.
+          Payments prepared for <strong>{query.drafted}</strong>:{' '}
+          {query.created ?? '0'} created,{' '}
+          {query.existed ?? '0'} already existed,{' '}
+          {query.zero ?? '0'} had zero earnings,{' '}
+          {query.failed ?? '0'} failed.
         </div>
       ) : null}
 

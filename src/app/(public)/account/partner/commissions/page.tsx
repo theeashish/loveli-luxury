@@ -29,12 +29,13 @@ type LedgerRow = {
 export default async function CommissionsPage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: Promise<{ page?: string }>
 }) {
+  const query = await searchParams
   const me = await getCurrentDistributor()
   if (!me) return null
 
-  const page = Math.max(1, Number(searchParams.page ?? 1) || 1)
+  const page = Math.max(1, Number(query.page ?? 1) || 1)
   const offset = (page - 1) * PAGE_SIZE
 
   const service = createServiceClient()

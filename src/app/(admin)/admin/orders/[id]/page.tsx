@@ -84,9 +84,10 @@ const ACTION_VARIANTS: Record<string, 'primary' | 'danger' | 'neutral'> = {
 export default async function AdminOrderDetail({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const orderId = Number(params.id)
+  const { id: idParam } = await params
+  const orderId = Number(idParam)
   if (!Number.isFinite(orderId) || orderId <= 0) notFound()
 
   const service = createServiceClient()

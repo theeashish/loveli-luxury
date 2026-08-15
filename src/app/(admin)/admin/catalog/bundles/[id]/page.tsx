@@ -15,9 +15,10 @@ export const metadata = { title: 'Edit bundle' }
 export default async function EditBundlePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const id = Number(params.id)
+  const { id: idParam } = await params
+  const id = Number(idParam)
   if (!Number.isInteger(id) || id <= 0) notFound()
 
   const bundle = await getBundleById(id, { includeInactive: true })

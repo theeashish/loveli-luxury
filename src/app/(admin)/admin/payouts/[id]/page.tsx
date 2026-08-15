@@ -36,9 +36,10 @@ type PayoutRow = {
 export default async function AdminPayoutDetail({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const id = Number(params.id)
+  const { id: idParam } = await params
+  const id = Number(idParam)
   if (!Number.isFinite(id) || id <= 0) notFound()
 
   const service = createServiceClient()

@@ -12,9 +12,10 @@ export const metadata = { title: 'Edit product' }
 export default async function EditProductPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const id = Number(params.id)
+  const { id: idParam } = await params
+  const id = Number(idParam)
   if (!Number.isInteger(id) || id <= 0) notFound()
 
   const [product, categories] = await Promise.all([

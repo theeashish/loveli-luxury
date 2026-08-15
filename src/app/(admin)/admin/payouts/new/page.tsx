@@ -43,11 +43,12 @@ type ProfileRow = {
 export default async function NewPayoutPage({
   searchParams,
 }: {
-  searchParams: SearchParams
+  searchParams: Promise<SearchParams>
 }) {
-  const distributorId = Number(searchParams.distributorId ?? '')
-  const year = Number(searchParams.year ?? '')
-  const month = Number(searchParams.month ?? '')
+  const query = await searchParams
+  const distributorId = Number(query.distributorId ?? '')
+  const year = Number(query.year ?? '')
+  const month = Number(query.month ?? '')
 
   const hasFilter =
     Number.isFinite(distributorId) &&

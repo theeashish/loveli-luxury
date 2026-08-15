@@ -18,9 +18,10 @@ const SPONSOR_RE = /^LL-[A-Z2-9]{2}-[A-Z2-9]{4}$/
 export default async function OgImage({
   params,
 }: {
-  params: { code: string }
+  params: Promise<{ code: string }>
 }) {
-  const code = (params.code ?? '').toUpperCase()
+  const { code: codeParam } = await params
+  const code = (codeParam ?? '').toUpperCase()
   let sponsorName: string | null = null
 
   if (SPONSOR_RE.test(code)) {

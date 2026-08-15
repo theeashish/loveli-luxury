@@ -46,10 +46,11 @@ type RankRow = {
 export default async function AdminDistributorsPage({
   searchParams,
 }: {
-  searchParams: SearchParams
+  searchParams: Promise<SearchParams>
 }) {
-  const q = (searchParams.q ?? '').trim()
-  const status = searchParams.status ?? 'active'
+  const query = await searchParams
+  const q = (query.q ?? '').trim()
+  const status = query.status ?? 'active'
 
   const service = createServiceClient()
 

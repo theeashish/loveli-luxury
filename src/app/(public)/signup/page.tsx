@@ -11,13 +11,14 @@ export const dynamic = 'force-dynamic'
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: { next?: string }
+  searchParams: Promise<{ next?: string }>
 }) {
+  const query = await searchParams
   const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  const next = safeNext(searchParams.next)
+  const next = safeNext(query.next)
   if (session?.user) redirect(next || '/post-login')
 
   const loginHref = next

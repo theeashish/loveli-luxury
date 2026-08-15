@@ -61,16 +61,17 @@ type AddressRow = {
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id: orderIdParam } = await params
   const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  const user = session?.user
-  if (!user) redirect(`/login?next=/account/orders/${params.id}`)
+    const user = session?.user
+  if (!user) redirect(`/login?next=/account/orders/${orderIdParam}`)
 
-  const orderId = Number(params.id)
+  const orderId = Number(orderIdParam)
   if (!Number.isFinite(orderId) || orderId <= 0) notFound()
 
   const orderRes = await supabase

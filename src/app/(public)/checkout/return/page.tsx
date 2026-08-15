@@ -48,8 +48,9 @@ type OrderRow = {
 export default async function CheckoutReturnPage({
   searchParams,
 }: {
-  searchParams: SearchParams
+  searchParams: Promise<SearchParams>
 }) {
+  const query = await searchParams
   const supabase = await createClient()
   const {
     data: { session },
@@ -57,10 +58,10 @@ export default async function CheckoutReturnPage({
   const user = session?.user
 
   const ref =
-    typeof searchParams.ref === 'string'
-      ? searchParams.ref
-      : typeof searchParams.tx_ref === 'string'
-        ? searchParams.tx_ref
+    typeof query.ref === 'string'
+      ? query.ref
+      : typeof query.tx_ref === 'string'
+        ? query.tx_ref
         : null
 
   if (!ref) {

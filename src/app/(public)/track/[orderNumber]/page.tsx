@@ -65,9 +65,10 @@ const STATUS_INDEX: Record<AnyStatus, number> = {
 export default async function TrackOrderPage({
   params,
 }: {
-  params: { orderNumber: string }
+  params: Promise<{ orderNumber: string }>
 }) {
-  const orderNumber = decodeURIComponent(params.orderNumber).toUpperCase().trim()
+  const { orderNumber: orderNumberParam } = await params
+  const orderNumber = decodeURIComponent(orderNumberParam).toUpperCase().trim()
   if (!orderNumber) notFound()
 
   const service = createServiceClient()

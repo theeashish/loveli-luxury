@@ -74,9 +74,10 @@ type AuditRow = {
 export default async function AdminDistributorDetail({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const distributorId = Number(params.id)
+  const { id: idParam } = await params
+  const distributorId = Number(idParam)
   if (!Number.isFinite(distributorId) || distributorId <= 0) notFound()
 
   const service = createServiceClient()

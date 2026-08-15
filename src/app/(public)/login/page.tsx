@@ -25,13 +25,14 @@ function subtitleFor(next: string): string {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string }
+  searchParams: Promise<{ next?: string }>
 }) {
+  const query = await searchParams
   const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  const next = safeNext(searchParams.next)
+  const next = safeNext(query.next)
   if (session?.user) {
     // If they're already signed in, honour `next` when explicit, else
     // smart-route via /post-login.

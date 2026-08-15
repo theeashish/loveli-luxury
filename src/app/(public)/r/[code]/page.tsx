@@ -12,12 +12,13 @@ import { redirect } from 'next/navigation'
 
 const SPONSOR_RE = /^LL-[A-Z2-9]{2}-[A-Z2-9]{4}$/
 
-export default function ShortShareRedirect({
+export default async function ShortShareRedirect({
   params,
 }: {
-  params: { code: string }
+  params: Promise<{ code: string }>
 }) {
-  const code = (params.code ?? '').toUpperCase()
+  const { code: codeParam } = await params
+  const code = (codeParam ?? '').toUpperCase()
   if (!SPONSOR_RE.test(code)) {
     redirect('/')
   }
