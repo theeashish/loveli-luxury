@@ -91,7 +91,7 @@ export default async function MyOrdersPage() {
           {retailOrders.length === 0 && signupOrders.length > 0 ? (
             <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-8 py-10 text-center">
               <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                You haven't bought any perfume yet. Only signup attempts above.
+                You haven't bought any perfume yet. Only Starter package payments are shown above.
               </p>
               <Link
                 href="/shop"
@@ -161,7 +161,7 @@ function OrderGroup({
 }
 
 function KindBadge({ variant }: { variant: 'signup' | 'retail' }) {
-  const label = variant === 'signup' ? 'Signup' : 'Retail'
+  const label = variant === 'signup' ? 'Starter package' : 'Perfume order'
   const cls =
     variant === 'signup'
       ? 'border-amber-400/40 bg-amber-500/10 text-amber-200'
@@ -184,7 +184,7 @@ function StatusBadge({
 }) {
   // Friendly relabel: pending signup orders are "payment incomplete" so
   // the user sees what went wrong instead of a generic PENDING.
-  let label = status
+  let label = status === 'pending' ? 'Payment pending' : status === 'fulfilled' ? 'Packed' : status === 'shipped' ? 'On the way' : status === 'failed' ? 'Payment failed' : status === 'expired' ? 'Payment expired' : status
   let tone =
     'border-[hsl(var(--muted-foreground))]/30 text-[hsl(var(--muted-foreground))]'
   if (variant === 'signup' && status === 'pending') {

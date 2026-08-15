@@ -100,7 +100,11 @@ module.exports = withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  disableLogger: true,
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
   // Tree-shake the heavy client-side Sentry features at build time. Tracing
   // (~120 KiB) and Replay (~60 KiB) aren't used on the browser — error
   // reporting only — so dropping the dead code is a flat perf win for the

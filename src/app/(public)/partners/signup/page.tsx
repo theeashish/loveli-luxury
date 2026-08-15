@@ -265,7 +265,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
 
   return (
     <Shell>
-      <BrandHeading subtitle="Pick your onboarding kit, complete KYC, pay via M-Pesa. Your partner account activates the moment payment confirms." />
+      <BrandHeading subtitle="Choose a Starter package, add your ID, date of birth, and phone number, then pay by M-Pesa. Your partner account starts when payment is confirmed." />
       <div className="mt-10">
         <AccountProtectionNotice />
         {(() => {

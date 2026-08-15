@@ -150,7 +150,7 @@ export default async function PartnerProgramPage() {
               href="/partners/agreement"
               className="mt-8 inline-flex text-[10px] font-semibold uppercase tracking-[0.24em] text-[hsl(var(--primary))] underline-offset-8 transition hover:underline"
             >
-              Read the partner agreement draft
+              Read the partner agreement
             </Link>
           </div>
         </div>

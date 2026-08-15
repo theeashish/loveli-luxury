@@ -164,7 +164,7 @@ export const FAQ_DEFAULTS: FaqContent = {
     },
     {
       q: 'Is delivery available outside Nairobi?',
-      a: 'Yes — we ship across Kenya and to neighbouring countries. Free delivery in Nairobi on orders above Kes 5,000.',
+      a: 'Yes, we ship across Kenya and to neighbouring countries. Free delivery in Nairobi on orders above Kes 5,000.',
     },
     {
       q: 'Are these bottles refillable?',
@@ -172,7 +172,7 @@ export const FAQ_DEFAULTS: FaqContent = {
     },
     {
       q: 'Can I join the partner program?',
-      a: 'By invitation only. An existing partner shares their sponsor code; you activate with an onboarding kit and begin as an Ambassador, earning retail margin on every bottle you place. Five ranks (Ambassador, Executive, Gold Director, Platinum Director, Crown President) advance on verified retail performance, never on recruitment. See the partner program for the full structure.',
+      a: 'By invitation only. An existing partner shares an invitation code. You join by buying the Starter package and begin as an Ambassador, earning retail margin on every bottle you place. Five ranks (Ambassador, Executive, Gold Director, Platinum Director, Crown President) advance through verified retail sales, never recruitment. See the partner program for the full structure.',
     },
     {
       q: 'Are your fragrances tested on animals?',
@@ -196,9 +196,9 @@ export type PartnerLandingContent = z.infer<typeof partnerLandingSchema>
 export const PARTNER_LANDING_DEFAULTS: PartnerLandingContent = {
   eyebrow: 'Loveli Luxury · Partner Program',
   headline: 'Build a *luxury fragrance* business',
-  microtag: 'Five ranks · Verified retail performance · Editorial brand access',
+  microtag: 'Five ranks · Earn through retail sales · Grow with the brand',
   subhead:
-    'A discreet, invite-only partner program for creators, resellers, and regional curators of modern African luxury fragrance. Earn alongside the house, advance through verified retail performance, not recruitment scale, and grow with a brand that takes restraint seriously.',
+    'An invite-only partner program for creators, resellers, and people building a fragrance business in their area. Earn through real retail sales and grow with a brand that values trust.',
   ctaLabel: 'Join via your sponsor',
   secondaryLabel: 'See the rank ladder ↓',
   secondaryHref: '#tiers',
@@ -228,7 +228,7 @@ export const POLICIES_AUTHENTICITY_DEFAULTS: PoliciesAuthenticityContent = {
   sections: [
     {
       title: 'How we source',
-      body: "Our inventory comes from a small set of authorised distributors — the same channels that supply premium retail across East Africa. Each consignment arrives with its house documentation. Anything that doesn't match the paperwork is returned at our expense, not yours.",
+      body: "Our inventory comes from a small set of authorised distributors. These are the same channels that supply premium retail across East Africa. Each consignment arrives with its house documentation. Anything that doesn't match the paperwork is returned at our expense, not yours.",
     },
     {
       title: 'How we store',
@@ -236,7 +236,7 @@ export const POLICIES_AUTHENTICITY_DEFAULTS: PoliciesAuthenticityContent = {
     },
     {
       title: 'How we seal',
-      body: 'Every order is hand-inspected, sealed, and tamper-banded before the rider arrives. Open the box on camera if you want — we keep unboxing-friendly packaging precisely because we expect you to scrutinise it. If the seal is broken on arrival, do not accept the parcel. Ping our Concierge and we send a replacement.',
+      body: 'Every order is hand-inspected, sealed, and tamper-banded before the rider arrives. Open the box on camera if you want. We keep unboxing-friendly packaging because we expect you to check it. If the seal is broken on arrival, do not accept the parcel. Ping our Concierge and we send a replacement.',
     },
     {
       title: 'If something is wrong',
@@ -324,7 +324,7 @@ export const POLICIES_REFUND_DEFAULTS: PoliciesRefundContent = {
     },
     {
       title: 'Distributor / partner returns',
-      body: "Onboarding kit purchases are covered by the same 7-day, sealed-only rule. Commission and tier consequences of a refund are documented in the partner agreement; the short version is that refunded orders aren't commissionable, and any commission already paid on a refunded order is clawed back against the next payout.",
+      body: "Starter package purchases follow the same 7-day, sealed-only rule. The partner agreement explains what a refund means for commissions and partner levels. In short, a refunded order does not earn commission, and any commission already paid is taken from a later payout.",
     },
   ],
 }
@@ -436,41 +436,41 @@ export const PARTNER_IDS_DEFAULTS: PartnerIdsContent = {
   eyebrow: 'Income disclosure',
   headline: 'What partners *actually* earn',
   lead: 'We publish this because you deserve real numbers, not a sales pitch. The stats below describe the verified earnings distribution across active Loveli partners over the reporting period. They are not projections, promises, or testimonials.',
-  periodLabel: 'Reporting period — DATA PENDING',
+  periodLabel: 'Reporting period: Figures not available yet',
   methodology:
     'An "active partner" is one who placed at least one verified retail sale in the 90 days before the period end. All amounts are gross commission earnings before taxes and personal expenses. Refunded and clawed-back commissions are excluded. The same numbers are visible in your partner dashboard under Earnings.',
   stats: [
     {
       label: 'Median monthly earnings',
       value: 'KES 0',
-      sub: 'Active partners (half earn less, half earn more) — DATA PENDING',
+      sub: 'Active partners. Figures not available yet.',
     },
     {
       label: 'Active partners earning more than zero',
       value: '0%',
-      sub: 'Of all active partners in the period — DATA PENDING',
+      sub: 'Of all active partners in the period. Figures not available yet.',
     },
     {
       label: 'Partners who recouped their starter cost',
       value: '0%',
-      sub: 'Cumulative earnings >= onboarding cost — DATA PENDING',
+      sub: 'Cumulative earnings compared with Starter package cost. Figures not available yet.',
     },
     {
       label: 'Top 5% monthly earnings',
       value: 'KES 0',
-      sub: 'The 95th-percentile active partner — DATA PENDING',
+      sub: 'Highest-earning 5% of active partners. Figures not available yet.',
     },
   ],
   rules: [
-    'Commissions only fire on confirmed retail sales. Recruiting a partner pays nothing.',
-    'A partner\'s own starter purchase is not commissionable.',
-    'Refunded orders trigger a clawback against the same partners who earned on them.',
-    'Maintenance: a partner must place verified retail sales each month to remain active.',
+    'Commissions are paid only on confirmed retail sales. Recruiting a partner does not earn commission.',
+    'Your own Starter package purchase does not earn commission.',
+    'If an order is refunded, any related commission is taken from a later payout.',
+    'To remain active, a partner must make verified retail sales each month.',
     'No income is guaranteed. Earnings depend entirely on retail performance.',
   ],
   photo: {
     alt: 'Loveli Luxury partner program editorial photograph',
-    caption: 'Income disclosure photography space',
+    caption: 'Income figures will be added here',
   },
   footnote:
     'Loveli Luxury Scents is committed to transparent compensation. If you ever see a recruitment-only pitch in our name, that pitch is not from us. Report it: concierge@loveliluxuryscents.com.',

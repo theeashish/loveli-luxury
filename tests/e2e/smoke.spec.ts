@@ -47,10 +47,10 @@ test.describe('public surfaces render', () => {
     const body = (await page.locator('body').textContent()) ?? ''
     // The non-negotiable rules from the locked design (lib/content/site.ts).
     // A regression that softens or drops these is a legal-exposure risk.
-    expect(body).toContain('Commissions only fire on confirmed retail sales')
-    expect(body).toContain('Recruiting a partner pays nothing')
-    expect(body).toContain('starter purchase is not commissionable')
-    expect(body).toContain('Refunded orders trigger a clawback')
+    expect(body).toContain('Commissions are paid only on confirmed retail sales')
+    expect(body).toContain('Recruiting a partner does not earn commission')
+    expect(body).toContain('Your own Starter package purchase does not earn commission')
+    expect(body).toContain('If an order is refunded, any related commission is taken from a later payout')
     expect(body).toContain('No income is guaranteed')
   })
 

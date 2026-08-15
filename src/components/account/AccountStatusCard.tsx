@@ -115,7 +115,7 @@ export async function AccountStatusCard() {
         </p>
         {sponsor ? (
           <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
-            Your sponsor:{' '}
+            Invitation code:{' '}
             <code className="font-mono text-[hsl(var(--primary))]">
               {sponsor}
             </code>
@@ -145,8 +145,8 @@ export async function AccountStatusCard() {
       </div>
       <h2 className="mt-3 font-serif text-2xl italic tracking-tight md:text-3xl">
         {pendingSignupCount === 1
-          ? '1 signup attempt waiting on payment'
-          : `${pendingSignupCount} signup attempts waiting on payment`}
+          ? '1 Starter package payment waiting'
+          : `${pendingSignupCount} Starter package payments waiting`}
       </h2>
       <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
         Signed in as <span className="font-mono">{email}</span>
@@ -159,7 +159,7 @@ export async function AccountStatusCard() {
       </p>
       {sponsor ? (
         <p className="mt-3 text-xs text-amber-100/80">
-          Your sponsor:{' '}
+          Invitation code:{' '}
           <code className="font-mono text-amber-200">{sponsor}</code>
         </p>
       ) : null}
@@ -168,7 +168,7 @@ export async function AccountStatusCard() {
           href="/partners/signup"
           className="inline-flex items-center justify-center rounded-md bg-[hsl(var(--foreground))] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90"
         >
-          Start a fresh signup →
+          Try again →
         </Link>
       </div>
     </section>

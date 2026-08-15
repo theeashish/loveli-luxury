@@ -170,7 +170,7 @@ export default async function OrderDetailPage({
           </p>
         </div>
         <span className="rounded-md border border-[hsl(var(--border))] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">
-          {order.status}
+          {order.status === 'pending' ? 'Payment pending' : order.status === 'fulfilled' ? 'Packed' : order.status === 'shipped' ? 'On the way' : order.status === 'failed' ? 'Payment failed' : order.status === 'expired' ? 'Payment expired' : order.status}
         </span>
       </header>
 
