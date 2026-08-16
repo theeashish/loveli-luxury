@@ -79,6 +79,9 @@ export type ApplyPaymentSuccessResult = {
   paid: boolean
   /** Non-fatal warnings from the downstream chain. */
   warnings: string[]
+  /** True when the commission-ledger RPC failed; reconciliation can target the order. */
+  commissionFailed?: boolean
+
   /** Set when mark_order_paid itself errored. */
   error?: string
 }
@@ -206,8 +209,24 @@ export async function applyPaymentSuccess(
   const ledgerRes = (await service.rpc('write_commission_ledger', {
     p_order_id: input.orderId,
   })) as { error: { message: string } | null }
-  if (ledgerRes.error) {
-    warnings.push(`write_commission_ledger: ${ledgerRes.error.message}`)
+  const commissionFailed = Boolean(ledgerRes.error)
+  if (commissionFailed) {
+    warnings.push('write_commission_ledger: ' + ledgerRes.error!.message)
+    const commissionAuditRes = await service.from('audit_log').insert({
+      actor_id: input.actorId ?? null,
+      action: 'commission.ledger_write_failed',
+      resource_type: 'order',
+      resource_id: String(input.orderId),
+      after_data: {
+        order_id: input.orderId,
+        invoice_id: input.invoiceId,
+        source: input.source,
+        error: ledgerRes.error!.message,
+      },
+    })
+    if (commissionAuditRes.error) {
+      warnings.push('commission failure audit: ' + commissionAuditRes.error.message)
+    }
   }
 
   // 6. Receipt email â€” non-fatal; no-op without RESEND env.
@@ -236,5 +255,5 @@ export async function applyPaymentSuccess(
     },
   })
 
-  return { paid: true, warnings }
+  return { paid: true, warnings, commissionFailed }
 }

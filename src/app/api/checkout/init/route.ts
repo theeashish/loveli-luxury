@@ -115,6 +115,17 @@ const requestSchema = z
 // Handler
 // -----------------------------------------------------------------------------
 
+export function hasBundleCheckoutLine<T extends object>(lines: ReadonlyArray<T>): boolean {
+  return lines.some((line) => (line as { bundleId?: unknown }).bundleId != null)
+}
+
+export function bundleCheckoutGoneResponse(): NextResponse {
+  return NextResponse.json(
+    { error: 'Bundle checkout is no longer available. Please shop individual fragrances.' },
+    { status: 410 },
+  )
+}
+
 export async function POST(req: Request) {
   const guard = await enforceSensitiveRequest(req, {
     bucket: 'checkout-init-strict',
@@ -371,6 +382,12 @@ export async function POST(req: Request) {
   }
 
   // 6. Server-side re-pricing + inventory check
+  // P0: Bundle checkout is permanently disabled
+  const hasBundleLine = hasBundleCheckoutLine(lines)
+  if (hasBundleLine) {
+    return bundleCheckoutGoneResponse()
+  }
+
   const variantIds = lines
     .filter((l): l is z.infer<typeof variantLineSchema> => l.kind === 'variant')
     .map((l) => l.variantId)
