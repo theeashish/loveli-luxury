@@ -1,11 +1,11 @@
 /**
- * /partners/signup — distributor onboarding entry.
+ * /partners/signup ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â distributor onboarding entry.
  *
  * Middleware enforces:
  *   - signed-in (else 307 to /login)
  *   - not already a distributor (else 307 to /account/partner)
  *
- * This file is render-only. It does NOT redirect — a redirect after the
+ * This file is render-only. It does NOT redirect ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â a redirect after the
  * layout has streamed leaves the user staring at the empty public chrome
  * while the browser follows the 307. Every "edge case" branches into an
  * inline empty-state card instead.
@@ -17,7 +17,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   DistributorSignupForm,
-  type StarterBundleOption,
+  type SignupVariantOption,
   type SignupAddress,
 } from '@/components/distributors/SignupForm'
 import { paymentProviderAvailability } from '@/lib/payments/availability'
@@ -53,17 +53,14 @@ type AddressRow = {
   is_default: boolean
 }
 
-type BundleRow = {
+type SignupVariantRow = {
   id: number
-  slug: string
-  name: string
-  description: string | null
+  product_id: number
+  size_ml: number
   retail_price_minor: string | number
-  starter_package_code: string | null
+  products?: { name: string } | null
 }
-
 type JoiningFeeRow = {
-  bundle_id: number
   joining_fee_minor: string | number
 }
 
@@ -91,7 +88,7 @@ function BrandHeading({ subtitle }: { subtitle: string }) {
   return (
     <header className="text-center">
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
-        Loveli Luxury · Partner Program
+        Loveli Luxury ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Partner Program
       </p>
       <h1 className="mt-5 font-serif text-5xl italic tracking-tight md:text-6xl">
         Begin your partnership
@@ -114,7 +111,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
   const user = session?.user
 
   if (!user) {
-    // Defensive — middleware should have caught this. Render an inline
+    // Defensive ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â middleware should have caught this. Render an inline
     // sign-in prompt instead of redirecting (no more chrome-flash).
     return (
       <Shell>
@@ -133,7 +130,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
 
   const service = createServiceClient()
 
-  const [profileRes, addressesRes, bundlesRes] = await Promise.all([
+  const [profileRes, addressesRes] = await Promise.all([
     service
       .from('profiles')
       .select('id, email, full_name, phone, national_id, date_of_birth')
@@ -146,15 +143,20 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
       )
       .eq('user_id', user.id)
       .order('is_default', { ascending: false }),
-    service
-      .from('bundles')
-      .select(
-        'id, slug, name, description, retail_price_minor, starter_package_code',
-      )
-      .eq('is_starter_package', true)
-      .eq('is_active', true)
-      .order('retail_price_minor', { ascending: true }),
   ])
+  const variantsRes = await service
+.from('product_variants')
+.select('id, product_id, size_ml, retail_price_minor, is_active, products(name)')
+.eq('is_active', true)
+.order('product_id', { ascending: true })
+.order('size_ml', { ascending: true })
+  const feeRes = await service
+.from('config_starter_packages')
+.select('joining_fee_minor')
+.is('effective_until', null)
+.order('id', { ascending: false })
+.limit(1)
+.maybeSingle()
 
   // If profile row missing, lazy-create from the auth user. The DB trigger
   // SHOULD have done this on signup but during the early operational
@@ -193,57 +195,15 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
     )
   }
 
-  const bundleRows = (bundlesRes.data ?? []) as BundleRow[]
-
-  // Look up the currently-effective joining fee for each starter bundle.
-  // The server-side init route uses this same `config_starter_packages`
-  // table to compute the order total, so the form's summary MUST include
-  // it too — otherwise the customer sees a price that doesn't match what
-  // we charge. (Source of the "Ksh 1 form, Ksh 2 charged" mismatch fixed
-  // 2026-05-18.)
-  const bundleIds = bundleRows.map((b) => b.id)
-  const joiningFeesRes = bundleIds.length
-    ? await service
-        .from('config_starter_packages')
-        .select('bundle_id, joining_fee_minor')
-        .in('bundle_id', bundleIds)
-        .is('effective_until', null)
-    : { data: [] as JoiningFeeRow[] }
-  const joiningFeeByBundle = new Map<number, string>(
-    ((joiningFeesRes.data ?? []) as JoiningFeeRow[]).map((j) => [
-      j.bundle_id,
-      String(j.joining_fee_minor),
-    ]),
-  )
-
-  const bundles: StarterBundleOption[] = bundleRows.map((b) => ({
-    id: b.id,
-    slug: b.slug,
-    name: 'Starter package',
-    description: b.description,
-    retailPriceMinor: b.retail_price_minor,
-    joiningFeeMinor: joiningFeeByBundle.get(b.id) ?? '0',
-    starterCode: b.starter_package_code,
+  const variantRows = (variantsRes.data ?? []) as SignupVariantRow[]
+  const variants: SignupVariantOption[] = variantRows.map((v) => ({
+    id: v.id,
+    productId: v.product_id,
+    sizeMl: v.size_ml,
+    name: v.products?.name ?? `Perfume ${v.product_id}`,
+    retailPriceMinor: v.retail_price_minor,
   }))
-
-  if (bundles.length === 0) {
-    return (
-      <Shell>
-        <BrandHeading subtitle="Starter packages aren't available yet." />
-        <p className="mt-8 text-center text-sm text-[hsl(var(--muted-foreground))]">
-          We're loading the season's starter bundles. Check back shortly,
-          or reach{' '}
-          <a
-            href="mailto:support@lovelilux.com"
-            className="text-[hsl(var(--primary))] underline-offset-4 hover:underline"
-          >
-            support@lovelilux.com
-          </a>{' '}
-          if this persists.
-        </p>
-      </Shell>
-    )
-  }
+  const joiningFeeMinor = String((feeRes.data as JoiningFeeRow | null)?.joining_fee_minor ?? '0')
 
   const sponsorCookie = (await cookies()).get('ll_sponsor')?.value ?? ''
   const activationMode = query?.activation === '1'
@@ -266,7 +226,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
 
   return (
     <Shell>
-      <BrandHeading subtitle="Choose a Starter package, add your ID, date of birth, and phone number, then pay by M-Pesa. Your partner account starts when payment is confirmed." />
+      <BrandHeading subtitle="Choose at least five perfumes, add your ID, date of birth, and phone number, then pay by M-Pesa. Your partner account starts when payment is confirmed." />
       <div className="mt-10">
         <AccountProtectionNotice />
         {(() => {
@@ -292,7 +252,8 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
               defaultNationalId={profile.national_id ?? ''}
               defaultDateOfBirth={profile.date_of_birth ?? ''}
               addresses={addresses}
-              bundles={bundles}
+              variants={variants}
+              joiningFeeMinor={joiningFeeMinor}
               sponsorCookie={sponsorCookie}
               activationMode={activationMode}
             />
@@ -305,7 +266,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
           href="/signup"
           className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
         >
-          Create a buyer account →
+          Create a buyer account ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
         </Link>
       </p>
     </Shell>

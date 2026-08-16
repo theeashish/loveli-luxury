@@ -1,16 +1,16 @@
 /**
- * applyPaymentSuccess — the canonical post-payment chain.
+ * applyPaymentSuccess â€” the canonical post-payment chain.
  *
  * After a provider confirms a payment SUCCEEDED, every call site needs to
  * run the same idempotent sequence:
  *
  *   1. Mark the matching `payments` row complete (or insert one if the
- *      collect flow never wrote it — possible for reconcile_admin paths
+ *      collect flow never wrote it â€” possible for reconcile_admin paths
  *      that flip an order paid without going through /api/intasend/collect).
  *   2. Stamp the canonical provider refs on the order row (provider name
  *      + provider_ref). The legacy `payhero_*` columns are NOT written by
  *      new code; they remain as nullable historical data.
- *   3. mark_order_paid (RPC, idempotent — short-circuits if already paid).
+ *   3. mark_order_paid (RPC, idempotent â€” short-circuits if already paid).
  *   4. provision_distributor (only for kind='distributor_signup').
  *   5. write_commission_ledger (non-fatal; warns on failure).
  *   6. sendOrderReceipt (no-op without RESEND env; non-fatal).
@@ -18,13 +18,13 @@
  *
  * Before this helper landed (migration 033 era), the chain was duplicated
  * across 5 call sites (webhook, /api/payhero/reconcile, /admin orders
- * actions, /api/payhero/status self-heal, /api/cron/reconcile-pending) — a
+ * actions, /api/payhero/status self-heal, /api/cron/reconcile-pending) â€” a
  * single bug needed 5 fixes. PayHero is now retired; the same one-helper
  * pattern keeps the IntaSend call sites in lock-step.
  *
- * Idempotency: safe to call concurrently — mark_order_paid is the
+ * Idempotency: safe to call concurrently â€” mark_order_paid is the
  * serialisation point, the payments row UPSERT keys on invoice_id, and
- * steps 5–7 are non-fatal write-once operations.
+ * steps 5â€“7 are non-fatal write-once operations.
  *
  * Return shape: callers can decide how to surface warnings (HTTP body,
  * audit row, console.warn) without this helper deciding for them.
@@ -42,7 +42,7 @@ export type ApplyPaymentSuccessInput = {
   orderId: number
   /** distributor_signup orders trigger provision_distributor. */
   orderKind: string
-  /** Which provider settled — written to orders.payment_provider + audit_log. */
+  /** Which provider settled â€” written to orders.payment_provider + audit_log. */
   provider: 'intasend'
   /**
    * Provider's unique reference for this transaction (IntaSend invoice id).
@@ -58,7 +58,7 @@ export type ApplyPaymentSuccessInput = {
   providerRef: string
   /** M-Pesa receipt code, when applicable. May equal providerRef. */
   receipt?: string | null
-  /** Where this reconcile originated — written to audit_log.action. */
+  /** Where this reconcile originated â€” written to audit_log.action. */
   source:
     | 'webhook'
     | 'reconcile_api'
@@ -110,7 +110,7 @@ export async function applyPaymentSuccess(
       order_id: input.orderId,
       invoice_id: input.invoiceId,
       // amount_cents is required NOT NULL; on reconcile_admin we don't
-      // know it from the input — read it from the order. UPDATE path
+      // know it from the input â€” read it from the order. UPDATE path
       // doesn't touch amount_cents, so a 0 here is only ever the seed
       // value of a freshly-INSERTed row on the admin reconcile path.
       amount_cents: 0,
@@ -128,7 +128,7 @@ export async function applyPaymentSuccess(
       error: { message: string } | null
     }
     if (upsertRes.error) {
-      // Non-fatal — the audit chain below still proceeds, the order still
+      // Non-fatal â€” the audit chain below still proceeds, the order still
       // flips paid, and a follow-up reconcile can re-stamp this row.
       warnings.push(`payments upsert: ${upsertRes.error.message}`)
     }
@@ -148,7 +148,7 @@ export async function applyPaymentSuccess(
     })
     .eq('id', input.orderId)
 
-  // 3. mark_order_paid — the only step that hard-fails the chain.
+  // 3. mark_order_paid â€” the only step that hard-fails the chain.
   const paidAt = new Date().toISOString()
   const markRes = (await service.rpc('mark_order_paid', {
     p_order_id: input.orderId,
@@ -163,36 +163,44 @@ export async function applyPaymentSuccess(
     }
   }
 
-  // 4. provision_distributor (signup orders only).
+  // 4. Verify the paid signup contains at least five perfume bottles before provisioning a distributor.
   if (input.orderKind === 'distributor_signup') {
     const orderRes = await service.from('orders').select('user_id, notes').eq('id', input.orderId).maybeSingle()
-    const notes = orderRes.data?.notes
-    let activationMode = false
-    let starterBundleId: number | null = null
-    if (typeof notes === 'string') {
-      try {
-        const parsed = JSON.parse(notes) as { signup?: { activation_mode?: boolean; starter_bundle_id?: number } }
-        activationMode = parsed.signup?.activation_mode === true
-        starterBundleId = parsed.signup?.starter_bundle_id ?? null
-      } catch {
-        warnings.push('activation metadata could not be parsed')
+    const itemsRes = await service.from('order_items').select('quantity').eq('order_id', input.orderId)
+    const bottleCount = ((itemsRes.data ?? []) as Array<{ quantity: number | string }>).reduce(
+      (sum, item) => sum + Number(item.quantity),
+      0,
+    )
+    if (itemsRes.error) {
+      warnings.push(`signup bottle check: ${itemsRes.error.message}`)
+    } else if (bottleCount < 5) {
+      warnings.push(`Distributor not provisioned: paid signup contains ${bottleCount} bottles; at least 5 are required.`)
+    } else if (orderRes.data?.user_id) {
+      let activationMode = false
+      if (typeof orderRes.data.notes === 'string') {
+        try {
+          const parsed = JSON.parse(orderRes.data.notes) as { signup?: { activation_mode?: boolean } }
+          activationMode = parsed.signup?.activation_mode === true
+        } catch {
+          warnings.push('signup metadata could not be parsed')
+        }
       }
-    }
-    if (activationMode && orderRes.data?.user_id) {
-      const distRes = await service.from('distributors').update({ is_active: true, starter_paid_at: paidAt, starter_package_id: starterBundleId }).eq('user_id', orderRes.data.user_id)
-      if (distRes.error) {
-        warnings.push(`activation update: ${distRes.error.message}`)
+      if (activationMode) {
+        const distRes = await service.from('distributors').update({ is_active: true, starter_paid_at: paidAt, starter_package_id: null }).eq('user_id', orderRes.data.user_id)
+        if (distRes.error) {
+          warnings.push(`activation update: ${distRes.error.message}`)
+        } else {
+          const roleRes = await service.from('user_roles').upsert({ user_id: orderRes.data.user_id, role: 'distributor', granted_at: paidAt }, { onConflict: 'user_id,role' })
+          if (roleRes.error) warnings.push(`activation role: ${roleRes.error.message}`)
+        }
       } else {
-        const roleRes = await service.from('user_roles').upsert({ user_id: orderRes.data.user_id, role: 'distributor', granted_at: paidAt }, { onConflict: 'user_id,role' })
-        if (roleRes.error) warnings.push(`activation role: ${roleRes.error.message}`)
+        const provRes = (await service.rpc('provision_distributor', { p_order_id: input.orderId })) as { error: { message: string } | null }
+        if (provRes.error) warnings.push(`provision_distributor: ${provRes.error.message}`)
       }
-    } else if (!activationMode) {
-      const provRes = (await service.rpc('provision_distributor', { p_order_id: input.orderId })) as { error: { message: string } | null }
-      if (provRes.error) warnings.push(`provision_distributor: ${provRes.error.message}`)
     }
   }
 
-  // 5. write_commission_ledger — non-fatal. The SQL RPC is the canonical
+  // 5. write_commission_ledger â€” non-fatal. The SQL RPC is the canonical
   //    money engine (see project_money_engine_truth memory + migration 014
   //    + migrations 029/036 for the rate config). Provider-agnostic.
   const ledgerRes = (await service.rpc('write_commission_ledger', {
@@ -202,7 +210,7 @@ export async function applyPaymentSuccess(
     warnings.push(`write_commission_ledger: ${ledgerRes.error.message}`)
   }
 
-  // 6. Receipt email — non-fatal; no-op without RESEND env.
+  // 6. Receipt email â€” non-fatal; no-op without RESEND env.
   try {
     await sendOrderReceipt(service, input.orderId)
   } catch (err) {

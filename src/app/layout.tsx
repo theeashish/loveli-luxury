@@ -26,6 +26,15 @@ export const metadata: Metadata = {
   description:
     'Loveli Luxury Scents. Eau de Parfum blended in small batches, bottled with intention. Free delivery in Nairobi on orders above Kes 5,000.',
   applicationName: publicEnv.NEXT_PUBLIC_APP_NAME,
+  icons: {
+    icon: [
+      { url: '/loveli-luxury-favicon.png', type: 'image/png' },
+      { url: '/loveli-luxury-logo.png', type: 'image/png' },
+    ],
+    shortcut: '/loveli-luxury-favicon.png',
+    apple: '/loveli-luxury-favicon.png',
+  },
+  manifest: '/site.webmanifest',
   authors: [{ name: 'Loveli Luxury International' }],
   generator: 'Next.js',
   keywords: ['perfume', 'luxury fragrance', 'eau de parfum', 'Kenya', 'Nairobi'],

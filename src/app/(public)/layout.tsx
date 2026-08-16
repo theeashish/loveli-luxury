@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { Toaster } from '@/lib/toast'
@@ -12,7 +13,6 @@ import { PublicDeferredWidgets } from '@/components/public/PublicDeferredWidgets
 
 const NAV = [
   { href: '/shop', label: 'Shop' },
-  { href: '/bundles', label: 'Bundles' },
   { href: '/story', label: 'Story' },
   { href: '/#faq', label: 'FAQ' },
 ] as const
@@ -27,14 +27,10 @@ export default async function PublicLayout({ children }: { children: React.React
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href="/" className="group flex flex-col leading-none">
-            <span className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))] transition group-hover:text-[hsl(var(--primary))]">
-              Loveli
-            </span>
-            <span className="mt-1 text-[10px] uppercase tracking-[0.4em] text-[hsl(var(--primary))]">
-              Luxury Scents
-            </span>
-          </Link>
+          <Link href="/" className="group flex items-center gap-2" aria-label="Loveli Luxury Scents home">
+  <Image src="/loveli-luxury-favicon.png" alt="" width={34} height={34} className="h-8 w-8 object-contain" priority />
+  <Image src="/loveli-luxury-wordmark.png" alt="Loveli Luxury Scents" width={118} height={48} className="h-9 w-auto object-contain object-left md:h-10" priority />
+</Link>
           <nav className="hidden items-center gap-6 text-[0.76rem] font-semibold uppercase tracking-[0.1em] md:flex">
             {NAV.map((item) => (
               <Link

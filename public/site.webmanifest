@@ -1,0 +1,17 @@
+{
+  "name": "Loveli Luxury Scents",
+  "short_name": "Loveli Luxury",
+  "description": "Loveli Luxury Scents. Eau de Parfum blended in small batches, bottled with intention.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F3EF",
+  "theme_color": "#F5F3EF",
+  "icons": [
+    {
+      "src": "/loveli-luxury-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

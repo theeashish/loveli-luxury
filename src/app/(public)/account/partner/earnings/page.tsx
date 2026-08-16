@@ -1,5 +1,6 @@
+import Image from 'next/image'
 /**
- * /account/partner/earnings — PARTNER-ONLY compensation detail.
+ * /account/partner/earnings â€” PARTNER-ONLY compensation detail.
  *
  * The pricing, retail margins, earnings examples, and exact commission rates
  * that used to sit on the PUBLIC /partners page live here, behind the partner
@@ -23,23 +24,23 @@ function kes(n: number): string {
 }
 
 const PRICING = [
-  { size: '30', purchase: 700, retail: 1500, margin: 800 },
-  { size: '50', purchase: 1400, retail: 2800, margin: 1400 },
-] as const
-
-const MARGIN_30 = [
-  { qty: 5, kes: 4_000 },
-  { qty: 10, kes: 8_000 },
-  { qty: 20, kes: 16_000 },
-  { qty: 50, kes: 40_000 },
-  { qty: 100, kes: 80_000 },
+  { size: '50', purchase: 500, retail: 2500, margin: 2000 },
+  { size: '100', purchase: 1400, retail: 5000, margin: 3600 },
 ] as const
 
 const MARGIN_50 = [
-  { qty: 5, kes: 7_000 },
-  { qty: 10, kes: 14_000 },
-  { qty: 20, kes: 28_000 },
-  { qty: 50, kes: 70_000 },
+  { qty: 5, kes: 10_000 },
+  { qty: 10, kes: 20_000 },
+  { qty: 20, kes: 40_000 },
+  { qty: 50, kes: 100_000 },
+  { qty: 100, kes: 200_000 },
+] as const
+
+const MARGIN_100 = [
+  { qty: 5, kes: 18_000 },
+  { qty: 10, kes: 36_000 },
+  { qty: 20, kes: 72_000 },
+  { qty: 50, kes: 180_000 },
 ] as const
 
 // Unilevel network commission, as a percentage of Point Value (PV). Your rank
@@ -55,6 +56,7 @@ const LEVELS = [
 export default function PartnerEarningsPage() {
   return (
     <div className="space-y-12">
+      <div className="flex items-center"><Image src="/loveli-luxury-logo.png" alt="Loveli Luxury Scents" width={112} height={120} className="h-20 w-auto object-contain object-left" priority /></div>
       <div className="rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--primary))]/5 px-4 py-3 text-xs text-[hsl(var(--muted-foreground))]">
         These figures are confidential to Loveli Luxury partners. Please keep
         them within the partner community.
@@ -111,8 +113,8 @@ export default function PartnerEarningsPage() {
       <section>
         <h2 className="font-serif text-2xl">Retail margin at a glance</h2>
         <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-          <MarginTable title="30ml" rows={MARGIN_30} />
           <MarginTable title="50ml" rows={MARGIN_50} />
+          <MarginTable title="100ml" rows={MARGIN_100} />
         </div>
       </section>
 
@@ -122,7 +124,7 @@ export default function PartnerEarningsPage() {
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
           Commissions are calculated on Point Value (PV). Your rank unlocks how
           many levels deep you earn. Ambassador earns Level 1; Crown President
-          earns Levels 1–5.
+          earns Levels 1â€“5.
         </p>
         <div className="mt-6 overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40">
           <ul className="divide-y divide-[hsl(var(--border))]/60 text-sm">
@@ -160,8 +162,8 @@ export default function PartnerEarningsPage() {
                 {tier.tagline}
               </p>
               <ul className="mt-3 space-y-1 text-xs text-[hsl(var(--foreground))]/90">
-                <li>◆ {tier.commissionLabel}</li>
-                <li>◆ {tier.bonusLabel}</li>
+                <li>â—† {tier.commissionLabel}</li>
+                <li>â—† {tier.bonusLabel}</li>
               </ul>
             </div>
           ))}

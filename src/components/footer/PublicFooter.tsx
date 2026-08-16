@@ -2,7 +2,7 @@
 
 /**
  * Site footer. Hidden on /account/* dashboards (those are working surfaces,
- * not browse surfaces — the marketing footer is clutter there for
+ * not browse surfaces â€” the marketing footer is clutter there for
  * distributors/admins). Visible on /shop, /bundles, /, /login, /signup,
  * /partners/signup, etc.
  *
@@ -12,6 +12,7 @@
  * code because each link ties to a real route.
  */
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -35,9 +36,10 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
       <div className="mx-auto max-w-7xl px-6 py-14 text-sm text-[hsl(var(--muted-foreground))]">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-5">
-            <p className="font-serif text-2xl text-[hsl(var(--foreground))]">
-              {copy.brandName}
-            </p>
+            <div className="space-y-3">
+  <Image src="/loveli-luxury-wordmark.png" alt="Loveli Luxury Scents" width={170} height={68} className="h-12 w-auto object-contain object-left" />
+  <p className="font-serif text-xl text-[hsl(var(--foreground))]">{copy.brandName}</p>
+</div>
             <p className="mt-3 max-w-sm text-sm leading-relaxed">
               {copy.tagline}
             </p>
@@ -49,11 +51,6 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               <li>
                 <Link className="hover:text-[hsl(var(--primary))]" href="/shop">
                   All fragrances
-                </Link>
-              </li>
-              <li>
-                <Link className="hover:text-[hsl(var(--primary))]" href="/bundles">
-                  Bundles
                 </Link>
               </li>
               <li>
@@ -167,7 +164,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--border))]/60 pt-8 text-xs sm:flex-row">
-          <p>© {new Date().getFullYear()} {copy.copyrightName}</p>
+          <p>Â© {new Date().getFullYear()} {copy.copyrightName}</p>
           <p>{copy.closingLine}</p>
         </div>
       </div>
