@@ -15,6 +15,7 @@ import { revalidatePath } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { adminClient, requireSuperadmin } from '../auth/roles'
 import { authorize, PERMISSIONS } from '../auth'
+import { doubleRetailMinor } from './retail-size-pricing'
 import {
   buildStoragePrefix,
   processImage,
@@ -49,6 +50,77 @@ type Tables = Database['public']['Tables']
 
 function bumpStorefront(paths: readonly string[]) {
   for (const p of paths) revalidatePath(p)
+}
+async function sibling50RetailMinor(supabase: Client, productId: number, excludeId?: number) {
+  let query = supabase
+    .from('product_variants')
+    .select('id, retail_price_minor')
+    .eq('product_id', productId)
+    .eq('size_ml', 50)
+    .limit(1)
+
+  if (excludeId !== undefined) query = query.neq('id', excludeId)
+
+  const { data, error } = await query.maybeSingle()
+  if (error) throw error
+  return data?.retail_price_minor == null ? null : String(data.retail_price_minor)
+}
+
+async function retailFor100ml(
+  supabase: Client,
+  productId: number,
+  fallbackRetailMinor: string | undefined,
+  excludeId?: number,
+) {
+  const retail50 = await sibling50RetailMinor(supabase, productId, excludeId)
+  return retail50 === null ? fallbackRetailMinor : doubleRetailMinor(retail50)
+}
+
+async function assert100mlDistributorAllowsRetail(
+  supabase: Client,
+  productId: number,
+  retail50: string,
+) {
+  const { data: variant100, error } = await supabase
+    .from('product_variants')
+    .select('distributor_price_minor')
+    .eq('product_id', productId)
+    .eq('size_ml', 100)
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  if (!variant100 || variant100.distributor_price_minor == null) return
+
+  const retail100 = doubleRetailMinor(retail50)
+  if (BigInt(String(variant100.distributor_price_minor)) > BigInt(retail100)) {
+    throw new Error('Lower the 100ml distributor price before changing the 50ml retail price.')
+  }
+}
+
+async function refresh100mlRetailFrom50(supabase: Client, productId: number) {
+  const retail50 = await sibling50RetailMinor(supabase, productId)
+  if (retail50 === null) return
+
+  const { data: variant100, error: readError } = await supabase
+    .from('product_variants')
+    .select('id, distributor_price_minor')
+    .eq('product_id', productId)
+    .eq('size_ml', 100)
+    .limit(1)
+    .maybeSingle()
+  if (readError) throw readError
+  if (!variant100) return
+
+  const retail100 = doubleRetailMinor(retail50)
+  if (BigInt(String(variant100.distributor_price_minor)) > BigInt(retail100)) {
+    throw new Error('Lower the 100ml distributor price before changing the 50ml retail price.')
+  }
+
+  const { error: updateError } = await supabase
+    .from('product_variants')
+    .update({ retail_price_minor: retail100 })
+    .eq('id', variant100.id)
+  if (updateError) throw updateError
 }
 
 // -----------------------------------------------------------------------------
@@ -161,28 +233,78 @@ export async function deleteProduct(id: number) {
 // -----------------------------------------------------------------------------
 
 export async function createVariant(input: CreateVariantInput) {
-  const data = createVariantSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
   const supabase = await adminClient()
+  const rawProductId = Number(input.productId)
+  const rawSizeMl = Number(input.sizeMl)
+  const normalizedInput = rawSizeMl === 100 && Number.isInteger(rawProductId)
+    ? {
+        ...input,
+        retailPriceMinor: await retailFor100ml(
+          supabase,
+          rawProductId,
+          String(input.retailPriceMinor),
+        ),
+      }
+    : input
+  if (rawSizeMl === 50 && Number.isInteger(rawProductId)) {
+    await assert100mlDistributorAllowsRetail(
+      supabase,
+      rawProductId,
+      String(input.retailPriceMinor),
+    )
+  }
+  const data = createVariantSchema.parse(normalizedInput)
+  const retailPriceMinor = data.retailPriceMinor
+
   const { error } = await supabase.from('product_variants').insert({
     product_id: data.productId,
     sku: data.sku,
     size_ml: data.sizeMl,
-    retail_price_minor: data.retailPriceMinor,
+    retail_price_minor: retailPriceMinor,
     distributor_price_minor: data.distributorPriceMinor,
     weight_g: data.weightG ?? null,
     inventory_qty: data.inventoryQty,
     is_active: data.isActive,
   })
   if (error) throw error
+
+  if (data.sizeMl === 50) {
+    await refresh100mlRetailFrom50(supabase, data.productId)
+  }
   await revalidateProductFromVariant(supabase, data.productId)
 }
 
 export async function updateVariant(input: UpdateVariantInput) {
   await requireSuperadmin()
-  const data = updateVariantSchema.parse(input)
   await authorize(PERMISSIONS.PRODUCTS_UPDATE)
   const supabase = await adminClient()
+  const rawId = Number(input.id)
+  const { data: existing, error: existingError } = await supabase
+    .from('product_variants')
+    .select('product_id, size_ml')
+    .eq('id', rawId)
+    .maybeSingle()
+  if (existingError) throw existingError
+  if (!existing) throw new Error('Variant not found')
+
+  const rawSizeMl = input.sizeMl === undefined ? existing.size_ml : Number(input.sizeMl)
+  const normalizedInput = rawSizeMl === 100
+    ? {
+        ...input,
+        retailPriceMinor: await retailFor100ml(
+          supabase,
+          existing.product_id,
+          input.retailPriceMinor === undefined
+            ? undefined
+            : String(input.retailPriceMinor),
+          rawId,
+        ),
+      }
+    : input
+  const data = updateVariantSchema.parse(normalizedInput)
+  const effectiveProductId = existing.product_id
+  const effectiveSizeMl = data.sizeMl ?? existing.size_ml
   const patch: Tables['product_variants']['Update'] = {}
   if (data.sku !== undefined) patch.sku = data.sku
   if (data.sizeMl !== undefined) patch.size_ml = data.sizeMl
@@ -193,6 +315,22 @@ export async function updateVariant(input: UpdateVariantInput) {
   if (data.inventoryQty !== undefined) patch.inventory_qty = data.inventoryQty
   if (data.isActive !== undefined) patch.is_active = data.isActive
 
+  if (
+    patch.distributor_price_minor !== undefined &&
+    patch.retail_price_minor !== undefined &&
+    BigInt(String(patch.distributor_price_minor)) > BigInt(String(patch.retail_price_minor))
+  ) {
+    throw new Error('Distributor price cannot be higher than the retail price.')
+  }
+
+  if (effectiveSizeMl === 50 && data.retailPriceMinor !== undefined) {
+    await assert100mlDistributorAllowsRetail(
+      supabase,
+      effectiveProductId,
+      data.retailPriceMinor,
+    )
+  }
+
   const { data: row, error } = await supabase
     .from('product_variants')
     .update(patch)
@@ -200,9 +338,12 @@ export async function updateVariant(input: UpdateVariantInput) {
     .select()
     .single()
   if (error) throw error
+
+  if (row.size_ml === 50) {
+    await refresh100mlRetailFrom50(supabase, row.product_id)
+  }
   await revalidateProductFromVariant(supabase, row.product_id)
 }
-
 export async function deleteVariant(id: number) {
   await authorize(PERMISSIONS.PRODUCTS_DELETE)
   const supabase = await adminClient()

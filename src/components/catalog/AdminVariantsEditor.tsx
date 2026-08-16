@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { doubleRetailMinor } from '@/lib/catalog/retail-size-pricing'
 
 import {
   createVariant,
@@ -72,6 +73,11 @@ export function AdminVariantsEditor({
     })
   }
 
+  const sibling50 = variants.find((item) => item.sizeMl === 50)
+  const calculated100RetailKes = sibling50
+    ? minorToKesInput(doubleRetailMinor(String(sibling50.retailPriceMinor)))
+    : null
+
   return (
     <div className="rounded-lg border border-neutral-200 bg-white">
       <header className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
@@ -107,6 +113,13 @@ export function AdminVariantsEditor({
       )}
 
       <div className="border-t border-neutral-200 bg-neutral-50 p-5">
+          {draft.sizeMl === '100' && (
+            <p className="mb-3 rounded-md bg-neutral-50 px-3 py-2 text-sm text-neutral-600">
+              {calculated100RetailKes
+                ? `100ml retail price is calculated at KES ${calculated100RetailKes} from the 50ml price. Distributor price stays separate.`
+                : 'Add the 50ml variant first so the 100ml retail price can be calculated automatically.'}
+            </p>
+          )}
         <p className="mb-3 text-sm font-medium text-neutral-700">Add a variant</p>
         <div className="grid grid-cols-6 gap-3">
           <input
