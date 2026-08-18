@@ -1,6 +1,6 @@
-import Image from 'next/image'
+﻿import Image from 'next/image'
 /**
- * /account/partner/earnings â€” PARTNER-ONLY compensation detail.
+ * /account/partner/earnings Ã¢â‚¬â€ PARTNER-ONLY compensation detail.
  *
  * The pricing, retail margins, earnings examples, and exact commission rates
  * that used to sit on the PUBLIC /partners page live here, behind the partner
@@ -12,6 +12,7 @@ import Image from 'next/image'
  */
 
 import { ALL_PARTNER_TIERS } from '@/lib/partners/tiers'
+import { LOVELI_COMPENSATION } from '@/lib/partners/compensation-plan'
 
 export const metadata = {
   title: 'Earnings & pricing',
@@ -23,35 +24,26 @@ function kes(n: number): string {
   return `Kes ${n.toLocaleString('en-KE')}`
 }
 
+const plan = LOVELI_COMPENSATION
 const PRICING = [
-  { size: '50', purchase: 500, retail: 2500, margin: 2000 },
-  { size: '100', purchase: 1400, retail: 5000, margin: 3600 },
+  {
+    size: '50',
+    purchase: plan.activation.iboPriceKes,
+    retail: plan.activation.suggestedRetailKes,
+    margin: plan.activation.retailProfitKes,
+  },
 ] as const
-
-const MARGIN_50 = [
-  { qty: 5, kes: 10_000 },
-  { qty: 10, kes: 20_000 },
-  { qty: 20, kes: 40_000 },
-  { qty: 50, kes: 100_000 },
-  { qty: 100, kes: 200_000 },
-] as const
-
-const MARGIN_100 = [
-  { qty: 5, kes: 18_000 },
-  { qty: 10, kes: 36_000 },
-  { qty: 20, kes: 72_000 },
-  { qty: 50, kes: 180_000 },
-] as const
+const MARGIN_50 = [5, 10, 20, 50, 100].map((qty) => ({
+  qty,
+  kes: qty * plan.activation.retailProfitKes,
+}))
 
 // Unilevel network commission, as a percentage of Point Value (PV). Your rank
 // unlocks how many levels deep you earn (Ambassador = L1 ... Crown President = L1-5).
-const LEVELS = [
-  { level: 1, pct: '20%' },
-  { level: 2, pct: '11%' },
-  { level: 3, pct: '6%' },
-  { level: 4, pct: '2%' },
-  { level: 5, pct: '1%' },
-] as const
+const LEVELS = LOVELI_COMPENSATION.commissionLevels.map((level) => ({
+  level: level.level,
+  pct: `${level.percentage}%`,
+}))
 
 export default function PartnerEarningsPage() {
   return (
@@ -70,7 +62,7 @@ export default function PartnerEarningsPage() {
           margin shown is what you earn on every bottle you personally place, on
           top of network commission.
         </p>
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-1 max-w-xl">
           {PRICING.map((p) => (
             <div
               key={p.size}
@@ -112,9 +104,8 @@ export default function PartnerEarningsPage() {
       {/* Retail margin at a glance */}
       <section>
         <h2 className="font-serif text-2xl">Retail margin at a glance</h2>
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-1 max-w-xl">
           <MarginTable title="50ml" rows={MARGIN_50} />
-          <MarginTable title="100ml" rows={MARGIN_100} />
         </div>
       </section>
 
@@ -124,7 +115,7 @@ export default function PartnerEarningsPage() {
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
           Commissions are calculated on Point Value (PV). Your rank unlocks how
           many levels deep you earn. Ambassador earns Level 1; Crown President
-          earns Levels 1â€“5.
+          earns Levels 1Ã¢â‚¬â€œ5.
         </p>
         <div className="mt-6 overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40">
           <ul className="divide-y divide-[hsl(var(--border))]/60 text-sm">
@@ -162,8 +153,8 @@ export default function PartnerEarningsPage() {
                 {tier.tagline}
               </p>
               <ul className="mt-3 space-y-1 text-xs text-[hsl(var(--foreground))]/90">
-                <li>â—† {tier.commissionLabel}</li>
-                <li>â—† {tier.bonusLabel}</li>
+                <li>Ã¢â€”â€  {tier.commissionLabel}</li>
+                <li>Ã¢â€”â€  {tier.bonusLabel}</li>
               </ul>
             </div>
           ))}
