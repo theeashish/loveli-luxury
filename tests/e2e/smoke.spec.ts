@@ -89,7 +89,7 @@ test.describe('public surfaces render', () => {
     const body = await res.text()
     expect(body).toContain('<urlset')
     // Static routes from sitemap.ts STATIC_PATHS.
-    for (const route of ['/shop', '/bundles', '/partners', '/story', '/policies']) {
+    for (const route of ['/shop', '/partners', '/story', '/policies']) {
       expect(body).toContain(route)
     }
   })
@@ -102,7 +102,6 @@ test.describe('public surfaces render', () => {
     const expected: Record<string, string> = {
       '/': '/',
       '/shop': '/shop',
-      '/bundles': '/bundles',
       '/partners': '/partners',
       '/story': '/story',
       '/policies/authenticity': '/policies/authenticity',
@@ -117,7 +116,7 @@ test.describe('public surfaces render', () => {
     const usesPlaceholderSupabase =
       process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
     const routes = Object.entries(expected).filter(
-      ([route]) => !usesPlaceholderSupabase || !['/shop', '/bundles', '/partners', '/policies/authenticity', '/policies/delivery', '/policies/refund', '/ids'].includes(route),
+      ([route]) => !usesPlaceholderSupabase || !['/shop', '/partners', '/policies/authenticity', '/policies/delivery', '/policies/refund', '/ids'].includes(route),
     )
 
     for (const [route, expectedPath] of routes) {

@@ -1,12 +1,11 @@
 import type { MetadataRoute } from 'next'
 import { publicEnv } from '@/lib/env'
-import { listActiveProductSlugs, listActiveBundleSlugs } from '@/lib/catalog/queries'
+import { listActiveProductSlugs } from '@/lib/catalog/queries'
 
 /**
  * /sitemap.xml
  *
- * Static public routes + every active product (/p/[slug]) and bundle
- * (/bundles/[slug]). The slug listers use the service-role client, so this
+ * Static public routes + every active product (/p/[slug]). The slug lister uses the service-role client, so this
  * runs fine at build time. Catalog reads are wrapped in try/catch so a DB
  * hiccup degrades to the static routes rather than failing the sitemap.
  * Revalidated hourly (and on every deploy). Brief §11.
@@ -16,7 +15,6 @@ export const revalidate = 3600
 const STATIC_PATHS = [
   '',
   '/shop',
-  '/bundles',
   '/partners',
   '/story',
   '/track',
@@ -49,19 +47,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     // Catalog unavailable — ship static routes rather than 500 the sitemap.
   }
-
-  let bundleEntries: MetadataRoute.Sitemap = []
-  try {
-    const slugs = await listActiveBundleSlugs()
-    bundleEntries = slugs.map((slug) => ({
-      url: `${base}/bundles/${slug}`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    }))
-  } catch {
-    // As above.
-  }
-
-  return [...staticEntries, ...productEntries, ...bundleEntries]
+  return [...staticEntries, ...productEntries]
 }

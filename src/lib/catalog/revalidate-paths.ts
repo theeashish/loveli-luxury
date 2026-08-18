@@ -10,9 +10,9 @@
  * by `slugSchema` in catalog/schemas.ts (lowercase a-z 0-9, single hyphens).
  */
 
-const STATIC_PATHS: ReadonlySet<string> = new Set(['/', '/shop', '/bundles'])
+const STATIC_PATHS: ReadonlySet<string> = new Set(['/', '/shop'])
 
-const DYNAMIC_PREFIXES: readonly string[] = ['/p', '/bundles']
+const DYNAMIC_PREFIXES: readonly string[] = ['/p']
 
 // eslint-disable-next-line security/detect-unsafe-regex -- Fixed, anchored slug rule; caller limits input to 80 characters.
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/

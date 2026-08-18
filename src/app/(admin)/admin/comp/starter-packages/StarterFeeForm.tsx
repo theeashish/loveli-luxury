@@ -37,7 +37,7 @@ export function StarterFeeForm({
           } else {
             setMsg({
               kind: 'ok',
-              text: `Joining fee updated to Kes ${value.toLocaleString()}.`,
+              text: `Joining fee updated to KES ${value.toLocaleString()}.`,
             })
           }
         })

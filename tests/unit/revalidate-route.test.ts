@@ -10,11 +10,11 @@ vi.mock('next/cache', () => ({
 }))
 
 describe('validateRevalidatePath', () => {
-  it.each(['/', '/shop', '/bundles'])('accepts static surface %s', (p) => {
+  it.each(['/', '/shop'])('accepts static surface %s', (p) => {
     expect(validateRevalidatePath(p)).toEqual({ ok: true, path: p })
   })
 
-  it.each(['/p/rose-noir', '/bundles/starter-30ml-x3', '/p/x'])(
+  it.each(['/p/rose-noir', '/p/x'])(
     'accepts dynamic surface %s',
     (p) => {
       expect(validateRevalidatePath(p)).toEqual({ ok: true, path: p })
@@ -157,7 +157,7 @@ describe('POST /api/revalidate', () => {
 
   it('revalidates each accepted path on the happy path', async () => {
     const { POST } = await loadRoute()
-    const paths = ['/', '/shop', '/p/rose-noir', '/bundles/starter-30ml-x3']
+    const paths = ['/', '/shop', '/p/rose-noir']
     const res = await POST(makeRequest({ body: { paths }, auth: `Bearer ${SECRET}` }))
     expect(res.status).toBe(200)
     const json = (await res.json()) as { revalidated: boolean; paths: string[] }

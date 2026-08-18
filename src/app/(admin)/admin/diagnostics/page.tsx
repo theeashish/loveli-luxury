@@ -49,7 +49,7 @@ export default async function DiagnosticsPage({
             dry-run. Mutating functions are exercised with invalid inputs
             and pass if they reject as expected. Two <code>audit_log</code>
             rows are written per run. <strong>One payment-provider hosted
-            link is created</strong> (Kes 10) — it stays in pending and
+            link is created</strong> (KES 10) — it stays in pending and
             never charges anyone.
           </p>
         </header>

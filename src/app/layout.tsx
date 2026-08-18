@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s | Loveli Luxury Scents',
   },
   description:
-    'Loveli Luxury Scents. Eau de Parfum blended in small batches, bottled with intention. Free delivery in Nairobi on orders above Kes 5,000.',
+    'Loveli Luxury Scents. Eau de Parfum blended in small batches, bottled with intention. Free delivery in Nairobi on orders above KES 5,000.',
   applicationName: publicEnv.NEXT_PUBLIC_APP_NAME,
   icons: {
     icon: [

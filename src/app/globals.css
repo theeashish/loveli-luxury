@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    /* Light premium palette: soft cream page, warm charcoal ink, gold + warm-brown accents. */
-    --background: 40 23% 95%;            /* soft cream #F5F3EF */
-    --foreground: 22 14% 13%;            /* warm charcoal ink */
-    --muted: 40 22% 90%;                 /* card / section bg, deeper cream */
-    --muted-foreground: 28 8% 38%;       /* secondary copy, warm gray */
-    --primary: 39 55% 35%;               /* antique gold, deepened for cream contrast */
-    --primary-foreground: 22 14% 13%;    /* charcoal text on gold (legible on light) */
-    --accent: 19 29% 28%;                /* warm brown #5C4033 */
-    --accent-foreground: 40 30% 97%;
-    --border: 34 16% 85%;                /* warm light hairline */
-    --ring: 39 55% 35%;
-    --brand-gold: 45 94% 50%;
-    --brand-gold-deep: 39 55% 35%;
-    --brand-cream: 40 23% 95%;
-    --brand-charcoal: 22 14% 13%;
-    --brand-brown: 19 29% 28%;
+    /* Light luxury palette drawn from the logo: white, silver, graphite, and gold. */
+    --background: 0 0% 99%;                 /* clean white */
+    --foreground: 220 15% 14%;              /* deep graphite */
+    --muted: 210 14% 96%;                    /* soft silver-white */
+    --muted-foreground: 215 10% 40%;        /* neutral grey */
+    --primary: 43 72% 31%;                   /* logo gold */
+    --primary-foreground: 220 15% 12%;       /* graphite on gold */
+    --accent: 220 12% 21%;                   /* deep graphite, not brown */
+    --accent-foreground: 0 0% 100%;
+    --border: 210 12% 86%;                   /* silver hairline */
+    --ring: 43 72% 31%;
+    --brand-gold: 43 72% 42%;
+    --brand-gold-deep: 43 72% 31%;
+    --brand-cream: 0 0% 99%;
+    --brand-charcoal: 220 15% 14%;
+    --brand-silver: 210 12% 72%;
     --radius: 0.375rem;
   }
 }
@@ -38,7 +38,7 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     background-image:
-      radial-gradient(at 50% 0%, hsl(34 45% 42% / 0.04) 0, transparent 55%);
+      radial-gradient(at 50% 0%, hsl(43 72% 42% / 0.05) 0, transparent 55%);
     background-attachment: fixed;
   }
   h1, h2, h3 {
@@ -64,7 +64,7 @@
 
 /* Refined scrollbar — thin, gold-tipped, low-key. */
 @media (hover: hover) and (pointer: fine) {
-  html { scrollbar-width: thin; scrollbar-color: hsl(34 45% 42% / 0.55) transparent; }
+  html { scrollbar-width: thin; scrollbar-color: hsl(43 72% 42% / 0.55) transparent; }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {

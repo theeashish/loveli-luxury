@@ -162,7 +162,7 @@ export default async function PartnerProgramPage() {
           <div className="max-w-3xl">
             <p className="text-eyebrow">Programme integrity</p>
             <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight text-[hsl(var(--foreground))] md:text-5xl">
-              Trust is part of the work.
+              Keep the programme fair.
             </h2>
             <p className="mt-6 text-base leading-8 text-[hsl(var(--muted-foreground))]">
               These safeguards keep the programme centred on the product, verified retail activity, and fair treatment of every partner.

@@ -44,7 +44,7 @@ export const HERO_DEFAULTS: HeroContent = {
   eyebrow: 'Where love meets luxury',
   headline: 'The Scent of *Elegance*, Bottled.',
   subhead:
-    'Eau de Parfum, blended in small batches in Nairobi. Each bottle a quiet love letter to those who choose to live beautifully.',
+    'Eau de Parfum blended in small batches in Nairobi. Each bottle is made for people who enjoy wearing fragrance.',
   ctaLabel: 'Shop the collection',
   ctaHref: '/shop',
   rotatingLabel: 'Now featuring',
@@ -70,7 +70,7 @@ export const TRUST_STRIP_DEFAULTS: TrustStripContent = {
     {
       icon: 'shield-check',
       label: 'Authenticity verified',
-      sub: 'Every fragrance checked before dispatch',
+      sub: 'Every fragrance is checked before dispatch',
       href: '/policies/authenticity',
     },
     {
@@ -82,13 +82,13 @@ export const TRUST_STRIP_DEFAULTS: TrustStripContent = {
     {
       icon: 'message-circle',
       label: 'Concierge on WhatsApp',
-      sub: 'Real help choosing your scent',
+      sub: 'Help choosing your scent',
       href: null,
     },
     {
       icon: 'truck',
       label: 'Nationwide delivery',
-      sub: 'Nairobi 24–48h · countrywide',
+      sub: 'Nairobi 24–48 hours · across Kenya',
       href: '/policies/delivery',
     },
   ],
@@ -142,7 +142,7 @@ export type FooterContent = z.infer<typeof footerSchema>
 export const FOOTER_DEFAULTS: FooterContent = {
   brandName: 'Loveli Luxury Scents',
   tagline:
-    'The home of modern African luxury fragrance culture. Sourced with discipline, sealed with care, delivered with intention.',
+    'Modern African fragrance, made in Nairobi and delivered with care.',
   copyrightName: 'Loveli Luxury International',
   closingLine: 'Blended in Nairobi · Shipped with intention',
 }
@@ -558,10 +558,10 @@ export const BUNDLES_LANDING_DEFAULTS: BundlesLandingContent = {
   eyebrow: 'Curated sets',
   headline: 'More to remember, together.',
   subhead:
-    'Thoughtfully paired fragrances and packages, assembled to make choosing feel more considered.',
-  countSingular: 'set, composed with intention.',
-  countPlural: 'sets, composed with intention.',
-  emptyMessage: 'A new set is being composed. Please return shortly.',
+    'Fragrance sets made to make choosing easier.',
+  countSingular: 'set',
+  countPlural: 'sets',
+  emptyMessage: 'No sets are available right now. Please check again later.',
 }
 
 
@@ -593,24 +593,24 @@ export const partnerProgramSchema = z.object({
 })
 export type PartnerProgramContent = z.infer<typeof partnerProgramSchema>
 export const PARTNER_PROGRAM_DEFAULTS: PartnerProgramContent = {
-  philosophyEyebrow: 'A considered path',
-  philosophyHeadline: 'A partner program built around real retail.',
+  philosophyEyebrow: 'How the programme works',
+  philosophyHeadline: 'A partner programme built on real sales.',
   philosophyBody:
-    'Loveli Luxury recognises the work of people who place fragrance with care. The programme is designed for creators, resellers, and regional curators who value a real product, a considered customer relationship, and a brand that treats trust as part of the work.',
+    'Loveli Luxury works with people who place fragrance with care. The programme is for creators, resellers, and regional curators who value the product and their customers. Trust matters in every sale.',
   philosophyNote:
     'Every commission is tied to a verified retail order. Recruitment alone is never rewarded.',
-  tiersEyebrow: 'The progression',
-  tiersHeadline: 'Five ranks. One considered standard.',
+  tiersEyebrow: 'The ranks',
+  tiersHeadline: 'Five ranks. One clear standard.',
   tiersLead:
-    'Progress is earned through verified retail performance over time. Each rank marks a deeper relationship with the house, not a promise of income.',
+    'Ranks are earned through verified retail performance over time. They show progress in the business, not a promise of income.',
   tiersFootnote:
     'Pricing, retail margins, and complete earning information are shared with approved partners inside the portal.',
-  storiesEyebrow: 'The people behind the work',
-  storiesHeadline: 'A programme with room for real stories.',
+  storiesEyebrow: 'Partner stories',
+  storiesHeadline: 'Real stories, when they are verified.',
   storiesBody:
-    'Partner stories will be published only when they are verified, contextual, and representative. Until then, the focus stays on the programme, the product, and the work required to build with care.',
-  startEyebrow: 'Begin with clarity',
-  startHeadline: 'A first step should feel informed.',
+    'We will publish partner stories only when they are verified and representative. Until then, we focus on the programme, the product, and the work of building a business.',
+  startEyebrow: 'How to start',
+  startHeadline: 'Know what to expect.',
   photo: {
     heroAlt: 'Loveli Luxury partner program editorial photograph',
     heroCaption: 'The partner programme',
