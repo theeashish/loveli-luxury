@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { ALL_PARTNER_TIERS, type PartnerTier } from '@/lib/partners/tiers'
 import { getSection } from '@/lib/content/site'
 import { HighlightText } from '@/components/content/HighlightText'
@@ -19,7 +19,7 @@ const TIER_PITCH: Record<PartnerTier['code'], string> = {
   executive: 'Develop your own clientele while taking a more active role in your growing business.',
   gold_director: 'Lead a growing organisation with a deeper relationship to the house and its launches.',
   platinum_director: 'A senior leader with broader responsibilities, brand access, and a voice in the house.',
-  crown_president: 'The houseâ€™s inner circle: long-term leadership, recognition, and limited-edition allocation.',
+  crown_president: "The house's inner circle: long-term leadership, recognition, and limited-edition allocation.",
 }
 
 const INTEGRITY_RULES = [

@@ -164,7 +164,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--border))]/60 pt-8 text-xs sm:flex-row">
-          <p>Â© {new Date().getFullYear()} {copy.copyrightName}</p>
+          <p><span aria-hidden="true">&copy;</span> {new Date().getFullYear()} {copy.copyrightName}</p>
           <p>{copy.closingLine}</p>
         </div>
       </div>
