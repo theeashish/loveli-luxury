@@ -90,11 +90,11 @@ export async function AccountStatusCard() {
           className="pointer-events-none absolute inset-0 -z-10 opacity-70"
           style={{
             background:
-              'radial-gradient(60% 80% at 100% 0%, hsl(38 40% 60% / 0.15) 0%, transparent 60%)',
+              'radial-gradient(60% 80% at 100% 0%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 60%)',
           }}
         />
         <div className="flex items-center gap-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-champagne-deep))]">
             Partner program
           </p>
           <span className="inline-block rounded-full border border-[hsl(var(--muted-foreground))]/30 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))]">
@@ -116,7 +116,7 @@ export async function AccountStatusCard() {
         {sponsor ? (
           <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
             Invitation code:{' '}
-            <code className="font-mono text-[hsl(var(--primary))]">
+            <code className="font-mono text-[hsl(var(--brand-champagne-deep))]">
               {sponsor}
             </code>
           </p>

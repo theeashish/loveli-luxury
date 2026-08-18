@@ -33,12 +33,12 @@ export default async function SignupPage({
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(38 40% 60% / 0.12) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(19 35% 45% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 54.9% / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-7xl items-center justify-center px-6 py-16 lg:py-24">
         <div className="w-full max-w-md rounded-2xl border border-[hsl(var(--primary))]/25 bg-[hsl(var(--muted))]/40 p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] backdrop-blur-sm md:p-12">
-          <p className="text-center text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--primary))]">
+          <p className="text-center text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-champagne-deep))]">
             Loveli Luxury
           </p>
           <h1 className="mt-5 text-center font-serif text-5xl italic tracking-tight md:text-6xl">
@@ -58,7 +58,7 @@ export default async function SignupPage({
               Already have an account?{' '}
               <Link
                 href={loginHref}
-                className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+                className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
               >
                 Sign in
               </Link>
@@ -67,7 +67,7 @@ export default async function SignupPage({
               Want to build a luxury fragrance business instead?{' '}
               <Link
                 href="/partners/signup"
-                className="font-medium text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+                className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
               >
                 Join the partner program →
               </Link>

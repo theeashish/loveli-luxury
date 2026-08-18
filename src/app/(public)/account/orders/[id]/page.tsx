@@ -154,7 +154,7 @@ export default async function OrderDetailPage({
     <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
       <Link
         href="/account/orders"
-        className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+        className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--brand-champagne-deep))]"
       >
         ← All orders
       </Link>

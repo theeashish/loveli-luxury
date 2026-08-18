@@ -143,7 +143,7 @@ export default async function CommissionsPage({
           {page > 1 ? (
             <Link
               href={`/account/partner/commissions?page=${page - 1}`}
-              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--brand-champagne-deep))]"
             >
               ← Previous
             </Link>
@@ -156,7 +156,7 @@ export default async function CommissionsPage({
           {page < lastPage ? (
             <Link
               href={`/account/partner/commissions?page=${page + 1}`}
-              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))]"
+              className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--brand-champagne-deep))]"
             >
               Next →
             </Link>

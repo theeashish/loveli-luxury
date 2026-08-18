@@ -37,7 +37,7 @@ export function renderReceiptHtml(data: ReceiptData, appUrl: string): string {
   const trackUrl = `${appUrl.replace(/\/+$/, '')}/track/${encodeURIComponent(data.orderNumber)}`
   return `<!doctype html><html><body style="margin:0;background:#faf8f5">
 <div style="font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;max-width:560px;margin:0 auto;padding:32px 24px">
-  <p style="letter-spacing:.3em;text-transform:uppercase;font-size:11px;color:#a07c3f;margin:0 0 8px">Loveli Luxury</p>
+  <p style="letter-spacing:.3em;text-transform:uppercase;font-size:11px;color:#1A1A1A;margin:0 0 8px">Loveli Luxury</p>
   <h1 style="font-size:22px;font-weight:500;margin:0 0 16px">Your order is confirmed</h1>
   <p style="margin:0 0 12px">${greeting}</p>
   <p style="margin:0 0 16px">Thank you — we&rsquo;ve received your payment for <strong>${escapeHtml(data.orderNumber)}</strong>.</p>
@@ -45,7 +45,7 @@ export function renderReceiptHtml(data: ReceiptData, appUrl: string): string {
     <tr><td style="padding:10px 0;border-top:1px solid #e3ddd3"><strong>Total paid</strong></td>
         <td style="padding:10px 0;border-top:1px solid #e3ddd3;text-align:right"><strong>${formatKes(data.totalMinor)}</strong></td></tr>
   </table>
-  <p style="margin:20px 0 8px;font-size:14px">Track your order: <a href="${trackUrl}" style="color:#a07c3f">${escapeHtml(data.orderNumber)}</a></p>
+  <p style="margin:20px 0 8px;font-size:14px">Track your order: <a href="${trackUrl}" style="color:#1A1A1A">${escapeHtml(data.orderNumber)}</a></p>
   <p style="color:#888;font-size:12px;margin:16px 0 0">Every fragrance is authenticity verified before dispatch.</p>
 </div></body></html>`
 }

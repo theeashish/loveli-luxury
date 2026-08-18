@@ -50,7 +50,7 @@ export default async function MyOrdersPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
       <header className="mb-10">
-        <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--primary))]">Account</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-champagne-deep))]">Account</p>
         <h1 className="mt-2 text-4xl font-light tracking-tight">My orders</h1>
       </header>
 
@@ -165,7 +165,7 @@ function KindBadge({ variant }: { variant: 'signup' | 'retail' }) {
   const cls =
     variant === 'signup'
       ? 'border-amber-400/40 bg-amber-500/10 text-amber-200'
-      : 'border-[hsl(var(--primary))]/40 bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))]'
+      : 'border-[hsl(var(--primary))]/40 bg-[hsl(var(--primary))]/10 text-[hsl(var(--brand-champagne-deep))]'
   return (
     <span
       className={`inline-block rounded-full border px-2 py-[2px] text-[10px] font-semibold uppercase tracking-[0.2em] ${cls}`}

@@ -6,7 +6,7 @@ export function AccountProtectionNotice() {
       className="rounded-2xl border border-[hsl(var(--primary))]/20 bg-[hsl(var(--muted))] p-6"
       aria-labelledby="account-protection-heading"
     >
-      <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--primary))]">
+      <p className="text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--brand-champagne-deep))]">
         Your privacy matters
       </p>
       <h2 id="account-protection-heading" className="mt-2 font-serif text-2xl tracking-tight">
@@ -28,7 +28,7 @@ export function AccountProtectionNotice() {
       </div>
       <Link
         href="/policies/privacy"
-        className="mt-4 inline-flex text-xs uppercase tracking-[0.15em] text-[hsl(var(--primary))] underline-offset-4 hover:underline"
+        className="mt-4 inline-flex text-xs uppercase tracking-[0.15em] text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
       >
         Read our privacy promise
       </Link>
