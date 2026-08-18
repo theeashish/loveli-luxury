@@ -38,7 +38,7 @@ export default async function PartnerProgramPage() {
   ])
 
   return (
-    <div>
+    <div data-page="partners">
       <section className="relative overflow-hidden border-b border-[hsl(var(--border))]/70">
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <div className="absolute -left-28 top-4 h-96 w-96 rounded-full bg-[hsl(var(--primary))]/[0.07] blur-3xl" />
