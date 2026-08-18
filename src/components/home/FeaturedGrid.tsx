@@ -9,7 +9,7 @@ function Card({ f, index }: { f: FragranceMeta; index: number }) {
     <Link
       href={'/p/' + f.slug}
       className={
-        'loveli-reveal-up group relative flex min-h-0 flex-col overflow-hidden border border-[hsl(35_45%_42%/0.24)] bg-[hsl(38_42%_93%)] p-4 text-[hsl(22_18%_12%)] transition duration-300 hover:-translate-y-1 hover:border-[hsl(35_45%_42%/0.62)] sm:p-7 md:block md:min-h-[28rem] ' +
+        'loveli-reveal-up group relative flex min-h-0 flex-col overflow-hidden border border-[hsl(var(--primary)/0.24)] bg-[hsl(var(--brand-charcoal))] p-4 text-[hsl(var(--foreground))] transition duration-300 hover:-translate-y-1 hover:border-[hsl(var(--primary)/0.62)] sm:p-7 md:block md:min-h-[28rem] ' +
         (index === 0 ? ' md:col-span-6' : ' md:col-span-3')
       }
     >
@@ -26,11 +26,11 @@ function Card({ f, index }: { f: FragranceMeta; index: number }) {
         </div>
       </div>
       <div className="relative z-10 mt-4 flex min-h-[8rem] flex-1 flex-col justify-between md:mt-0 md:min-h-[25rem]">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[hsl(35_45%_42%)]">{f.family}</p>
-        <div className="mt-auto max-w-[17rem] border-l border-[hsl(35_45%_42%/0.55)] pl-4">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-[hsl(var(--primary))]">{f.family}</p>
+        <div className="mt-auto max-w-[17rem] border-l border-[hsl(var(--primary)/0.55)] pl-4">
           <h3 className="font-serif text-3xl leading-none tracking-tight sm:text-4xl">{f.name}</h3>
-          <p className="mt-2 text-sm italic text-[hsl(22_12%_28%)]">{f.tagline}</p>
-          <span className="mt-4 inline-flex text-[9px] font-semibold uppercase tracking-[0.24em] text-[hsl(35_45%_42%)] underline-offset-4 group-hover:underline">
+          <p className="mt-2 text-sm italic text-[hsl(var(--muted-foreground))]">{f.tagline}</p>
+          <span className="mt-4 inline-flex text-[9px] font-semibold uppercase tracking-[0.24em] text-[hsl(var(--primary))] underline-offset-4 group-hover:underline">
             Discover the scent →
           </span>
         </div>
@@ -45,16 +45,16 @@ export function FeaturedGrid() {
   )
 
   return (
-    <section className="relative border-b border-[hsl(35_45%_42%/0.24)] bg-[hsl(28_22%_18%)] py-7 sm:py-10">
+    <section className="relative border-b border-[hsl(var(--primary)/0.24)] bg-[hsl(28_22%_18%)] py-7 sm:py-10">
       <div className="mx-auto max-w-7xl px-6">
         <header className="loveli-reveal-up mb-7 flex flex-wrap items-end justify-between gap-5 sm:mb-10">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[hsl(35_58%_67%)]">The Loveli edit</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[hsl(var(--brand-gold))]">The Loveli edit</p>
             <h2 className="mt-3 max-w-2xl font-serif text-4xl leading-[0.94] tracking-tight text-[hsl(38_52%_87%)] sm:text-5xl">
-              Fragrance for the mood <em className="italic text-[hsl(35_58%_67%)]">you carry.</em>
+              Fragrance for the mood <em className="italic text-[hsl(var(--brand-gold))]">you carry.</em>
             </h2>
           </div>
-          <Link href="/shop" className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[hsl(35_58%_67%)] underline-offset-8 hover:underline">
+          <Link href="/shop" className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[hsl(var(--brand-gold))] underline-offset-8 hover:underline">
             Shop all fragrances →
           </Link>
         </header>

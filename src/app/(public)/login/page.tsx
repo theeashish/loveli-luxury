@@ -50,12 +50,12 @@ export default async function LoginPage({
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 54.9% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 90.2% / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-7xl items-center justify-center px-6 py-16 lg:py-24">
         <div className="w-full max-w-md rounded-2xl border border-[hsl(var(--primary))]/25 bg-[hsl(var(--muted))]/40 p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)] backdrop-blur-sm md:p-12">
-          <p className="text-center text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-champagne-deep))]">
+          <p className="text-center text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-gold))]">
             Loveli Luxury
           </p>
           <h1 className="mt-5 text-center font-serif text-5xl italic tracking-tight md:text-6xl">
@@ -70,7 +70,7 @@ export default async function LoginPage({
           <div className="mt-5 text-center">
             <Link
               href="/forgot-password"
-              className="text-xs uppercase tracking-[0.25em] text-[hsl(var(--muted-foreground))] underline-offset-4 transition hover:text-[hsl(var(--brand-champagne-deep))] hover:underline"
+              className="text-xs uppercase tracking-[0.25em] text-[hsl(var(--muted-foreground))] underline-offset-4 transition hover:text-[hsl(var(--brand-gold))] hover:underline"
             >
               Forgot password?
             </Link>
@@ -80,7 +80,7 @@ export default async function LoginPage({
               New here?{' '}
               <Link
                 href={signupHref}
-                className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
+                className="font-medium text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
               >
                 Create a buyer account
               </Link>
@@ -89,7 +89,7 @@ export default async function LoginPage({
               Building a luxury fragrance business?{' '}
               <Link
                 href="/partners/signup"
-                className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
+                className="font-medium text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
               >
                 Join the partner program →
               </Link>

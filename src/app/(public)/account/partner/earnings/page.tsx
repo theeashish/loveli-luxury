@@ -83,7 +83,7 @@ export default function PartnerEarningsPage() {
                   <dt className="text-[hsl(var(--muted-foreground))]">
                     Mandatory retail price
                   </dt>
-                  <dd className="font-medium text-[hsl(var(--brand-champagne-deep))]">
+                  <dd className="font-medium text-[hsl(var(--brand-gold))]">
                     {kes(p.retail)}
                   </dd>
                 </div>
@@ -92,7 +92,7 @@ export default function PartnerEarningsPage() {
                 <span className="text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--muted-foreground))]">
                   Your margin per bottle
                 </span>
-                <span className="font-serif text-2xl text-[hsl(var(--brand-champagne-deep))]">
+                <span className="font-serif text-2xl text-[hsl(var(--brand-gold))]">
                   {kes(p.margin)}
                 </span>
               </div>
@@ -118,7 +118,7 @@ export default function PartnerEarningsPage() {
             {LEVELS.map((l) => (
               <li key={l.level} className="flex items-center justify-between px-5 py-3">
                 <span className="text-[hsl(var(--muted-foreground))]">Level {l.level}</span>
-                <span className="font-medium text-[hsl(var(--brand-champagne-deep))]">{l.pct} of PV</span>
+                <span className="font-medium text-[hsl(var(--brand-gold))]">{l.pct} of PV</span>
               </li>
             ))}
           </ul>
@@ -176,7 +176,7 @@ function MarginTable({
             <span className="text-[hsl(var(--muted-foreground))]">
               Sell {r.qty} bottles
             </span>
-            <span className="font-medium text-[hsl(var(--brand-champagne-deep))]">
+            <span className="font-medium text-[hsl(var(--brand-gold))]">
               {kes(r.kes)}
             </span>
           </li>

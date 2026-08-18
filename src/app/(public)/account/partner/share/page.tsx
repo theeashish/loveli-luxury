@@ -17,7 +17,7 @@ async function qrSvg(text: string): Promise<string> {
     type: 'svg',
     errorCorrectionLevel: 'M',
     margin: 1,
-    color: { dark: '#0A0A0A', light: '#FDFCFB' },
+    color: { dark: '#121212', light: '#FFFFFF' },
   })
 }
 
@@ -41,7 +41,7 @@ export default async function SharePage() {
         <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--muted-foreground))]">
           Your sponsor code
         </p>
-        <p className="mt-3 font-mono text-4xl tracking-wide text-[hsl(var(--brand-champagne-deep))]">
+        <p className="mt-3 font-mono text-4xl tracking-wide text-[hsl(var(--brand-gold))]">
           {me.sponsorCode}
         </p>
         <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
@@ -61,7 +61,7 @@ export default async function SharePage() {
         </p>
         <div className="mt-4 grid grid-cols-1 items-center gap-4 md:grid-cols-[10rem_1fr]">
           <div
-            className="flex justify-center rounded-md bg-[#FDFCFB] p-3 [&_svg]:h-32 [&_svg]:w-32"
+            className="flex justify-center rounded-md bg-[#FFFFFF] p-3 [&_svg]:h-32 [&_svg]:w-32"
             dangerouslySetInnerHTML={{ __html: shortQr }}
           />
           <div>
@@ -77,7 +77,7 @@ export default async function SharePage() {
           </p>
           <p className="mt-2 break-all font-mono text-xs">{shareUrl}</p>
           <div
-            className="mt-4 flex justify-center rounded-md bg-[#FDFCFB] p-4 [&_svg]:h-40 [&_svg]:w-40"
+            className="mt-4 flex justify-center rounded-md bg-[#FFFFFF] p-4 [&_svg]:h-40 [&_svg]:w-40"
             dangerouslySetInnerHTML={{ __html: shopQr }}
           />
           <div className="mt-4 flex justify-center">
@@ -91,7 +91,7 @@ export default async function SharePage() {
           </p>
           <p className="mt-2 break-all font-mono text-xs">{signupUrl}</p>
           <div
-            className="mt-4 flex justify-center rounded-md bg-[#FDFCFB] p-4 [&_svg]:h-40 [&_svg]:w-40"
+            className="mt-4 flex justify-center rounded-md bg-[#FFFFFF] p-4 [&_svg]:h-40 [&_svg]:w-40"
             dangerouslySetInnerHTML={{ __html: signupQr }}
           />
           <div className="mt-4 flex justify-center">

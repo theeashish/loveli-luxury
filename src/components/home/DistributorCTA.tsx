@@ -15,13 +15,13 @@ export function DistributorCTA() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(60% 80% at 50% 100%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 70%)',
+            'radial-gradient(60% 80% at 50% 100%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 70%)',
         }}
       />
       <div className="mx-auto max-w-4xl px-6 text-center">
         <p className="text-eyebrow">Partner program</p>
         <h2 className="mt-5 font-serif text-[clamp(2.25rem,5vw,4rem)] leading-[1.05] tracking-tight">
-          Wear the brand. <em className="italic text-[hsl(var(--brand-champagne-deep))]">Build a luxury fragrance business</em>.
+          Wear the brand. <em className="italic text-[hsl(var(--brand-gold))]">Build a luxury fragrance business</em>.
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
           Invite-only. Five ranks, each tied to verified retail performance.
@@ -34,7 +34,7 @@ export function DistributorCTA() {
         <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4">
           {STATS.map((s) => (
             <li key={s.l} className="text-center">
-              <p className="font-serif text-3xl text-[hsl(var(--brand-champagne-deep))]">{s.v}</p>
+              <p className="font-serif text-3xl text-[hsl(var(--brand-gold))]">{s.v}</p>
               <p className="mt-1 text-xs uppercase tracking-[0.2em]">{s.l}</p>
             </li>
           ))}

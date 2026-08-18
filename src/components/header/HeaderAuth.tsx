@@ -51,7 +51,7 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
       return (
         <div data-testid="desktop-auth-menu" className="group relative">
           <Link href="/signup" className={desktopLinkCls}>Create account</Link>
-          <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-40 translate-y-1 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 opacity-0 shadow-[0_14px_32px_hsl(22_18%_12%/0.14)] transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-40 translate-y-1 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 opacity-0 shadow-[0_14px_32px_hsl(var(--brand-onyx)/0.65)] transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
             <Link href="/login" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
               Log in
             </Link>

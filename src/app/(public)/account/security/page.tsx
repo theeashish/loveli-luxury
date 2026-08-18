@@ -144,7 +144,7 @@ export default function SecurityPage() {
           <div className="space-y-4">
             <p className="text-sm">Scan this with your authenticator app, then enter the 6-digit code.</p>
             <div
-              className="inline-block rounded-md bg-white p-3"
+              className="inline-block rounded-md bg-[hsl(var(--brand-white))] p-3"
               // Supabase returns the QR as an inline SVG string.
               dangerouslySetInnerHTML={{ __html: enrol.qr }}
             />

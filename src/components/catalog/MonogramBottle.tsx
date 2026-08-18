@@ -56,7 +56,7 @@ export function MonogramBottle({
         </radialGradient>
         {/* Glass body — pale tonal wash. */}
         <linearGradient id="ll-mb-glass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(30 33.33% 98.82%)" stopOpacity="0.95" />
+          <stop offset="0%" stopColor="hsl(0 0% 100%)" stopOpacity="0.95" />
           <stop offset="100%" stopColor="hsl(0 0% 86%)" stopOpacity="0.95" />
         </linearGradient>
       </defs>
@@ -74,7 +74,7 @@ export function MonogramBottle({
         height="10"
         rx="2"
         fill="hsl(0 0% 70%)"
-        stroke="hsl(0 0% 54.9%)"
+        stroke="hsl(0 0% 90.2%)"
         strokeWidth="0.75"
       />
 
@@ -86,7 +86,7 @@ export function MonogramBottle({
         height="28"
         rx="3"
         fill="hsl(0 0% 78%)"
-        stroke="hsl(0 0% 60%)"
+        stroke="hsl(0 0% 90.2%)"
         strokeWidth="0.75"
       />
       {/* Cap highlight */}
@@ -96,7 +96,7 @@ export function MonogramBottle({
       <path
         d="M 100 60 Q 95 64 95 70 L 95 78 L 145 78 L 145 70 Q 145 64 140 60 Z"
         fill="url(#ll-mb-glass)"
-        stroke="hsl(0 0% 54.9%)"
+        stroke="hsl(0 0% 90.2%)"
         strokeOpacity="0.45"
         strokeWidth="0.75"
       />
@@ -109,7 +109,7 @@ export function MonogramBottle({
         height="200"
         rx="5"
         fill="url(#ll-mb-glass)"
-        stroke="hsl(0 0% 54.9%)"
+        stroke="hsl(0 0% 90.2%)"
         strokeOpacity="0.45"
         strokeWidth="0.75"
       />
@@ -121,7 +121,7 @@ export function MonogramBottle({
         width="5"
         height="184"
         rx="2"
-        fill="hsl(30 33.33% 98.82%)"
+        fill="hsl(0 0% 100%)"
         opacity="0.6"
       />
 
@@ -134,7 +134,7 @@ export function MonogramBottle({
         rx="32"
         ry="46"
         fill="none"
-        stroke="hsl(343.78 30.08% 75.88%)"
+        stroke="hsl(47.22 95.58% 55.69%)"
         strokeWidth="0.75"
         opacity="0.7"
       />
@@ -151,7 +151,7 @@ export function MonogramBottle({
              C 4 -20 10 -22 16 -16
              C 24 -8 16 2 0 16 Z"
           fill="none"
-          stroke="hsl(343.78 30.08% 75.88%)"
+          stroke="hsl(47.22 95.58% 55.69%)"
           strokeWidth="2"
           strokeLinejoin="round"
         />
@@ -159,7 +159,7 @@ export function MonogramBottle({
         <path
           d="M -3 -8 L -3 6 L 6 6"
           fill="none"
-          stroke="hsl(343.78 30.08% 75.88%)"
+          stroke="hsl(47.22 95.58% 55.69%)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"

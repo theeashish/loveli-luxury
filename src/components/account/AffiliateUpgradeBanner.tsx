@@ -51,7 +51,7 @@ export async function AffiliateUpgradeBanner({
         </span>
         <Link
           href="/partners/signup"
-          className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
+          className="font-medium text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
         >
           Join the partner program →
         </Link>
@@ -66,10 +66,10 @@ export async function AffiliateUpgradeBanner({
         className="pointer-events-none absolute inset-0 -z-10 opacity-70"
         style={{
           background:
-            'radial-gradient(60% 80% at 100% 0%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 60%)',
+            'radial-gradient(60% 80% at 100% 0%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 60%)',
         }}
       />
-      <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-champagne-deep))]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-gold))]">
         Partner program
       </p>
       <h2 className="mt-3 font-serif text-3xl italic tracking-tight md:text-4xl">
@@ -84,7 +84,7 @@ export async function AffiliateUpgradeBanner({
       {sponsor ? (
         <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
           Your sponsor:{' '}
-          <code className="font-mono text-[hsl(var(--brand-champagne-deep))]">{sponsor}</code>
+          <code className="font-mono text-[hsl(var(--brand-gold))]">{sponsor}</code>
         </p>
       ) : null}
       <Link

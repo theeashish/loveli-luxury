@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
     : undefined)
 
   return (
-    <article className="group relative mx-auto w-full max-w-[19rem] overflow-hidden border border-[hsl(35_45%_42%/0.28)] bg-[hsl(38_42%_93%)] transition duration-300 hover:-translate-y-1 hover:border-[hsl(35_45%_42%/0.72)] hover:shadow-[0_22px_46px_-34px_hsl(22_18%_12%/0.28)]">
+    <article className="group relative mx-auto w-full max-w-[19rem] overflow-hidden border border-[hsl(var(--primary)/0.28)] bg-[hsl(var(--brand-charcoal))] transition duration-300 hover:-translate-y-1 hover:border-[hsl(var(--primary)/0.72)] hover:shadow-[0_22px_46px_-34px_hsl(var(--brand-onyx)/0.65)]">
       <Link href={`/p/${product.slug}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
         <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(var(--muted))]">
           {cardImage ? (
@@ -34,12 +34,12 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
           ) : (
             <MonogramBottle name={product.name} />
           )}
-          <div className="pointer-events-none absolute inset-3 border border-[hsl(35_45%_42%/0.24)]" />
-          <p className="absolute bottom-4 left-5 text-[9px] font-semibold uppercase tracking-[0.28em] text-[hsl(35_45%_42%)]">
+          <div className="pointer-events-none absolute inset-3 border border-[hsl(var(--primary)/0.24)]" />
+          <p className="absolute bottom-4 left-5 text-[9px] font-semibold uppercase tracking-[0.28em] text-[hsl(var(--brand-gold))]">
             Eau de Parfum
           </p>
         </div>
-        <div className="border-t border-[hsl(35_45%_42%/0.22)] p-5">
+        <div className="border-t border-[hsl(var(--primary)/0.22)] p-5">
           <h3 className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))] transition group-hover:text-[hsl(var(--primary))]">
             {product.name}
           </h3>

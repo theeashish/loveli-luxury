@@ -72,7 +72,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(343.78 30.08% 75.88% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 54.9% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 90.2% / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-3xl items-center justify-center px-6 py-16 lg:py-24">
@@ -87,7 +87,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function BrandHeading({ subtitle }: { subtitle: string }) {
   return (
     <header className="text-center">
-      <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-champagne-deep))]">
+      <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-gold))]">
         Loveli Luxury ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Partner Program
       </p>
       <h1 className="mt-5 font-serif text-5xl italic tracking-tight md:text-6xl">
@@ -185,7 +185,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
           Please contact{' '}
           <a
             href="mailto:support@lovelilux.com"
-            className="text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
+            className="text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
           >
             support@lovelilux.com
           </a>{' '}
@@ -234,7 +234,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
           if (!availability.ok) {
             return (
               <div className="rounded-lg border border-[hsl(var(--primary))]/30 bg-[hsl(var(--muted))]/50 p-8 text-center">
-                <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-champagne-deep))]">
+                <p className="text-xs uppercase tracking-[0.3em] text-[hsl(var(--brand-gold))]">
                   Just a moment
                 </p>
                 <h2 className="mt-3 font-serif text-2xl tracking-tight">
@@ -264,7 +264,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
         Just want to shop?{' '}
         <Link
           href="/signup"
-          className="font-medium text-[hsl(var(--brand-champagne-deep))] underline-offset-4 hover:underline"
+          className="font-medium text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
         >
           Create a buyer account ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
         </Link>
