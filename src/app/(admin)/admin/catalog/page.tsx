@@ -1,19 +1,17 @@
 import Link from 'next/link'
-import { listProductSummaries, listBundles, listCategories } from '@/lib/catalog/queries'
+import { listProductSummaries, listCategories } from '@/lib/catalog/queries'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Catalog dashboard' }
 
 export default async function CatalogDashboardPage() {
-  const [products, bundles, categories] = await Promise.all([
+  const [products, categories] = await Promise.all([
     listProductSummaries({ includeInactive: true }),
-    listBundles({ includeInactive: true }),
     listCategories({ includeInactive: true }),
   ])
 
   const stats = [
     { label: 'Products', value: products.length, href: '/admin/catalog/products' },
-    { label: 'Bundles', value: bundles.length, href: '/admin/catalog/bundles' },
     { label: 'Categories', value: categories.length, href: '/admin/catalog/categories' },
   ]
 
@@ -22,11 +20,11 @@ export default async function CatalogDashboardPage() {
       <header className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight">Catalog</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Manage perfumes, bundles, and the storefront category tree.
+          Manage perfumes and the storefront category tree.
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {stats.map((s) => (
           <Link
             key={s.label}

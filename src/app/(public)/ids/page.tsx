@@ -35,7 +35,7 @@ export default async function IncomeDisclosurePage() {
   }
 
   return (
-    <main>
+    <div>
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
@@ -147,6 +147,6 @@ export default async function IncomeDisclosurePage() {
           <p className="max-w-3xl text-sm leading-7 text-[hsl(var(--muted-foreground))]">{copy.footnote}</p>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }

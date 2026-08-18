@@ -48,7 +48,8 @@ export function WhatsAppConcierge() {
   if (!href) return null
 
   return (
-    <a
+    <aside aria-label="Concierge support">
+      <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -59,7 +60,8 @@ export function WhatsAppConcierge() {
       <span className="pointer-events-none absolute right-[calc(100%+12px)] hidden whitespace-nowrap rounded-md border border-[hsl(var(--primary))]/30 bg-[hsl(var(--background))] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-[hsl(var(--foreground))] shadow-md transition group-hover:block group-focus-visible:block">
         Concierge
       </span>
-    </a>
+      </a>
+    </aside>
   )
 }
 

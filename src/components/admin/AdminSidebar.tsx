@@ -24,7 +24,6 @@ const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: '/admin/catalog', label: 'Overview' },
       { href: '/admin/catalog/products', label: 'Products' },
-      { href: '/admin/catalog/bundles', label: 'Bundles' },
     ],
   },
   {
