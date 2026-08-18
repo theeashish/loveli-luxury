@@ -1,4 +1,4 @@
-﻿import Image from 'next/image'
+import Image from 'next/image'
 /**
  * /account/partner/earnings Ã¢â‚¬â€ PARTNER-ONLY compensation detail.
  *
@@ -109,14 +109,10 @@ export default function PartnerEarningsPage() {
         </div>
       </section>
 
-      {/* Network commission by level */}
+      {/* Commission by level */}
       <section>
-        <h2 className="font-serif text-2xl">Network commission by level</h2>
-        <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-          Commissions are calculated on Point Value (PV). Your rank unlocks how
-          many levels deep you earn. Ambassador earns Level 1; Crown President
-          earns Levels 1Ã¢â‚¬â€œ5.
-        </p>
+        <h2 className="font-serif text-2xl">Commission by level</h2>
+        <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">Your commission is based on Point Value (PV). The number of levels you can earn from depends on your rank. Ambassador earns Level 1; Crown President earns Levels 1-5.</p>
         <div className="mt-6 overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40">
           <ul className="divide-y divide-[hsl(var(--border))]/60 text-sm">
             {LEVELS.map((l) => (
@@ -129,13 +125,11 @@ export default function PartnerEarningsPage() {
         </div>
       </section>
 
-      {/* Rank earnings */}
+      {/* What each rank means */}
       <section>
-        <h2 className="font-serif text-2xl">Rank earnings</h2>
+        <h2 className="font-serif text-2xl">What each rank means</h2>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-          Your rank sets how many network levels you earn on, plus your monthly
-          lifestyle bonus. Advancement is on rolling-90-day verified retail
-          performance.
+          Your rank determines how many commission levels you can earn from. You move up based on verified retail sales over the last 90 days.
         </p>
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {ALL_PARTNER_TIERS.map((tier) => (
@@ -153,8 +147,8 @@ export default function PartnerEarningsPage() {
                 {tier.tagline}
               </p>
               <ul className="mt-3 space-y-1 text-xs text-[hsl(var(--foreground))]/90">
-                <li>Ã¢â€”â€  {tier.commissionLabel}</li>
-                <li>Ã¢â€”â€  {tier.bonusLabel}</li>
+                <li>Commission: {tier.commissionLabel}</li>
+                <li>Bonus: {tier.bonusLabel}</li>
               </ul>
             </div>
           ))}
