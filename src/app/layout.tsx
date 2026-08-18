@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+
 import { publicEnv } from '@/lib/env'
 import './globals.css'
 
@@ -71,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             after the page is idle so it has no impact on Core Web Vitals.
             Replaces lab Lighthouse as the canonical perf source. */}
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
