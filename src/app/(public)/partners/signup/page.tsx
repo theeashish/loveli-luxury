@@ -1,11 +1,11 @@
 /**
- * /partners/signup ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â distributor onboarding entry.
+ * /partners/signup - distributor onboarding entry.
  *
  * Middleware enforces:
  *   - signed-in (else 307 to /login)
  *   - not already a distributor (else 307 to /account/partner)
  *
- * This file is render-only. It does NOT redirect ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â a redirect after the
+ * This file is render-only. It does not redirect - the middleware handles access.
  * layout has streamed leaves the user staring at the empty public chrome
  * while the browser follows the 307. Every "edge case" branches into an
  * inline empty-state card instead.
@@ -88,7 +88,7 @@ function BrandHeading({ subtitle }: { subtitle: string }) {
   return (
     <header className="text-center">
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-gold))]">
-        Loveli Luxury ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Partner Program
+        Loveli Luxury - Partner Program
       </p>
       <h1 className="mt-5 font-serif text-5xl italic tracking-tight md:text-6xl">
         Begin your partnership
@@ -111,7 +111,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
   const user = session?.user
 
   if (!user) {
-    // Defensive ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â middleware should have caught this. Render an inline
+    // Defensive check: middleware should have caught this. Render an inline
     // sign-in prompt instead of redirecting (no more chrome-flash).
     return (
       <Shell>
@@ -266,7 +266,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
           href="/signup"
           className="font-medium text-[hsl(var(--brand-gold))] underline-offset-4 hover:underline"
         >
-          Create a buyer account ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
+          Create a buyer account
         </Link>
       </p>
     </Shell>
