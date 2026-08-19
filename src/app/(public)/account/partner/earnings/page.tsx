@@ -3,12 +3,10 @@ import Image from 'next/image'
  * /account/partner/earnings Ã¢â‚¬â€ PARTNER-ONLY compensation detail.
  *
  * The pricing, retail margins, earnings examples, and exact commission rates
- * that used to sit on the PUBLIC /partners page live here, behind the partner
- * login (the /account/partner layout gates access). Per the owner's privacy
- * rule (2026-05-21): the numbers are for partners only.
+ * are shown here for signed-in partners.
  *
- * Reflects the client comp plan applied 2026-05-22 (masterplan Appendix C):
- * unilevel L1-L5 at 20/11/6/2/1, PV-based, rank unlocks the number of levels.
+ * Reflects the pasted five-rank plan: 50ml product, 500 PV, and unilevel
+ * levels L1-L5 at 20/11/6/2/1.
  */
 
 import { ALL_PARTNER_TIERS } from '@/lib/partners/tiers'
@@ -28,18 +26,18 @@ const plan = LOVELI_COMPENSATION
 const PRICING = [
   {
     size: '50',
-    purchase: plan.activation.iboPriceKes,
-    retail: plan.activation.suggestedRetailKes,
-    margin: plan.activation.retailProfitKes,
+    purchase: plan.product.iboPriceKes,
+    retail: plan.product.suggestedRetailKes,
+    margin: plan.product.retailProfitKes,
   },
 ] as const
 const MARGIN_50 = [5, 10, 20, 50, 100].map((qty) => ({
   qty,
-  kes: qty * plan.activation.retailProfitKes,
+  kes: qty * plan.product.retailProfitKes,
 }))
 
-// Unilevel network commission, as a percentage of Point Value (PV). Your rank
-// unlocks how many levels deep you earn (Ambassador = L1 ... Crown President = L1-5).
+// Unilevel network commission, as a percentage of Point Value (PV). The
+// applicable levels are listed by rank in the compensation plan.
 const LEVELS = LOVELI_COMPENSATION.commissionLevels.map((level) => ({
   level: level.level,
   pct: `${level.percentage}%`,
@@ -112,7 +110,7 @@ export default function PartnerEarningsPage() {
       {/* Commission by level */}
       <section>
         <h2 className="font-serif text-2xl">Commission by level</h2>
-        <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">Your commission is based on Point Value (PV). The number of levels you can earn from depends on your rank. Ambassador earns Level 1; Crown President earns Levels 1-5.</p>
+        <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">Your commission is based strictly on Point Value (PV), not on retail price, partner price, registration fees or company profit. The plan lists the applicable levels for each rank.</p>
         <div className="mt-6 overflow-hidden rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--muted))]/40">
           <ul className="divide-y divide-[hsl(var(--border))]/60 text-sm">
             {LEVELS.map((l) => (
@@ -129,7 +127,7 @@ export default function PartnerEarningsPage() {
       <section>
         <h2 className="font-serif text-2xl">What each rank means</h2>
         <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-          Your rank determines how many commission levels you can earn from. You move up based on verified retail sales over the last 90 days.
+          Your rank is based on the plan requirements for personal bottles, Active Directs, group volume and qualifying months.
         </p>
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {ALL_PARTNER_TIERS.map((tier) => (

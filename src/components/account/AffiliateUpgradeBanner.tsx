@@ -77,9 +77,9 @@ export async function AffiliateUpgradeBanner({
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
         Earn alongside the house on every fragrance you place. Begin as an
-        Ambassador and progress through Executive, Gold Director, Platinum
-        Director, and Crown President. Each rank opens richer earnings and
-        access tied to verified retail performance.
+        Ambassador and progress through Active, Gold Director, Platinum Director,
+        and Crown President. Each rank is based on verified retail performance,
+        Active Directs and group volume.
       </p>
       {sponsor ? (
         <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">

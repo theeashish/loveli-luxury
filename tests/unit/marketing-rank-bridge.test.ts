@@ -8,18 +8,18 @@ import {
 } from "@/lib/partners/compensation-plan"
 
 describe("marketing rank bridge", () => {
-  it("covers each of the eight engine positions exactly once", () => {
+  it("covers each of the five active engine positions exactly once", () => {
     expect(marketingRankBridgeIsComplete()).toBe(true)
-    expect(MARKETING_RANK_BRIDGE.flatMap((band) => band.engineRankPositions)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+    expect(MARKETING_RANK_BRIDGE.flatMap((band) => band.engineRankPositions)).toEqual([1, 2, 3, 4, 5])
   })
 
   it("uses the approved five-band grouping", () => {
     expect(MARKETING_RANK_BRIDGE.map((band) => [band.marketingName, band.engineRankPositions])).toEqual([
       ["Ambassador", [1]],
-      ["Executive", [2, 3]],
-      ["Gold Director", [4, 5]],
-      ["Platinum Director", [6, 7]],
-      ["Crown President", [8]],
+      ["Active", [2]],
+      ["Gold Director", [3]],
+      ["Platinum Director", [4]],
+      ["Crown President", [5]],
     ])
   })
 
@@ -31,8 +31,8 @@ describe("marketing rank bridge", () => {
 
   it("resolves engine positions and rejects unknown positions", () => {
     expect(marketingBandForEngineRank(1)?.marketingName).toBe("Ambassador")
-    expect(marketingBandForEngineRank(7)?.marketingName).toBe("Platinum Director")
-    expect(marketingCommissionLevelForEngineRank(8)).toBe(5)
+    expect(marketingBandForEngineRank(4)?.marketingName).toBe("Platinum Director")
+    expect(marketingCommissionLevelForEngineRank(5)).toBe(5)
     expect(marketingBandForEngineRank(9)).toBeNull()
     expect(marketingCommissionLevelForEngineRank(0)).toBeNull()
   })

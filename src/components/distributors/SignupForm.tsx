@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { formatKes } from '@/lib/money'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import { StkPushPanel } from '@/components/checkout/StkPushPanel'
+import { MIN_PARTNER_SIGNUP_BOTTLES } from '@/lib/partners/signup-policy'
 
 export type SignupAddress = {
   id: number
@@ -113,10 +114,6 @@ export function DistributorSignupForm({
       setError('Please accept the partner agreement to continue.')
       return
     }
-    if (bottleCount < 5) {
-      setError('Choose at least five bottles to become a verified distributor.')
-      return
-    }
 
     setSubmitting(true)
     const body = {
@@ -218,7 +215,7 @@ export function DistributorSignupForm({
           </div>
         </Section>
 
-        <Section title="Your perfumes" subtitle="Select at least five bottles. You can mix fragrances or repeat one variant.">
+        <Section title="Your perfumes" subtitle="Choose one or more bottles. You can mix fragrances or repeat one variant.">
           <div className="space-y-3">
             {variants.map((variant) => (
               <div key={variant.id} className="flex items-center justify-between gap-4 rounded-lg border border-[hsl(var(--border))] px-4 py-3">
@@ -243,7 +240,7 @@ export function DistributorSignupForm({
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">{bottleCount} bottles selected. At least 5 bottles are required.</p>
+          <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">{bottleCount} bottles selected. Choose at least one bottle to continue.</p>
         </Section>
 
         <Section title="ID details" subtitle="Your ID helps us check your account before we send payments.">
@@ -476,7 +473,7 @@ export function DistributorSignupForm({
           </dl>
         ) : (
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Choose at least five bottles to see the total.
+            Choose at least one bottle to see the total.
           </p>
         )}
 
@@ -488,7 +485,7 @@ export function DistributorSignupForm({
 
         <button
           type="submit"
-          disabled={submitting || bottleCount < 5}
+          disabled={submitting || bottleCount < MIN_PARTNER_SIGNUP_BOTTLES}
           className="mt-6 w-full rounded-md bg-[hsl(var(--foreground))] px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition hover:opacity-90 disabled:opacity-50"
         >
           {submitting ? 'Redirecting...' : 'Create my account'}

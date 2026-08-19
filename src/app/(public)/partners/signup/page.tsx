@@ -226,7 +226,7 @@ export default async function DistributorSignupPage({ searchParams }: { searchPa
 
   return (
     <Shell>
-      <BrandHeading subtitle="Choose at least five perfumes, add your ID, date of birth, and phone number, then pay by M-Pesa. Your partner account starts when payment is confirmed." />
+      <BrandHeading subtitle="Choose one or more perfumes, add your ID, date of birth, and phone number, then pay by M-Pesa. Your partner account starts when payment is confirmed." />
       <div className="mt-10">
         <AccountProtectionNotice />
         {(() => {

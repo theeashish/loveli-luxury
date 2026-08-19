@@ -43,6 +43,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { initiatePayment } from '@/lib/payments/dispatcher'
 import { paymentProviderAvailability } from '@/lib/payments/availability'
+import { MIN_PARTNER_SIGNUP_BOTTLES } from '@/lib/partners/signup-policy'
 import { computeProcessingFeeMinor } from '@/lib/payments/fees'
 import {
   decidePendingAction,
@@ -385,7 +386,11 @@ export async function POST(req: Request) {
   }
 
   const sponsorId = body.activationMode ? existing.data?.sponsor_id ?? null : sponsor?.id ?? null
-  // 7. Server-derived variant lookup. The client cannot set prices or bypass the bottle minimum.
+  // 7. Server-derived variant lookup. The client cannot set prices or bypass server pricing.
+  const selectedBottleCount = body.variantLines.reduce((sum, line) => sum + line.qty, 0)
+  if (selectedBottleCount < MIN_PARTNER_SIGNUP_BOTTLES) {
+    return NextResponse.json({ error: 'Choose at least one bottle.' }, { status: 400 })
+  }
   const requestedVariantIds = Array.from(new Set(body.variantLines.map((line) => line.variantId)))
   const variantsRes = await service
     .from('product_variants')
@@ -406,11 +411,8 @@ export async function POST(req: Request) {
   const missingVariant = requestedVariantIds.some((id) => !variantById.get(id)?.is_active)
   if (missingVariant) {
     return NextResponse.json({ error: 'One or more selected perfumes are unavailable.' }, { status: 409 })
-  }
-  const bottleCount = body.variantLines.reduce((sum, line) => sum + line.qty, 0)
-  if (bottleCount < 5) {
-    return NextResponse.json({ error: 'Partner orders require at least five bottles.' }, { status: 400 })
-  }
+    }
+
   const outOfStock = body.variantLines.some((line) => (variantById.get(line.variantId)?.inventory_qty ?? 0) < line.qty)
   if (outOfStock) {
     return NextResponse.json({ error: 'One or more selected perfumes do not have enough stock.' }, { status: 409 })

@@ -24,11 +24,9 @@ export function DistributorCTA() {
           Wear the brand. <em className="italic text-[hsl(var(--brand-gold))]">Build a luxury fragrance business</em>.
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))]">
-          Invite-only. Five ranks, each tied to verified retail performance.
-          Begin as an Ambassador and progress through Executive, Gold Director,
-          Platinum Director, and Crown President. Richer earnings, regional
-          access, limited-edition allocation. Retention bonuses reviewed
-          quarterly, tied to real sales.
+          Invite-only. Five ranks, each tied to personal bottles, Active Directs and
+          group volume. Begin as an Ambassador and progress through Active, Gold
+          Director, Platinum Director, and Crown President.
         </p>
 
         <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-4 text-left text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-4">

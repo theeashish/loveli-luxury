@@ -6,7 +6,7 @@
  * transformation masterplan, Appendix C.
  *
  *   1. Ambassador
- *   2. Executive
+ *   2. Active
  *   3. Gold Director
  *   4. Platinum Director
  *   5. Crown President
@@ -24,7 +24,7 @@ export interface PartnerTier {
   position: PartnerTierPosition
   code:
     | 'ambassador'
-    | 'executive'
+    | 'active'
     | 'gold_director'
     | 'platinum_director'
     | 'crown_president'
@@ -47,9 +47,9 @@ const TIERS: Record<PartnerTierPosition, PartnerTier> = {
   },
   2: {
     position: 2,
-    code: 'executive',
-    displayName: 'Executive',
-    tagline: 'Build a team and earn from two levels.',
+    code: 'active',
+    displayName: 'Active',
+    tagline: 'Meet the Active rank requirements and earn from two levels.',
     commissionLabel: 'Levels 1-2 commission',
     bonusLabel: 'Monthly bonus when you meet the target',
   },

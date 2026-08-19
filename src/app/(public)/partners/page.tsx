@@ -16,7 +16,7 @@ export const metadata = {
 // tables, margins, and pricing remain partner-only inside the portal.
 const TIER_PITCH: Record<PartnerTier['code'], string> = {
   ambassador: 'Where every partnership begins. Build with the fragrances you personally place.',
-  executive: 'Develop your own clientele while taking a more active role in your growing business.',
+  active: 'Meet the Active rank requirements while taking a more active role in your growing business.',
   gold_director: 'Lead a growing organisation with a deeper relationship to the house and its launches.',
   platinum_director: 'A senior leader with broader responsibilities, brand access, and a voice in the house.',
   crown_president: "The house's inner circle: long-term leadership, recognition, and limited-edition allocation.",

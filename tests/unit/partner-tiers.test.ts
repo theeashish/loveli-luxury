@@ -15,9 +15,9 @@ describe('partnerTierForRank — 5 ranks map 1:1', () => {
     expect(partnerTierForRank(1).displayName).toBe('Ambassador')
   })
 
-  it('rank 2 → Executive', () => {
-    expect(partnerTierForRank(2).code).toBe('executive')
-    expect(partnerTierForRank(2).displayName).toBe('Executive')
+  it('rank 2 → Active', () => {
+    expect(partnerTierForRank(2).code).toBe('active')
+    expect(partnerTierForRank(2).displayName).toBe('Active')
   })
 
   it('rank 3 → Gold Director', () => {
@@ -51,7 +51,7 @@ describe('partnerTierForRank — 5 ranks map 1:1', () => {
 describe('getPartnerTier — direct lookup by position', () => {
   it('returns the right rank for each of 1-5', () => {
     expect(getPartnerTier(1).displayName).toBe('Ambassador')
-    expect(getPartnerTier(2).displayName).toBe('Executive')
+    expect(getPartnerTier(2).displayName).toBe('Active')
     expect(getPartnerTier(3).displayName).toBe('Gold Director')
     expect(getPartnerTier(4).displayName).toBe('Platinum Director')
     expect(getPartnerTier(5).displayName).toBe('Crown President')

@@ -109,9 +109,9 @@ export async function AccountStatusCard() {
         </p>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
           Earn alongside the house on every fragrance you place. Begin as an
-          Ambassador; progress through Executive, Gold Director, Platinum
-          Director and Crown President as your verified retail performance
-          grows.
+          Ambassador; progress through Active, Gold Director, Platinum Director
+          and Crown President as your verified retail performance, Active Directs
+          and group volume grow.
         </p>
         {sponsor ? (
           <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">
@@ -145,8 +145,8 @@ export async function AccountStatusCard() {
       </div>
       <h2 className="mt-3 font-serif text-2xl italic tracking-tight md:text-3xl">
         {pendingSignupCount === 1
-          ? '1 Starter package payment waiting'
-          : `${pendingSignupCount} Starter package payments waiting`}
+          ? '1 partner signup payment waiting'
+          : `${pendingSignupCount} partner signup payments waiting`}
       </h2>
       <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
         Signed in as <span className="font-mono">{email}</span>

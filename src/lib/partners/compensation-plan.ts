@@ -1,11 +1,10 @@
-/** Shared display data for the attachment-approved Loveli compensation plan. */
+/** Shared display data for the pasted Loveli compensation plan. */
 
 export type CompensationRank = {
   position: 1 | 2 | 3 | 4 | 5
   name: string
   personalBottles: number
   activeDirects: number
-  activeCustomers: number | null
   groupTargetKes: number
   commissionLevels: string
   rankBonusKes: number
@@ -16,9 +15,8 @@ export type CompensationRank = {
 }
 
 export const LOVELI_COMPENSATION = {
-  registrationFeeKes: 100,
-  activation: {
-    bottles: 5,
+  registrationFeeKes: 900,
+  product: {
     sizeMl: 50,
     iboPriceKes: 1000,
     suggestedRetailKes: 2500,
@@ -33,43 +31,44 @@ export const LOVELI_COMPENSATION = {
     { level: 5, percentage: 1 },
   ],
   ranks: [
-    { position: 1, name: 'Ambassador', personalBottles: 5, activeDirects: 5, activeCustomers: null, groupTargetKes: 100000, commissionLevels: 'Level 1', rankBonusKes: 5000, rankBonusMonths: 2, lifestyleBonusKes: null, lifestyleBonusTiming: null, prestige: 'standard' },
-    { position: 2, name: 'Executive', personalBottles: 20, activeDirects: 10, activeCustomers: null, groupTargetKes: 300000, commissionLevels: 'Levels 1-2', rankBonusKes: 15000, rankBonusMonths: 3, lifestyleBonusKes: 5000, lifestyleBonusTiming: 'Paid when the monthly target is met', prestige: 'standard' },
-    { position: 3, name: 'Gold Director', personalBottles: 30, activeDirects: 20, activeCustomers: null, groupTargetKes: 750000, commissionLevels: 'Levels 1-3', rankBonusKes: 40000, rankBonusMonths: 3, lifestyleBonusKes: 20000, lifestyleBonusTiming: 'Paid when the monthly target is met', prestige: 'gold' },
-    { position: 4, name: 'Platinum Director', personalBottles: 40, activeDirects: 50, activeCustomers: null, groupTargetKes: 2500000, commissionLevels: 'Levels 1-4', rankBonusKes: 120000, rankBonusMonths: 2, lifestyleBonusKes: 100000, lifestyleBonusTiming: 'Paid when the monthly target is met', prestige: 'platinum' },
-    { position: 5, name: 'Crown President', personalBottles: 60, activeDirects: 120, activeCustomers: 200, groupTargetKes: 7500000, commissionLevels: 'Levels 1-5', rankBonusKes: 300000, rankBonusMonths: 3, lifestyleBonusKes: 250000, lifestyleBonusTiming: 'Paid when the monthly target is met', prestige: 'crown' },
+    { position: 1, name: 'Ambassador', personalBottles: 5, activeDirects: 5, groupTargetKes: 100000, commissionLevels: 'Level 1', rankBonusKes: 5000, rankBonusMonths: 1, lifestyleBonusKes: null, lifestyleBonusTiming: null, prestige: 'standard' },
+    { position: 2, name: 'Active', personalBottles: 20, activeDirects: 30, groupTargetKes: 300000, commissionLevels: 'Levels 1-2', rankBonusKes: 15000, rankBonusMonths: 2, lifestyleBonusKes: 5000, lifestyleBonusTiming: 'Paid on the 25th when the monthly target is met', prestige: 'standard' },
+    { position: 3, name: 'Gold Director', personalBottles: 40, activeDirects: 40, groupTargetKes: 850000, commissionLevels: 'Levels 1-3', rankBonusKes: 40000, rankBonusMonths: 3, lifestyleBonusKes: 20000, lifestyleBonusTiming: 'Paid on the 25th when the monthly target is met', prestige: 'gold' },
+    { position: 4, name: 'Platinum Director', personalBottles: 60, activeDirects: 60, groupTargetKes: 2500000, commissionLevels: 'Levels 1-4', rankBonusKes: 120000, rankBonusMonths: 3, lifestyleBonusKes: 100000, lifestyleBonusTiming: 'Paid on the 25th when the monthly target is met', prestige: 'platinum' },
+    { position: 5, name: 'Crown President', personalBottles: 100, activeDirects: 120, groupTargetKes: 8500000, commissionLevels: 'Levels 1-5', rankBonusKes: 300000, rankBonusMonths: 3, lifestyleBonusKes: 250000, lifestyleBonusTiming: 'Paid on the 25th when the monthly target is met', prestige: 'crown' },
   ] satisfies readonly CompensationRank[],
   maintenance: {
-    ambassador: "Ambassadors may maintain at any time during the month and still receive that month's full commission, subject to meeting all applicable qualification requirements.",
-    executiveAndAboveGrace: "Executive and above ranks have a maintenance grace period from the 1st to the 7th of every month. Partners who complete maintenance during this grace period will still receive their full month's commission, subject to all other requirements.",
-    afterGrace: 'For maintenance completed between the 8th and 31st, commissions will be unlocked from the date maintenance is completed.',
+    earlyWindow: 'Maintenance completed from Day 1 to Day 10 gives normal commission eligibility from the beginning of the month.',
+    afterWindow: 'Maintenance completed after Day 10 leaves the account active, but commission eligibility starts on the date maintenance is completed. No retroactive commissions are created.',
   },
   terms: [
-    'Changes can be made without prior notice.',
-    'All earnings are paid on the 15th of the following month.',
-    'All earnings are calculated based on our current products.',
-    'Accounts should be maintained monthly to receive monthly earnings.',
-    'All commissions are calculated based on Point Value (PV).',
+    'A qualifying month requires the personal-purchase, Active Direct and group-volume requirements for the rank.',
+    'Personal purchases do not count toward group volume.',
+    'A distributor does not earn commission on their own purchases.',
+    'Missing a month does not reset accumulated qualifying months; it simply adds no qualifying month.',
+    'Commissions are calculated from PV, not from retail price, partner price, registration fees or company profit.',
+    'Rank-up bonuses are paid with commissions on the 15th after the required qualifying months are verified.',
+    'Luxury lifestyle bonuses are paid on the 25th when the applicable monthly requirements are met.',
   ],
   incomeDisclaimer: 'Income and bonuses are performance-based and are not guaranteed. Results vary based on individual sales, customer demand, activity, leadership and qualification.',
   retailDisclaimer: 'Suggested retail pricing should be followed in accordance with company policies and applicable Kenyan laws.',
 } as const
 
 export type LoveliCompensation = typeof LOVELI_COMPENSATION
-/** Versioned bridge: engine ranks remain authoritative for qualification, rank-up bonuses, salary, and ledger calculations. */
+
 export type MarketingRankBridge = {
-  marketingPosition: CompensationRank["position"]
-  marketingName: CompensationRank["name"]
+  marketingPosition: CompensationRank['position']
+  marketingName: CompensationRank['name']
   engineRankPositions: readonly number[]
   maxCommissionLevel: 1 | 2 | 3 | 4 | 5
 }
 
 export const MARKETING_RANK_BRIDGE = [
-  { marketingPosition: 1, marketingName: "Ambassador", engineRankPositions: [1], maxCommissionLevel: 1 },
-  { marketingPosition: 2, marketingName: "Executive", engineRankPositions: [2, 3], maxCommissionLevel: 2 },
-  { marketingPosition: 3, marketingName: "Gold Director", engineRankPositions: [4, 5], maxCommissionLevel: 3 },
-  { marketingPosition: 4, marketingName: "Platinum Director", engineRankPositions: [6, 7], maxCommissionLevel: 4 },
-  { marketingPosition: 5, marketingName: "Crown President", engineRankPositions: [8], maxCommissionLevel: 5 },
+  { marketingPosition: 1, marketingName: 'Ambassador', engineRankPositions: [1], maxCommissionLevel: 1 },
+  { marketingPosition: 2, marketingName: 'Active', engineRankPositions: [2], maxCommissionLevel: 2 },
+  { marketingPosition: 3, marketingName: 'Gold Director', engineRankPositions: [3], maxCommissionLevel: 3 },
+  { marketingPosition: 4, marketingName: 'Platinum Director', engineRankPositions: [4], maxCommissionLevel: 4 },
+  { marketingPosition: 5, marketingName: 'Crown President', engineRankPositions: [5], maxCommissionLevel: 5 },
 ] as const satisfies readonly MarketingRankBridge[]
 
 export function marketingBandForEngineRank(engineRankPosition: number) {
@@ -82,5 +81,5 @@ export function marketingCommissionLevelForEngineRank(engineRankPosition: number
 
 export function marketingRankBridgeIsComplete() {
   const positions = MARKETING_RANK_BRIDGE.flatMap((band) => band.engineRankPositions)
-  return positions.length === 8 && new Set(positions).size === 8 && positions.every((position) => position >= 1 && position <= 8)
+  return positions.length === 5 && new Set(positions).size === 5 && positions.every((position) => position >= 1 && position <= 5)
 }

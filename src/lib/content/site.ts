@@ -172,7 +172,7 @@ export const FAQ_DEFAULTS: FaqContent = {
     },
     {
       q: 'Can I join the partner program?',
-      a: 'By invitation only. An existing partner shares an invitation code. You join by buying the Starter package and begin as an Ambassador, earning retail margin on every bottle you place. Five ranks (Ambassador, Executive, Gold Director, Platinum Director, Crown President) advance through verified retail sales, never recruitment. See the partner program for the full structure.',
+      a: 'By invitation only. An existing partner shares an invitation code. You join by paying the registration fee and choosing one or more 50ml perfumes. You begin as an Ambassador and earn retail margin on every bottle you place. Five ranks (Ambassador, Active, Gold Director, Platinum Director, Crown President) are based on verified retail sales, Active Directs and group volume, never recruitment alone. See the partner program for the full structure.',
     },
     {
       q: 'Are your fragrances tested on animals?',
@@ -196,9 +196,9 @@ export type PartnerLandingContent = z.infer<typeof partnerLandingSchema>
 export const PARTNER_LANDING_DEFAULTS: PartnerLandingContent = {
   eyebrow: 'Loveli Luxury · Partner Program',
   headline: 'Build a *luxury fragrance* business',
-  microtag: 'Five ranks · Earn through retail sales · Grow with the brand',
+  microtag: 'Five ranks · 50ml product · Grow through retail sales',
   subhead:
-    'An invite-only partner program for creators, resellers, and people building a fragrance business in their area. Earn through real retail sales and grow with a brand that values trust.',
+    'An invite-only partner program for people building a fragrance business in their area. Join with the registration fee and one or more perfumes, then grow through personal bottles, Active Directs and group volume.',
   ctaLabel: 'Join via your sponsor',
   secondaryLabel: 'See the rank ladder ↓',
   secondaryHref: '#tiers',
@@ -602,7 +602,7 @@ export const PARTNER_PROGRAM_DEFAULTS: PartnerProgramContent = {
   tiersEyebrow: 'The ranks',
   tiersHeadline: 'Five ranks. One clear standard.',
   tiersLead:
-    'Ranks are earned through verified retail performance over time. They show progress in the business, not a promise of income.',
+    'Ranks are earned through personal bottles, Active Directs and group volume over time. They show progress in the business, not a promise of income.',
   tiersFootnote:
     'Pricing, retail margins, and complete earning information are shared with approved partners inside the portal.',
   storiesEyebrow: 'Partner stories',
@@ -610,7 +610,7 @@ export const PARTNER_PROGRAM_DEFAULTS: PartnerProgramContent = {
   storiesBody:
     'We will publish partner stories only when they are verified and representative. Until then, we focus on the programme, the product, and the work of building a business.',
   startEyebrow: 'How to start',
-  startHeadline: 'Know what to expect.',
+  startHeadline: 'Join with the registration fee and one or more perfumes.',
   photo: {
     heroAlt: 'Loveli Luxury partner program editorial photograph',
     heroCaption: 'The partner programme',
