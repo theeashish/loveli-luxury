@@ -17,6 +17,25 @@ export function isValidKesInput(input: string): boolean {
   return KES_INPUT_RE.test(trimmed)
 }
 
+/**
+ * Validate the two human-readable KES price fields before a catalog mutation.
+ * Returning a message lets client forms avoid surfacing a generic Server
+ * Components error when the distributor price is above the retail price.
+ */
+export function validateKesPricePair(retailInput: string, distributorInput: string): string | null {
+  if (!isValidKesInput(retailInput) || !isValidKesInput(distributorInput)) {
+    return 'Prices must be numbers, e.g. 4000 or 4000.50'
+  }
+
+  const retailMinor = kesInputToMinor(retailInput)
+  const distributorMinor = kesInputToMinor(distributorInput)
+  if (BigInt(distributorMinor) > BigInt(retailMinor)) {
+    return 'Distributor price cannot exceed retail price. Lower the distributor price first.'
+  }
+
+  return null
+}
+
 /** "4000" → "400000", "4000.5" → "400050", "4000.55" → "400055" */
 export function kesInputToMinor(input: string): string {
   const trimmed = input.trim()

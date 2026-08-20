@@ -10,7 +10,7 @@ import {
   updateVariant,
   deleteVariant,
 } from '@/lib/catalog/mutations'
-import { kesInputToMinor, minorToKesInput, isValidKesInput } from '@/lib/catalog/money-input'
+import { kesInputToMinor, minorToKesInput, validateKesPricePair } from '@/lib/catalog/money-input'
 import { formatKes } from '@/lib/money'
 import type { VariantDto } from '@/lib/catalog/types'
 
@@ -48,8 +48,9 @@ export function AdminVariantsEditor({
       toast.error('SKU, size, and both prices are required')
       return
     }
-    if (!isValidKesInput(draft.retailKes) || !isValidKesInput(draft.distributorKes)) {
-      toast.error('Prices must be numbers, e.g. 4000 or 4000.50')
+    const priceError = validateKesPricePair(draft.retailKes, draft.distributorKes)
+    if (priceError) {
+      toast.error(priceError)
       return
     }
     startTransition(async () => {
@@ -184,6 +185,12 @@ function VariantRow({ variant, disabled }: { variant: VariantDto; disabled: bool
   })
 
   const save = () => {
+    const priceError = validateKesPricePair(draft.retailKes, draft.distributorKes)
+    if (priceError) {
+      toast.error(priceError)
+      return
+    }
+
     startTransition(async () => {
       try {
         await updateVariant({

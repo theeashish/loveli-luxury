@@ -3,6 +3,7 @@ import {
   isValidKesInput,
   kesInputToMinor,
   minorToKesInput,
+  validateKesPricePair,
 } from '../../src/lib/catalog/money-input'
 
 describe('isValidKesInput', () => {
@@ -20,6 +21,25 @@ describe('isValidKesInput', () => {
     expect(isValidKesInput('abc')).toBe(false)
     expect(isValidKesInput('4000.555')).toBe(false)
     expect(isValidKesInput('4,000')).toBe(false)
+  })
+})
+
+describe('validateKesPricePair', () => {
+  it('allows a distributor price at or below retail', () => {
+    expect(validateKesPricePair('2500', '1000')).toBeNull()
+    expect(validateKesPricePair('1000', '1000')).toBeNull()
+  })
+
+  it('blocks a distributor price above retail with a useful message', () => {
+    expect(validateKesPricePair('200', '1000')).toBe(
+      'Distributor price cannot exceed retail price. Lower the distributor price first.',
+    )
+  })
+
+  it('blocks malformed price input before conversion', () => {
+    expect(validateKesPricePair('200', '1,000')).toBe(
+      'Prices must be numbers, e.g. 4000 or 4000.50',
+    )
   })
 })
 
