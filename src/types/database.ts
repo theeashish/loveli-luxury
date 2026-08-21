@@ -353,6 +353,7 @@ export type Database = {
           id: number
           level: number
           payout_id: number | null
+          test_only: boolean
           rate_basis_points: number
           source_distributor_id: number
           source_order_id: number
@@ -368,6 +369,7 @@ export type Database = {
           id?: number
           level: number
           payout_id?: number | null
+          test_only?: boolean
           rate_basis_points: number
           source_distributor_id: number
           source_order_id: number
@@ -383,6 +385,7 @@ export type Database = {
           id?: number
           level?: number
           payout_id?: number | null
+          test_only?: boolean
           rate_basis_points?: number
           source_distributor_id?: number
           source_order_id?: number
