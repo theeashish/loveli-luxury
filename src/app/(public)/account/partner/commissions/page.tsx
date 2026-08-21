@@ -24,6 +24,7 @@ type LedgerRow = {
   earned_at: string
   source_order_id: number
   payout_id: number | null
+  test_only: boolean
 }
 
 export default async function CommissionsPage({
@@ -48,14 +49,14 @@ export default async function CommissionsPage({
     service
       .from('commission_ledger')
       .select(
-        'id, level, amount_minor, rate_basis_points, commission_basis_minor, earned_at, source_order_id, payout_id',
+        'id, level, amount_minor, rate_basis_points, commission_basis_minor, earned_at, source_order_id, payout_id, test_only',
       )
       .eq('distributor_id', me.id)
       .order('earned_at', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1),
     service
       .from('commission_ledger')
-      .select('amount_minor, payout_id')
+      .select('amount_minor, payout_id, test_only')
       .eq('distributor_id', me.id),
   ])
 
@@ -64,10 +65,13 @@ export default async function CommissionsPage({
   const allRows = (totalsRes.data ?? []) as Array<{
     amount_minor: string | number
     payout_id: number | null
+    test_only: boolean
   }>
-  const totalEarned = allRows.reduce((acc, r) => acc + BigInt(r.amount_minor), 0n)
+  const totalEarned = allRows
+    .filter((r) => !r.test_only)
+    .reduce((acc, r) => acc + BigInt(r.amount_minor), 0n)
   const totalUnpaid = allRows
-    .filter((r) => r.payout_id === null)
+    .filter((r) => r.payout_id === null && !r.test_only)
     .reduce((acc, r) => acc + BigInt(r.amount_minor), 0n)
   const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -123,7 +127,9 @@ export default async function CommissionsPage({
                     {formatKes(BigInt(r.amount_minor))}
                   </td>
                   <td className="px-4 py-3 text-xs uppercase tracking-[0.15em]">
-                    {r.payout_id ? (
+                    {r.test_only ? (
+                      <span className="text-amber-600 font-medium">test only</span>
+                    ) : r.payout_id ? (
                       <span className="text-[hsl(var(--muted-foreground))]">
                         in payout #{r.payout_id}
                       </span>
