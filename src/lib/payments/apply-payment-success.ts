@@ -166,38 +166,58 @@ export async function applyPaymentSuccess(
     }
   }
 
-  // 4. Verify the paid signup contains at least five perfume bottles before provisioning a distributor.
+  // 4. Provision or activate every paid distributor signup. Eligibility is
+  // determined by the signup/payment records and database rules, not by a
+  // hardcoded bottle-count threshold.
   if (input.orderKind === 'distributor_signup') {
-    const orderRes = await service.from('orders').select('user_id, notes').eq('id', input.orderId).maybeSingle()
-    const itemsRes = await service.from('order_items').select('quantity').eq('order_id', input.orderId)
-    const bottleCount = ((itemsRes.data ?? []) as Array<{ quantity: number | string }>).reduce(
-      (sum, item) => sum + Number(item.quantity),
-      0,
-    )
-    if (itemsRes.error) {
-      warnings.push(`signup bottle check: ${itemsRes.error.message}`)
-    } else if (bottleCount < 5) {
-      warnings.push(`Distributor not provisioned: paid signup contains ${bottleCount} bottles; at least 5 are required.`)
+    const orderRes = await service
+      .from('orders')
+      .select('user_id, notes')
+      .eq('id', input.orderId)
+      .maybeSingle()
+
+    if (orderRes.error) {
+      warnings.push(`signup order lookup: ${orderRes.error.message}`)
     } else if (orderRes.data?.user_id) {
       let activationMode = false
       if (typeof orderRes.data.notes === 'string') {
         try {
-          const parsed = JSON.parse(orderRes.data.notes) as { signup?: { activation_mode?: boolean } }
+          const parsed = JSON.parse(orderRes.data.notes) as {
+            signup?: { activation_mode?: boolean }
+          }
           activationMode = parsed.signup?.activation_mode === true
         } catch {
           warnings.push('signup metadata could not be parsed')
         }
       }
+
       if (activationMode) {
-        const distRes = await service.from('distributors').update({ is_active: true, starter_paid_at: paidAt, starter_package_id: null }).eq('user_id', orderRes.data.user_id)
+        const distRes = await service
+          .from('distributors')
+          .update({
+            is_active: true,
+            starter_paid_at: paidAt,
+            starter_package_id: null,
+          })
+          .eq('user_id', orderRes.data.user_id)
+
         if (distRes.error) {
           warnings.push(`activation update: ${distRes.error.message}`)
         } else {
-          const roleRes = await service.from('user_roles').upsert({ user_id: orderRes.data.user_id, role: 'distributor', granted_at: paidAt }, { onConflict: 'user_id,role' })
+          const roleRes = await service.from('user_roles').upsert(
+            {
+              user_id: orderRes.data.user_id,
+              role: 'distributor',
+              granted_at: paidAt,
+            },
+            { onConflict: 'user_id,role' },
+          )
           if (roleRes.error) warnings.push(`activation role: ${roleRes.error.message}`)
         }
       } else {
-        const provRes = (await service.rpc('provision_distributor', { p_order_id: input.orderId })) as { error: { message: string } | null }
+        const provRes = (await service.rpc('provision_distributor', {
+          p_order_id: input.orderId,
+        })) as { error: { message: string } | null }
         if (provRes.error) warnings.push(`provision_distributor: ${provRes.error.message}`)
       }
     }
