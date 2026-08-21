@@ -115,8 +115,17 @@ const serverSchema = z.object({
 // Parsed exports
 // -----------------------------------------------------------------------------
 
+const configuredPublicAppUrl = process.env.NEXT_PUBLIC_APP_URL
+// Production links must always use the canonical branded domain. Preview and
+// local environments continue to use their explicitly configured URL.
+const effectivePublicAppUrl =
+  process.env.VERCEL_ENV === 'production'
+    ? 'https://www.loveliluxury.com'
+    : configuredPublicAppUrl
+
 const publicResult = publicSchema.safeParse({
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_APP_URL: effectivePublicAppUrl,
+
   NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
