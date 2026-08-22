@@ -72,7 +72,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(50% 70% at 80% 30%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(0 0% 90.2% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 70% at 80% 30%, hsl(var(--brand-gold) / 0.18) 0%, transparent 60%), radial-gradient(40% 60% at 20% 80%, hsl(var(--brand-silver) / 0.10) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto flex min-h-[calc(100vh-200px)] max-w-3xl items-center justify-center px-6 py-16 lg:py-24">

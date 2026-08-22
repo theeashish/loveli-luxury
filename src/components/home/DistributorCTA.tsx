@@ -15,7 +15,7 @@ export function DistributorCTA() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'radial-gradient(60% 80% at 50% 100%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 70%)',
+            'radial-gradient(60% 80% at 50% 100%, hsl(var(--brand-gold) / 0.18) 0%, transparent 70%)',
         }}
       />
       <div className="mx-auto max-w-4xl px-6 text-center">

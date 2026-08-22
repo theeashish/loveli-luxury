@@ -66,7 +66,7 @@ export async function AffiliateUpgradeBanner({
         className="pointer-events-none absolute inset-0 -z-10 opacity-70"
         style={{
           background:
-            'radial-gradient(60% 80% at 100% 0%, hsl(47.22 95.58% 55.69% / 0.18) 0%, transparent 60%)',
+            'radial-gradient(60% 80% at 100% 0%, hsl(var(--brand-gold) / 0.18) 0%, transparent 60%)',
         }}
       />
       <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[hsl(var(--brand-gold))]">

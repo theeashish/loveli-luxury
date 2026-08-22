@@ -4,23 +4,23 @@
 
 @layer base {
   :root {
-    /* Loveli Luxury color-block palette: Deep Onyx, Brilliant White, Signature Gold, Charcoal Ink, and Diamond Frost. */
-    --background: 0 0% 100%;                  /* Brilliant White #FFFFFF */
-    --foreground: 0 0% 10.2%;                 /* Charcoal Ink #1A1A1A */
-    --muted: 0 0% 96.86%;                     /* Diamond Frost #F7F7F7 */
-    --muted-foreground: 0 0% 10.2%;            /* Charcoal Ink */
-    --primary: 47.22 95.58% 55.69%;           /* Signature Gold #FACC22 */
-    --primary-foreground: 0 0% 3.92%;         /* Deep Onyx on gold */
-    --accent: 47.22 95.58% 55.69%;            /* Signature Gold */
-    --accent-foreground: 0 0% 3.92%;          /* Deep Onyx */
-    --border: 0 0% 86%;                       /* Soft neutral separation */
-    --ring: 47.22 95.58% 55.69%;              /* Signature Gold focus ring */
-    --brand-onyx: 0 0% 3.92%;                 /* Deep Onyx #0A0A0A */
-    --brand-charcoal: 0 0% 10.2%;             /* Charcoal Ink #1A1A1A */
-    --brand-silver: 0 0% 90.2%;               /* Diamond Silver #E6E6E6 */
-    --brand-white: 0 0% 100%;                 /* Brilliant White #FFFFFF */
-    --brand-frost: 0 0% 96.86%;               /* Diamond Frost #F7F7F7 */
-    --brand-gold: 47.22 95.58% 55.69%;       /* Signature Gold #FACC22 */
+    /* Loveli Luxury warm-neutral palette: Cashmere Cream, Smoked Truffle, Antique Brass, and Silk Greige. */
+    --background: 37.5 44.44% 96.47%;        /* Cashmere Cream #FAF7F2 */
+    --foreground: 22.5 7.02% 22.35%;         /* Smoked Truffle #3D3835 */
+    --muted: 38.57 23.33% 88.24%;            /* Silk Greige #E8E3DA */
+    --muted-foreground: 22.5 7.02% 22.35%;   /* Smoked Truffle */
+    --primary: 34.86 40.22% 63.92%;          /* Antique Brass #C8A97E */
+    --primary-foreground: 22.5 7.02% 22.35%; /* Smoked Truffle on brass */
+    --accent: 34.86 40.22% 63.92%;           /* Antique Brass */
+    --accent-foreground: 22.5 7.02% 22.35%;  /* Smoked Truffle */
+    --border: 38.57 23.33% 88.24%;           /* Silk Greige separation */
+    --ring: 34.86 40.22% 63.92%;             /* Antique Brass focus ring */
+    --brand-onyx: 22.5 7.02% 22.35%;         /* Smoked Truffle #3D3835 */
+    --brand-charcoal: 22.5 7.02% 22.35%;     /* Smoked Truffle */
+    --brand-silver: 38.57 23.33% 88.24%;     /* Silk Greige #E8E3DA */
+    --brand-white: 37.5 44.44% 96.47%;       /* Cashmere Cream #FAF7F2 */
+    --brand-frost: 38.57 23.33% 88.24%;      /* Silk Greige */
+    --brand-gold: 34.86 40.22% 63.92%;       /* Antique Brass #C8A97E */
     --radius: 0.375rem;
   }
 }
@@ -64,14 +64,14 @@
 
 /* Refined scrollbar — thin, gold-tipped, low-key. */
 @media (hover: hover) and (pointer: fine) {
-  html { scrollbar-width: thin; scrollbar-color: hsl(47.22 95.58% 55.69% / 0.75) hsl(0 0% 96.86%); }
+    html { scrollbar-width: thin; scrollbar-color: hsl(34.86 40.22% 63.92% / 0.75) hsl(38.57 23.33% 88.24%); }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, hsl(47.22 95.58% 55.69% / 0.7), hsl(0 0% 90.2% / 0.4));
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, hsl(34.86 40.22% 63.92% / 0.7), hsl(38.57 23.33% 88.24% / 0.4));
     border-radius: 999px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(47.22 95.58% 55.69% / 0.9); }
+    ::-webkit-scrollbar-thumb:hover { background: hsl(34.86 40.22% 63.92% / 0.9); }
 }
 
 
@@ -93,7 +93,7 @@
     inset: 0;
     pointer-events: none;
     transform: translateX(-115%);
-    background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.42) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, hsl(var(--brand-white) / 0.42) 50%, transparent 70%);
     transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .group:hover .loveli-sheen::after { transform: translateX(115%); }

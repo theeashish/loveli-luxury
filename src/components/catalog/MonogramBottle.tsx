@@ -13,7 +13,8 @@
  * Render notes:
  *   - Purely declarative SVG — no JS at runtime. Pre-rendered server-side.
  *   - Fills 100% of its parent's box; pair with a 3:4 aspect wrapper.
- *   - Single accent color = brand gold (#B89866-ish via HSL token). The
+ *   - Single accent color = Antique Brass from the shared HSL token. The
+
  *     surrounding wash uses the muted background token so the bottle
  *     reads as inset, not floating.
  *   - `aria-label` is the fragrance name when supplied; otherwise an
@@ -45,7 +46,7 @@ export function MonogramBottle({
       <defs>
         {/* Subtle warm wash behind the bottle so it sits inside its tile. */}
         <radialGradient id="ll-mb-bg" cx="50%" cy="55%" r="70%">
-          <stop offset="0%" stopColor="hsl(0 0% 90%)" stopOpacity="1" />
+          <stop offset="0%" stopColor="hsl(var(--brand-silver))" stopOpacity="1" />
           <stop offset="100%" stopColor="hsl(0 0% 84%)" stopOpacity="1" />
         </radialGradient>
         {/* Soft drop shadow under the bottle. */}
@@ -56,8 +57,8 @@ export function MonogramBottle({
         </radialGradient>
         {/* Glass body — pale tonal wash. */}
         <linearGradient id="ll-mb-glass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="hsl(0 0% 100%)" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="hsl(0 0% 86%)" stopOpacity="0.95" />
+          <stop offset="0%" stopColor="hsl(var(--brand-white))" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="hsl(var(--brand-silver))" stopOpacity="0.95" />
         </linearGradient>
       </defs>
 
@@ -74,7 +75,7 @@ export function MonogramBottle({
         height="10"
         rx="2"
         fill="hsl(0 0% 70%)"
-        stroke="hsl(0 0% 90.2%)"
+        stroke="hsl(var(--brand-silver))"
         strokeWidth="0.75"
       />
 
@@ -86,17 +87,17 @@ export function MonogramBottle({
         height="28"
         rx="3"
         fill="hsl(0 0% 78%)"
-        stroke="hsl(0 0% 90.2%)"
+        stroke="hsl(var(--brand-silver))"
         strokeWidth="0.75"
       />
       {/* Cap highlight */}
-      <rect x="101" y="26" width="6" height="18" rx="2" fill="hsl(0 0% 92%)" opacity="0.7" />
+      <rect x="101" y="26" width="6" height="18" rx="2" fill="hsl(var(--brand-white))" opacity="0.7" />
 
       {/* Shoulder transition (slight taper) */}
       <path
         d="M 100 60 Q 95 64 95 70 L 95 78 L 145 78 L 145 70 Q 145 64 140 60 Z"
         fill="url(#ll-mb-glass)"
-        stroke="hsl(0 0% 90.2%)"
+        stroke="hsl(var(--brand-silver))"
         strokeOpacity="0.45"
         strokeWidth="0.75"
       />
@@ -109,7 +110,7 @@ export function MonogramBottle({
         height="200"
         rx="5"
         fill="url(#ll-mb-glass)"
-        stroke="hsl(0 0% 90.2%)"
+        stroke="hsl(var(--brand-silver))"
         strokeOpacity="0.45"
         strokeWidth="0.75"
       />
@@ -121,7 +122,7 @@ export function MonogramBottle({
         width="5"
         height="184"
         rx="2"
-        fill="hsl(0 0% 100%)"
+        fill="hsl(var(--brand-white))"
         opacity="0.6"
       />
 
@@ -134,7 +135,7 @@ export function MonogramBottle({
         rx="32"
         ry="46"
         fill="none"
-        stroke="hsl(47.22 95.58% 55.69%)"
+        stroke="hsl(var(--brand-gold))"
         strokeWidth="0.75"
         opacity="0.7"
       />
@@ -151,7 +152,7 @@ export function MonogramBottle({
              C 4 -20 10 -22 16 -16
              C 24 -8 16 2 0 16 Z"
           fill="none"
-          stroke="hsl(47.22 95.58% 55.69%)"
+          stroke="hsl(var(--brand-gold))"
           strokeWidth="2"
           strokeLinejoin="round"
         />
@@ -159,7 +160,7 @@ export function MonogramBottle({
         <path
           d="M -3 -8 L -3 6 L 6 6"
           fill="none"
-          stroke="hsl(47.22 95.58% 55.69%)"
+          stroke="hsl(var(--brand-gold))"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
