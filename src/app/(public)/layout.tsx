@@ -25,7 +25,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const footerCopy = await getSection('footer')
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-[hsl(var(--brand-gold))]/30 bg-[hsl(var(--brand-onyx))] text-[hsl(var(--brand-white))]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <Link href="/" className="group flex items-center gap-2" aria-label="Loveli Luxury Scents home">
   <Image src="/loveli-luxury-favicon.png" alt="" width={34} height={34} className="h-8 w-8 object-contain" priority />
@@ -36,7 +36,7 @@ export default async function PublicLayout({ children }: { children: React.React
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
+                className="text-[hsl(var(--brand-white))] transition hover:text-[hsl(var(--brand-gold))]"
               >
                 {item.label}
               </Link>
@@ -47,7 +47,7 @@ export default async function PublicLayout({ children }: { children: React.React
             <CartIndicator />
             <Link
               href="/partners"
-              className="rounded-full border border-[hsl(var(--primary))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--foreground))] transition hover:bg-[hsl(var(--primary))] hover:text-[hsl(var(--primary-foreground))]"
+              className="rounded-full border border-[hsl(var(--brand-gold))] px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[hsl(var(--brand-white))] transition hover:bg-[hsl(var(--brand-gold))] hover:text-[hsl(var(--brand-onyx))]"
             >
               Partners
             </Link>

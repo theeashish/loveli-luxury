@@ -28,10 +28,10 @@ type RoleLabel = 'CUSTOMER' | 'PARTNER' | 'ADMIN'
 
 const ROLE_STYLES: Record<RoleLabel, string> = {
   CUSTOMER:
-    'border-[hsl(var(--muted-foreground))]/30 text-[hsl(var(--muted-foreground))]',
+    'border-[hsl(var(--brand-silver))]/35 text-[hsl(var(--brand-silver))]',
   PARTNER:
     'border-[hsl(var(--primary))]/50 bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))]',
-  ADMIN: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+  ADMIN: 'border-[hsl(var(--brand-gold))]/50 bg-[hsl(var(--brand-gold))]/10 text-[hsl(var(--brand-gold))]',
 }
 
 export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
@@ -41,9 +41,9 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
   } = await supabase.auth.getSession()
 
   const desktopLinkCls =
-    'text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
+    'text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--brand-white))] transition hover:text-[hsl(var(--brand-gold))]'
   const mobileLinkCls =
-    'block w-full py-3 text-left text-sm font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]'
+    'block w-full py-3 text-left text-sm font-semibold uppercase tracking-[0.1em] text-[hsl(var(--brand-white))] transition hover:text-[hsl(var(--brand-gold))]'
   const linkCls = variant === 'desktop' ? desktopLinkCls : mobileLinkCls
 
   if (!session?.user) {
@@ -51,8 +51,8 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
       return (
         <div data-testid="desktop-auth-menu" className="group relative">
           <Link href="/signup" className={desktopLinkCls}>Create account</Link>
-          <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-40 translate-y-1 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--background))] p-1 opacity-0 shadow-[0_14px_32px_hsl(var(--brand-onyx)/0.65)] transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-            <Link href="/login" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--muted))]/70`}>
+          <div className="invisible absolute right-0 top-full z-50 mt-3 min-w-40 translate-y-1 rounded-sm border border-[hsl(var(--border))]/70 bg-[hsl(var(--brand-charcoal))] p-1 opacity-0 shadow-[0_14px_32px_hsl(var(--brand-onyx)/0.65)] transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            <Link href="/login" className={`${desktopLinkCls} block rounded-sm px-3 py-2 hover:bg-[hsl(var(--brand-gold))]/10`}>
               Log in
             </Link>
           </div>
@@ -107,7 +107,7 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
     return (
       <>
         <div className="mb-2 flex flex-col gap-2 pt-1">
-          <p className="break-all text-xs text-[hsl(var(--muted-foreground))]">
+            <p className="break-all text-xs text-[hsl(var(--brand-silver))]">
             {email}
           </p>
           <span className={badgeCls}>{roleLabel}</span>
@@ -128,10 +128,10 @@ export async function HeaderAuth({ variant = 'desktop' }: HeaderAuthProps) {
     <>
       <Link
         href={accountHref}
-        className="group flex max-w-[18rem] items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--foreground))] transition hover:text-[hsl(var(--primary))]"
+        className="group flex max-w-[18rem] items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-[hsl(var(--brand-white))] transition hover:text-[hsl(var(--brand-gold))]"
         title={email}
       >
-        <span className="hidden truncate normal-case tracking-normal text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--primary))] lg:inline">
+        <span className="hidden truncate normal-case tracking-normal text-[hsl(var(--brand-silver))] group-hover:text-[hsl(var(--brand-gold))] lg:inline">
           {email}
         </span>
         <span className={badgeCls}>{roleLabel}</span>

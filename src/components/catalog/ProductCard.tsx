@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
   return (
     <article className="group relative mx-auto w-full max-w-[19rem] overflow-hidden border border-[hsl(var(--primary)/0.28)] bg-[hsl(var(--brand-charcoal))] transition duration-300 hover:-translate-y-1 hover:border-[hsl(var(--primary)/0.72)] hover:shadow-[0_22px_46px_-34px_hsl(var(--brand-onyx)/0.65)]">
       <Link href={`/p/${product.slug}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(var(--muted))]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(var(--brand-frost))]">
           {cardImage ? (
             <Image
               src={cardImage}
@@ -40,10 +40,10 @@ export function ProductCard({ product }: { product: ProductSummaryDto }) {
           </p>
         </div>
         <div className="border-t border-[hsl(var(--primary)/0.22)] p-5">
-          <h3 className="font-serif text-2xl tracking-tight text-[hsl(var(--foreground))] transition group-hover:text-[hsl(var(--primary))]">
+          <h3 className="font-serif text-2xl tracking-tight text-[hsl(var(--brand-white))] transition group-hover:text-[hsl(var(--brand-gold))]">
             {product.name}
           </h3>
-          <p className="mt-2 text-sm tabular-nums text-[hsl(var(--muted-foreground))]">{priceLabel}</p>
+          <p className="mt-2 text-sm tabular-nums text-[hsl(var(--brand-silver))]">{priceLabel}</p>
         </div>
       </Link>
       <WishlistButton productId={product.id} className="absolute right-4 top-4 z-10" />

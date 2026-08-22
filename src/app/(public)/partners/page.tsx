@@ -18,7 +18,7 @@ export default async function PartnerProgramPage() {
 
   return (
     <div data-page="partners">
-      <section className="relative overflow-hidden border-b border-[hsl(var(--border))]/70">
+      <section className="relative overflow-hidden border-b border-[hsl(var(--brand-gold))]/30 bg-[hsl(var(--brand-onyx))] text-[hsl(var(--brand-white))]">
         <div
           className="pointer-events-none absolute inset-0"
           aria-hidden="true"
@@ -28,20 +28,20 @@ export default async function PartnerProgramPage() {
         </div>
         <div className="relative mx-auto grid max-w-7xl gap-14 px-6 py-16 md:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.64fr)] md:items-end md:py-24">
           <div className="max-w-3xl">
-            <p className="text-eyebrow">{hero.eyebrow}</p>
-            <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-[hsl(var(--foreground))] md:text-6xl lg:text-7xl">
+            <p className="text-eyebrow text-[hsl(var(--brand-gold))]">{hero.eyebrow}</p>
+            <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-tight text-[hsl(var(--brand-white))] md:text-6xl lg:text-7xl">
               <HighlightText text={hero.headline} />
             </h1>
             <p className="mt-7 text-[10px] font-medium uppercase tracking-[0.25em] text-[hsl(var(--primary))]">
               {hero.microtag}
             </p>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[hsl(var(--muted-foreground))] md:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[hsl(var(--brand-silver))] md:text-lg">
               {hero.subhead}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <Link
                 href="/partners/signup"
-                className="rounded-sm bg-[hsl(var(--foreground))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
+                className="rounded-sm bg-[hsl(var(--brand-gold))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--brand-onyx))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--brand-white))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
               >
                 {hero.ctaLabel}
               </Link>
@@ -52,7 +52,7 @@ export default async function PartnerProgramPage() {
                 Discover the programme
               </Link>
             </div>
-            <p className="mt-6 text-[9px] uppercase tracking-[0.26em] text-[hsl(var(--muted-foreground))]">
+            <p className="mt-6 text-[9px] uppercase tracking-[0.26em] text-[hsl(var(--brand-silver))]">
               {hero.inviteNote}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default async function PartnerProgramPage() {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 href="/partners/signup"
-                className="rounded-sm bg-[hsl(var(--foreground))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
+                className="rounded-sm bg-[hsl(var(--brand-gold))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--brand-onyx))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--brand-white))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
               >
                 {hero.ctaLabel}
               </Link>

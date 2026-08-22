@@ -32,13 +32,13 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
   )
 
   return (
-    <footer className="border-t border-[hsl(var(--border))]/60 bg-[hsl(var(--background))]">
-      <div className="mx-auto max-w-7xl px-6 py-14 text-sm text-[hsl(var(--muted-foreground))]">
+    <footer className="border-t border-[hsl(var(--brand-gold))]/30 bg-[hsl(var(--brand-onyx))]">
+      <div className="mx-auto max-w-7xl px-6 py-14 text-sm text-[hsl(var(--brand-silver))]">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-5">
             <div className="space-y-3">
   <Image src="/loveli-luxury-wordmark.png" alt="Loveli Luxury Scents" width={170} height={68} className="h-12 w-auto object-contain object-left" />
-  <p className="font-serif text-xl text-[hsl(var(--foreground))]">{copy.brandName}</p>
+  <p className="font-serif text-xl text-[hsl(var(--brand-white))]">{copy.brandName}</p>
 </div>
             <p className="mt-3 max-w-sm text-sm leading-relaxed">
               {copy.tagline}
@@ -46,16 +46,16 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
           </div>
 
           <div className="md:col-span-2">
-            <p className="text-eyebrow">Shop</p>
+            <p className="text-eyebrow text-[hsl(var(--brand-gold))]">Shop</p>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link className="hover:text-[hsl(var(--primary))]" href="/shop">
+                <Link className="hover:text-[hsl(var(--brand-gold))]" href="/shop">
                   All fragrances
                 </Link>
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/partners"
                 >
                   Partner program
@@ -63,7 +63,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/ids"
                 >
                   Income disclosure
@@ -73,15 +73,15 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
           </div>
 
           <div className="md:col-span-2">
-            <p className="text-eyebrow">Brand</p>
+            <p className="text-eyebrow text-[hsl(var(--brand-gold))]">Brand</p>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link className="hover:text-[hsl(var(--primary))]" href="/story">
+                <Link className="hover:text-[hsl(var(--brand-gold))]" href="/story">
                   Our story
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[hsl(var(--primary))]" href="/#faq">
+                <Link className="hover:text-[hsl(var(--brand-gold))]" href="/#faq">
                   FAQ
                 </Link>
               </li>
@@ -89,11 +89,11 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
           </div>
 
           <div className="md:col-span-3">
-            <p className="text-eyebrow">Promise</p>
+            <p className="text-eyebrow text-[hsl(var(--brand-gold))]">Promise</p>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/authenticity"
                 >
                   Authenticity
@@ -101,7 +101,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/delivery"
                 >
                   Delivery
@@ -109,7 +109,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/refund"
                 >
                   Refunds
@@ -117,7 +117,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/privacy"
                 >
                   Privacy & data
@@ -125,7 +125,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/terms"
                 >
                   Terms of sale
@@ -133,7 +133,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/policies/complaints"
                 >
                   Complaints
@@ -141,7 +141,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
               </li>
               <li>
                 <Link
-                  className="hover:text-[hsl(var(--primary))]"
+                  className="hover:text-[hsl(var(--brand-gold))]"
                   href="/track"
                 >
                   Track an order
@@ -153,7 +153,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
                     href={concierge}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-[hsl(var(--primary))]"
+                    className="hover:text-[hsl(var(--brand-gold))]"
                   >
                     Concierge (WhatsApp)
                   </a>
@@ -163,7 +163,7 @@ export function PublicFooter({ copy }: { copy: FooterContent }) {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--border))]/60 pt-8 text-xs sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[hsl(var(--brand-gold))]/25 pt-8 text-xs sm:flex-row">
           <p><span aria-hidden="true">&copy;</span> {new Date().getFullYear()} {copy.copyrightName}</p>
           <p>{copy.closingLine}</p>
         </div>

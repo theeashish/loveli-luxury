@@ -22,7 +22,7 @@ export async function Story() {
         className="pointer-events-none absolute inset-0 -z-10 opacity-60"
         style={{
           background:
-            'radial-gradient(50% 60% at 80% 20%, hsl(47.22 95.58% 55.69% / 0.16) 0%, transparent 60%), radial-gradient(40% 50% at 10% 90%, hsl(0 0% 90.2% / 0.10) 0%, transparent 60%)',
+            'radial-gradient(50% 60% at 80% 20%, hsl(var(--brand-gold) / 0.14) 0%, transparent 60%), radial-gradient(40% 50% at 10% 90%, hsl(var(--brand-charcoal) / 0.06) 0%, transparent 60%)',
         }}
       />
       <div className="mx-auto max-w-3xl px-6 text-center">

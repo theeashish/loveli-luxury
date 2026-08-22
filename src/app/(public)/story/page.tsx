@@ -58,7 +58,7 @@ export default function StoryPage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-sm self-center md:self-end">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-[hsl(var(--primary))]/25 bg-[linear-gradient(145deg,hsl(var(--muted))_0%,hsl(var(--background))_48%,hsl(var(--primary))_180%)] p-5 shadow-[0_24px_60px_-34px_hsl(var(--foreground)/0.45)]">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-[hsl(var(--primary))]/25 bg-[linear-gradient(145deg,hsl(var(--brand-charcoal))_0%,hsl(var(--brand-onyx))_58%,hsl(var(--primary))_180%)] p-5 shadow-[0_24px_60px_-34px_hsl(var(--foreground)/0.45)]">
               <div className="absolute inset-5 border border-[hsl(var(--primary))]/20" />
               <div className="absolute inset-x-0 top-[18%] h-px bg-[hsl(var(--primary))]/30" />
               <div className="absolute inset-x-0 bottom-[18%] h-px bg-[hsl(var(--primary))]/30" />
@@ -116,7 +116,7 @@ export default function StoryPage() {
         </div>
       </section>
 
-      <section className="border-y border-[hsl(var(--border))]/70 bg-[hsl(var(--muted))]/45">
+      <section className="border-y border-[hsl(var(--border))]/70 bg-[hsl(var(--brand-frost))]">
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:py-20">
           <blockquote className="max-w-4xl font-serif text-3xl leading-tight italic tracking-tight text-[hsl(var(--foreground))] sm:text-4xl md:text-5xl">
             “A fragrance does not need to announce itself. It only needs to be
@@ -129,7 +129,7 @@ export default function StoryPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-14 md:py-20">
-        <div className="grid gap-10 border border-[hsl(var(--primary))]/25 bg-[hsl(var(--background))]/70 p-8 shadow-[0_20px_48px_-38px_hsl(var(--foreground)/0.6)] md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-12">
+        <div className="grid gap-10 border border-[hsl(var(--primary))]/25 bg-[hsl(var(--brand-white))] p-8 shadow-[0_20px_48px_-38px_hsl(var(--foreground)/0.6)] md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-12">
           <div className="max-w-2xl">
             <p className="text-eyebrow">Find your signature</p>
             <h2 className="mt-5 font-serif text-4xl leading-tight tracking-tight md:text-5xl">
@@ -143,7 +143,7 @@ export default function StoryPage() {
           <div className="flex flex-wrap gap-3 md:justify-end">
             <Link
               href="/shop"
-              className="rounded-sm bg-[hsl(var(--foreground))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--background))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
+              className="rounded-sm bg-[hsl(var(--brand-gold))] px-7 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[hsl(var(--brand-onyx))] transition duration-200 hover:-translate-y-0.5 hover:bg-[hsl(var(--brand-onyx))] hover:text-[hsl(var(--brand-white))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
             >
               Explore the collection
             </Link>

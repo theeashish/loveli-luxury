@@ -4,22 +4,23 @@
 
 @layer base {
   :root {
-    /* Loveli Luxury dark palette: Onyx Black, Charcoal Velvet, Diamond Silver, Brilliant White, and Signature Gold. */
-    --background: 0 0% 7.06%;                 /* Onyx Black #121212 */
-    --foreground: 0 0% 90.2%;                 /* Diamond Silver #E6E6E6 */
-    --muted: 0 0% 14.12%;                     /* Charcoal Velvet #242424 */
-    --muted-foreground: 0 0% 90.2%;           /* Diamond Silver */
+    /* Loveli Luxury color-block palette: Deep Onyx, Brilliant White, Signature Gold, Charcoal Ink, and Diamond Frost. */
+    --background: 0 0% 100%;                  /* Brilliant White #FFFFFF */
+    --foreground: 0 0% 10.2%;                 /* Charcoal Ink #1A1A1A */
+    --muted: 0 0% 96.86%;                     /* Diamond Frost #F7F7F7 */
+    --muted-foreground: 0 0% 10.2%;            /* Charcoal Ink */
     --primary: 47.22 95.58% 55.69%;           /* Signature Gold #FACC22 */
-    --primary-foreground: 0 0% 7.06%;         /* Onyx Black on gold */
+    --primary-foreground: 0 0% 3.92%;         /* Deep Onyx on gold */
     --accent: 47.22 95.58% 55.69%;            /* Signature Gold */
-    --accent-foreground: 0 0% 7.06%;          /* Onyx Black */
-    --border: 0 0% 25%;                       /* Charcoal edge */
+    --accent-foreground: 0 0% 3.92%;          /* Deep Onyx */
+    --border: 0 0% 86%;                       /* Soft neutral separation */
     --ring: 47.22 95.58% 55.69%;              /* Signature Gold focus ring */
-    --brand-onyx: 0 0% 7.06%;
-    --brand-charcoal: 0 0% 14.12%;
-    --brand-silver: 0 0% 90.2%;
-    --brand-white: 0 0% 100%;
-    --brand-gold: 47.22 95.58% 55.69%;
+    --brand-onyx: 0 0% 3.92%;                 /* Deep Onyx #0A0A0A */
+    --brand-charcoal: 0 0% 10.2%;             /* Charcoal Ink #1A1A1A */
+    --brand-silver: 0 0% 90.2%;               /* Diamond Silver #E6E6E6 */
+    --brand-white: 0 0% 100%;                 /* Brilliant White #FFFFFF */
+    --brand-frost: 0 0% 96.86%;               /* Diamond Frost #F7F7F7 */
+    --brand-gold: 47.22 95.58% 55.69%;       /* Signature Gold #FACC22 */
     --radius: 0.375rem;
   }
 }
@@ -37,9 +38,8 @@
     font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    background-image:
-      radial-gradient(at 50% 0%, hsl(47.22 95.58% 55.69% / 0.08) 0, transparent 55%);
-    background-attachment: fixed;
+    background-image: none;
+    background-attachment: initial;
   }
   h1, h2, h3 {
     font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -54,8 +54,8 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.32em;
-    color: hsl(var(--brand-gold));
-    font-weight: 500;
+    color: hsl(var(--brand-charcoal));
+    font-weight: 600;
   }
   .hairline {
     border-top: 1px solid hsl(var(--border));
@@ -64,7 +64,7 @@
 
 /* Refined scrollbar — thin, gold-tipped, low-key. */
 @media (hover: hover) and (pointer: fine) {
-  html { scrollbar-width: thin; scrollbar-color: hsl(47.22 95.58% 55.69% / 0.55) transparent; }
+  html { scrollbar-width: thin; scrollbar-color: hsl(47.22 95.58% 55.69% / 0.75) hsl(0 0% 96.86%); }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
@@ -93,7 +93,7 @@
     inset: 0;
     pointer-events: none;
     transform: translateX(-115%);
-    background: linear-gradient(110deg, transparent 30%, hsl(30 33.33% 98.82% / 0.42) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.42) 50%, transparent 70%);
     transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .group:hover .loveli-sheen::after { transform: translateX(115%); }
