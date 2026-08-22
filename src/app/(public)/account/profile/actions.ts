@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 /**
  * Customer profile self-service.
@@ -20,6 +20,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { normalizePhone } from '@/lib/auth/identity'
 
 const phoneSchema = z
   .string()
@@ -27,7 +28,7 @@ const phoneSchema = z
 
 const inputSchema = z.object({
   fullName: z.string().min(2).max(120),
-  phone: phoneSchema.optional().or(z.literal('')),
+  phone: phoneSchema,
   preferredLanguage: z.string().min(2).max(8).optional().or(z.literal('')),
   preferredCurrency: z.string().length(3).optional().or(z.literal('')),
   marketingConsent: z.enum(['true', 'false']).optional(),
@@ -42,7 +43,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
 
   const parsed = inputSchema.safeParse({
     fullName: formData.get('fullName'),
-    phone: formData.get('phone') ?? '',
+    phone: normalizePhone(String(formData.get('phone') ?? '')),
     preferredLanguage: formData.get('preferredLanguage') ?? '',
     preferredCurrency: formData.get('preferredCurrency') ?? '',
     marketingConsent: formData.get('marketingConsent') ?? 'false',
@@ -66,7 +67,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
   if (before.error || !before.data) throw new Error('Profile not found')
   const beforeRow = before.data as {
     full_name: string
-    phone: string | null
+    phone: string
     preferred_language: string
     preferred_currency: string
     marketing_consent_at: string | null
@@ -78,13 +79,13 @@ export async function updateProfile(formData: FormData): Promise<void> {
 
   const update: {
     full_name: string
-    phone: string | null
+    phone: string
     preferred_language?: string
     preferred_currency?: string
     marketing_consent_at?: string | null
   } = {
     full_name: fullName,
-    phone: phone || null,
+    phone,
   }
   if (preferredLanguage) update.preferred_language = preferredLanguage
   if (preferredCurrency) update.preferred_currency = preferredCurrency.toUpperCase()
@@ -111,14 +112,14 @@ export async function updateProfile(formData: FormData): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// requestEmailChange — uses Supabase auth's built-in re-verification.
+// requestEmailChange â€” uses Supabase auth's built-in re-verification.
 // ---------------------------------------------------------------------------
 //
 // Calls supabase.auth.updateUser({ email }) on the user's session. Supabase
 // sends a confirmation email to the new address; the email contains a link
 // back to the app that completes the change. The `profiles.email` column
 // is mirrored from auth.users.email by an existing trigger (or backfilled
-// at next login), so we don't touch profiles directly here — that
+// at next login), so we don't touch profiles directly here â€” that
 // would race the auth confirmation.
 //
 // On success we redirect to a page that tells the user to check their
