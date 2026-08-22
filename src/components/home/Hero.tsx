@@ -16,7 +16,7 @@ export function Hero({ copy }: { copy: HeroContent }) {
   if (!bottle) return null
 
   return (
-    <section className="relative isolate overflow-hidden bg-[hsl(var(--brand-onyx))] text-[hsl(var(--brand-white))]">
+    <section className="hero-section relative isolate overflow-hidden text-[hsl(var(--brand-white))]">
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 72% at 80% 34%, hsl(var(--brand-gold) / 0.12) 0%, transparent 64%), radial-gradient(48% 60% at 8% 92%, hsl(var(--brand-white) / 0.05) 0%, transparent 70%)' }} />
       <div aria-hidden className="pointer-events-none absolute right-[9%] top-[8%] h-64 w-64 rounded-full border border-[hsl(var(--primary)/0.18)] sm:h-96 sm:w-96" />
       <div className="relative mx-auto grid w-full min-w-0 min-h-[30rem] max-w-7xl grid-cols-1 lg:min-h-[37rem] lg:grid-cols-[0.9fr_1.1fr]">

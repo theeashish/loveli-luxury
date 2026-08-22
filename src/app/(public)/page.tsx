@@ -80,6 +80,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero copy={heroCopy} />
+      <div aria-hidden className="gradient-bridge" />
       <FeaturedGrid />
       <TrustStrip />
       <FindYourScent copy={findYourScentCopy} />

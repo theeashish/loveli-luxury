@@ -21,6 +21,12 @@
     --brand-white: 37.5 44.44% 96.47%;       /* Cashmere Cream #FAF7F2 */
     --brand-frost: 38.57 23.33% 88.24%;      /* Silk Greige */
     --brand-gold: 34.86 40.22% 63.92%;       /* Antique Brass #C8A97E */
+
+    /* Raw aliases used by the attached luxury color-block direction. */
+    --cashmere-cream: #FAF7F2;
+    --smoked-truffle: #3D3835;
+    --antique-brass: #C8A97E;
+    --silk-greige: #E8E3DA;
     --radius: 0.375rem;
   }
 }
@@ -33,7 +39,10 @@
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   }
   body {
-    background-color: hsl(var(--background));
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: var(--cashmere-cream);
     color: hsl(var(--foreground));
     font-feature-settings: 'rlig' 1, 'calt' 1, 'ss01' 1;
     text-rendering: optimizeLegibility;
@@ -59,6 +68,40 @@
   }
   .hairline {
     border-top: 1px solid hsl(var(--border));
+  }
+
+  /* Safe, reusable equivalents of the attached luxury section language. */
+  .section-padding {
+    padding: clamp(3.5rem, 8vw, 6.25rem) 1.25rem;
+  }
+  .hero-section {
+    background-color: var(--smoked-truffle);
+    color: var(--cashmere-cream);
+  }
+  .gold-accent {
+    color: var(--antique-brass);
+    font-style: italic;
+    font-weight: 400;
+  }
+  .gradient-bridge {
+    width: 100%;
+    height: clamp(5rem, 12vw, 10rem);
+    background: linear-gradient(
+      to bottom,
+      var(--smoked-truffle) 0%,
+      var(--cashmere-cream) 100%
+    );
+  }
+  .light-section {
+    background-color: var(--cashmere-cream);
+    color: var(--smoked-truffle);
+  }
+  .btn-luxury {
+    background-color: var(--antique-brass);
+    color: var(--smoked-truffle);
+    border: 0;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 }
 
